@@ -2,11 +2,9 @@
 /**
  * Fired during plugin deactivation
  *
- * @link       http://example.com
  * @since      1.0.0
- *
  * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO/includes
+ * @author     Frans Jaspers<frans.jaspers@marikenhuis.nl>
  */
 
 /**
@@ -16,17 +14,11 @@
  *
  * @since      1.0.0
  * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO/includes
- * @author     Your Name <email@example.com>
  */
 class MHWP_IPSO_Deactivator {
 
 	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
+	 * Deactivate the plugin
 	 */
 	public static function deactivate() {
 		delete_option( 'mhwp_ipso_apikey' );

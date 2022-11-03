@@ -5,11 +5,9 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       http://example.com
  * @since      1.0.0
- *
  * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO/includes
+ * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 
 /**
@@ -21,10 +19,6 @@
  * Also maintains the unique identifier of this plugin as well as the current
  * version of the plugin.
  *
- * @since      1.0.0
- * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO/includes
- * @author     Your Name <email@example.com>
  */
 class MHWP_IPSO {
 
@@ -32,8 +26,6 @@ class MHWP_IPSO {
 	 * The loader that's responsible for maintaining and registering all hooks that power
 	 * the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   protected
 	 * @var      MHWP_IPSO_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
@@ -41,8 +33,6 @@ class MHWP_IPSO {
 	/**
 	 * The unique identifier of this plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   protected
 	 * @var      string    $mhwp_ipso    The string used to uniquely identify this plugin.
 	 */
 	protected $mhwp_ipso;
@@ -50,8 +40,6 @@ class MHWP_IPSO {
 	/**
 	 * The current version of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   protected
 	 * @var      string    $version    The current version of the plugin.
 	 */
 	protected $version;
@@ -63,7 +51,6 @@ class MHWP_IPSO {
 	 * Load the dependencies, define the locale, and set the hooks for the admin area and
 	 * the public-facing side of the site.
 	 *
-	 * @since    1.0.0
 	 */
 	public function __construct() {
 		if ( defined( 'MHWP_IPSO__VERSION' ) ) {
@@ -94,7 +81,6 @@ class MHWP_IPSO {
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
 	 *
-	 * @since    1.0.0
 	 * @access   private
 	 */
 	private function load_dependencies() {
@@ -138,8 +124,6 @@ class MHWP_IPSO {
 	 * Uses the MHWP_IPSO_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 */
 	private function set_locale() {
 
@@ -153,8 +137,6 @@ class MHWP_IPSO {
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 */
 	private function define_admin_hooks() {
 
@@ -171,8 +153,6 @@ class MHWP_IPSO {
 	 * Register all of the hooks related to the public-facing functionality
 	 * of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 */
 	private function define_public_hooks() {
 
@@ -187,8 +167,6 @@ class MHWP_IPSO {
 	 * Register all of the hooks related to the block functionality
 	 * of the plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 */
 	private function define_block_hooks() {
 
@@ -203,7 +181,6 @@ class MHWP_IPSO {
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
 	 *
-	 * @since    1.0.0
 	 */
 	public function run() {
 		$this->loader->run();
@@ -213,7 +190,6 @@ class MHWP_IPSO {
 	 * The name of the plugin used to uniquely identify it within the context of
 	 * WordPress and to define internationalization functionality.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
 	public function get_mhwp_ipso() {
@@ -223,7 +199,6 @@ class MHWP_IPSO {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    MHWP_IPSO_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
@@ -233,7 +208,6 @@ class MHWP_IPSO {
 	/**
 	 * Retrieve the version number of the plugin.
 	 *
-	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
 	public function get_version() {

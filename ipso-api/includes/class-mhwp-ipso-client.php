@@ -2,26 +2,21 @@
 /**
  * Connects to the ipso system
  *
- * @package  MHWP_IPSO
- * @author   Frans Jaspers <frans.jaspers@marikenhuis.nl>
- * @link     https://www.marikenhuis.nl
+ * @since      1.0.0
+ * @package    MHWP_IPSO
+ * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 
 /**
  * Class for connecting to the ipso system.
  * We provide methods for each endpoint.These setup the request parameters,
  * encode data to a json string if necessary, check the response for errors.
- *
- * @package  MHWP_IPSO
- * @author   Frans Jaspers <frans.jaspers@marikenhuis.nl>
- * @link     https://www.marikenhuis.nl
  */
 class MHWP_IPSO_Client {
 
 	/**
 	 * The json response for failng to make the request.
 	 *
-	 * @access private
 	 * @var string[]
 	 */
 	private $error_failure = array(
@@ -32,7 +27,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The json response for a 404 error.
 	 *
-	 * @access private
 	 * @var string[]
 	 */
 	private $error_404 = array(
@@ -44,7 +38,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The json response for all other http errors.
 	 *
-	 * @access private
 	 * @var string[]
 	 */
 	private $error = array(
@@ -55,7 +48,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The json response for an ok response.
 	 *
-	 * @access private
 	 * @var string[]
 	 */
 	private $ok = array(
@@ -65,7 +57,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The method to use for the request.
 	 *
-	 * @access private
 	 * @var string method
 	 */
 	private $method;
@@ -73,7 +64,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The url to use.
 	 *
-	 * @access private
 	 * @var array host
 	 */
 	private $url;
@@ -81,7 +71,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The data for the request.
 	 *
-	 * @access private
 	 * @var string array
 	 */
 	private $data;
@@ -89,7 +78,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * The timeout we want to use.
 	 *
-	 * @access private
 	 * @var string integer
 	 */
 	private $timeout = 10;
@@ -97,7 +85,6 @@ class MHWP_IPSO_Client {
 	/**
 	 * Headers
 	 *
-	 * @access private
 	 * @var string array
 	 */
 	private $headers = array();
