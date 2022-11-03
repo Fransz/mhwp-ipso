@@ -18,7 +18,6 @@
  *
  * Also maintains the unique identifier of this plugin as well as the current
  * version of the plugin.
- *
  */
 class MHWP_IPSO {
 

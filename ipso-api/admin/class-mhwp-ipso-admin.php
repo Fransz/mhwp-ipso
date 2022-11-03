@@ -24,9 +24,9 @@ class MHWP_IPSO_Admin {
 	/**
 	 * The ID of this plugin.
 	 *
-	 * @var      string $plugin_id The ID of this plugin.
+	 * @var      string $mhwp_ipso The ID of this plugin.
 	 */
-	private $plugin_id;
+	private $mhwp_ipso;
 
 	/**
 	 * The version of this plugin.
@@ -57,7 +57,7 @@ class MHWP_IPSO_Admin {
 	 */
 	public function __construct( string $plugin_id, string $version ) {
 
-		$this->plugin_id = $plugin_id;
+		$this->mhwp_ipso = $plugin_id;
 		$this->version   = $version;
 
 		$this->admin_pages_mngr    = new MHWP_IPSO_Admin_Pages();
@@ -83,14 +83,14 @@ class MHWP_IPSO_Admin {
 	 * Register the stylesheets for the admin area.
 	 */
 	public function enqueue_styles() {
-		wp_enqueue_style( $this->plugin_id . '_admin', plugin_dir_url( __FILE__ ) . 'css/mhwp-ipso-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( $this->mhwp_ipso . '_admin', plugin_dir_url( __FILE__ ) . 'css/mhwp-ipso-admin.css', array(), $this->version, 'all' );
 	}
 
 	/**
 	 * Register the JavaScript for the admin area.
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_id . '_admin', plugin_dir_url( __FILE__ ) . 'js/mhwp-ipso-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->mhwp_ipso . '_admin', plugin_dir_url( __FILE__ ) . 'js/mhwp-ipso-admin.js', array( 'jquery' ), $this->version, false );
 	}
 
 }

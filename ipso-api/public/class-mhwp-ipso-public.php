@@ -4,9 +4,8 @@
  * The public-facing functionality of the plugin.
  *
  * @since      1.0.0
- *
  * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO
+ * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-rest-controller.php';
 
@@ -14,17 +13,12 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-re
  * The public-facing functionality of the plugin.
  *
  * Defines the plugin name, version, register stylesheets and scripts, register api endpoints.
- *
- * @package    MHWP_IPSO
- * @subpackage MHWP_IPSO/public
  */
 class MHWP_IPSO_Public {
 
 	/**
 	 * The ID of this plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 * @var      string    $mhwp_ipso    The ID of this plugin.
 	 */
 	private $mhwp_ipso;
@@ -32,8 +26,6 @@ class MHWP_IPSO_Public {
 	/**
 	 * The version of this plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
 	 * @var      string    $version    The current version of this plugin.
 	 */
 	private $version;
@@ -55,8 +47,6 @@ class MHWP_IPSO_Public {
 
 	/**
 	 * Register the stylesheets for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
 		wp_enqueue_style( $this->mhwp_ipso . '_public', plugin_dir_url( __FILE__ ) . 'css/mhwp-ipso-public.css', array(), $this->version, 'all' );
@@ -64,8 +54,6 @@ class MHWP_IPSO_Public {
 
 	/**
 	 * Register the JavaScript for the public-facing side of the site.
-	 *
-	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_script( $this->mhwp_ipso . '_public', plugin_dir_url( __FILE__ ) . 'js/mhwp-ipso-public.js', array( 'jquery' ), $this->version, false );
@@ -78,5 +66,4 @@ class MHWP_IPSO_Public {
 		$rest_controller = new MHWP_IPSO_REST_Controller();
 		$rest_controller->register_routes();
 	}
-
 }
