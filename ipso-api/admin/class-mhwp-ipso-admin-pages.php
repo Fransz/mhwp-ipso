@@ -2,17 +2,13 @@
 	/**
 	 * Class for admin pages.
 	 *
-	 * @package MHWP_IPSO
-	 * @author   Frans Jasper
+	 * @since      1.0.0
+	 * @package    MHWP_IPSO
+	 * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
 	 */
 
 	/**
 	 * Class for admin pages
-	 *
-	 * PHP version 7.4
-	 *
-	 * @package  MHWP_IPSO
-	 * @author   Frans Jaspers.
 	 */
 class MHWP_IPSO_Admin_Pages {
 
@@ -31,44 +27,7 @@ class MHWP_IPSO_Admin_Pages {
 	protected $admin_subpages;
 
 	/**
-	 * Setter for attribute $admin_pages.
-	 *
-	 * @param array $pages An array of pages to set.
-	 *
-	 * @return self An instance of SettingsApi. This enables chaining of methods.
-	 */
-	public function setAdminPages( array $pages ): self {    // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		$this->admin_pages = $pages;
-
-		return $this;
-	}
-
-	/**
-	 * Setter for attribute $admin_sub_pages.
-	 * The initial value for admin_sub_pages does contain already one element after
-	 * calling withSubPages.
-	 *
-	 * @param array $sub_pages An array of subpages to set.
-	 *
-	 * @return self An instance of SettingsApi. This enables chaining of methods.
-	 */
-	public function setAdminSubPages( array $sub_pages ): self {// phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		if ( empty( $this->admin_subpages ) ) {
-			$this->admin_subpages = $sub_pages;
-		} else {
-			$this->admin_subpages = array_merge(
-				$this->admin_subpages,
-				$sub_pages
-			);
-		}
-
-		return $this;
-	}
-
-	/**
 	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
 	 */
 	public function __construct() {
 		$this->init_pages();

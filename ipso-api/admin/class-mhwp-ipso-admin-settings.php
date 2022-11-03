@@ -1,18 +1,12 @@
 <?php
 	/**
-	 * Short description for file
-	 *
-	 * @package  MHWP_IPSO
-	 * @author   Frans Jasper
+	 * @since      1.0.0
+	 * @package    MHWP_IPSO
+	 * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
 	 */
 
 	/**
 	 * Class for managing admin settings
-	 *
-	 * PHP version 7.4
-	 *
-	 * @package  MHWP_IPSO
-	 * @author   Frans Jaspers.
 	 */
 class MHWP_IPSO_Admin_Settings {
 
@@ -41,7 +35,6 @@ class MHWP_IPSO_Admin_Settings {
 	 * Setter for attribute $admin_settings;
 	 *
 	 * @param array $settings The settings to set.
-	 *
 	 * @return self An instance of SettingsApi.
 	 */
 	public function setSettings( array $settings ): self { // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
@@ -65,7 +58,6 @@ class MHWP_IPSO_Admin_Settings {
 	 * Setter for attribute $admin_fields;
 	 *
 	 * @param array $fields The fields to set.
-	 *
 	 * @return self An instance of SettingsApi.
 	 */
 	public function setFields( array $fields ): self {// phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
@@ -75,8 +67,6 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
 	 */
 	public function __construct() {
 		$this->init_settings();
@@ -192,7 +182,6 @@ class MHWP_IPSO_Admin_Settings {
 	 * TODO: We want the api key stored encrypted.
 	 *
 	 * @param string $key The key to sanitize.
-	 *
 	 * @return string
 	 */
 	public function sanitize_apikey( string $key ) : string {
@@ -201,12 +190,12 @@ class MHWP_IPSO_Admin_Settings {
 
 		// phpcs:ignore
 		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso-options' ) ) {
-			add_settings_error( 'mhwp_ipso_is_test', 'mhwp_ipso_error', 'Security issues!' );
+			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Security issues!' );
 			return $oldkey;
 		}
 
 		if ( ! preg_match( '/^[a-f0-9-]{36}$/', $key ) ) {
-			add_settings_error( 'tp_tax_manager', 'tp_tax_error', 'Invalid key' );
+			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Invalid key' );
 			return $oldkey;
 		}
 
