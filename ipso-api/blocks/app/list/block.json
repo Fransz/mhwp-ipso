@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "mhwp-ipso/list",
+  "title": "ipsolist",
+  "description": "provides a summary of a recipe",
+  "category": "text",
+  "keywords": [ "ipso" ],
+  "supports": {
+    "html": false
+  },
+  "style": "file:../../dist/mhwp-ipso-list.css",
+  "attributes": {
+    "nr_days": {
+      "type": "string",
+      "default": 10
+    }
+  }
+}

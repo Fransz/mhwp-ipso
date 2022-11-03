@@ -1,0 +1,32 @@
+/*!****************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./mhwp-ipso/blocks/app/list/mhwp-ipso-list.scss ***!
+  \****************************************************************************************************************************************/
+div.mhwp-ipso-activities-list .list-group-item-light {
+  background-color: #d3d3d3;
+}
+div.mhwp-ipso-activities-list .list-group-item-dark {
+  background-color: #fefefe;
+}
+div.mhwp-ipso-activities-list div.reserveer label {
+  display: inline-block;
+}
+div.mhwp-ipso-activities-list div.reserveer .required {
+  color: red;
+}
+div.mhwp-ipso-activities-list div.reserveer .error {
+  color: red;
+}
+div.mhwp-ipso-activities-list div.reserveer input.error {
+  color: black;
+  border: 1px solid red;
+}
+
+.wp-block-mhwp-ipso-list ul.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+.wp-block-mhwp-ipso-list li {
+  margin: 0;
+  padding: 0;
+  color: blue;
+}

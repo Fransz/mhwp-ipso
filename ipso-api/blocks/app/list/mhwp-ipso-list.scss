@@ -1,0 +1,42 @@
+// Front end styles.
+div.mhwp-ipso-activities-list {
+  .list-group-item-light {
+    background-color: #d3d3d3;
+  }
+  .list-group-item-dark {
+    background-color: #fefefe;
+  }
+
+  div.reserveer {
+    label {
+      display:inline-block;
+    }
+    .required {
+      color:red;
+    }
+
+    .error {
+      color:red;
+    }
+
+    input.error {
+      color: black;
+      border: 1px solid red;
+    }
+  }
+}
+
+
+// Editor styles.
+.wp-block-mhwp-ipso-list{
+  ul.list-unstyled{
+    padding-left: 0;
+    list-style: none;
+  }
+
+  li{
+    margin: 0;
+    padding: 0;
+    color:blue;
+  }
+}
