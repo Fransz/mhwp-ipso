@@ -77,7 +77,8 @@ function getActivities() {
     url.searchParams.append('nrDays', '7');
 
     // Get the nonce.
-    const nonce = document.getElementById('mhwp-ipso-list-nonce').value;
+    const node = document.getElementById('mhwp-ipso-list-nonce');
+    const nonce = node ?. value;
 
     fetch( url, {
         method: 'GET',
