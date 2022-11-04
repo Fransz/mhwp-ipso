@@ -71,21 +71,21 @@ function makeReservation() {
 }
 
 function getActivities() {
-    console.log('DOMContentLoaded');
-
-    // TODO: Use the proction URL.
+    // TODO: Use the production URL.
     const url = new URL( "http://localhost:8080/" );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
+    url.searchParams.append('nrDays', '7');
 
-    nrDays = 1;
-    const query = new URLSearchParams({nrDays});
+    // Get the nonce.
+    const nonce = document.getElementById('mhwp-ipso-list-nonce').value;
 
     fetch( url, {
         method: 'GET',
         cache: 'no-store',
         headers: {
-            'Accept': 'application/json',
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'HTTP_X_WP_NONCE': nonce,
         }
     }).then( ( res  )=> {
         console.log(res);

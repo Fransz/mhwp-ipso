@@ -72,13 +72,13 @@ class MHWP_IPSO_Blocks {
 	public function enqueue_scripts() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
 
-//		wp_enqueue_script(
-//			$this->mhwp_ipso . '_blocks',
-//			plugin_dir_url( __FILE__ ) . 'dist/mhwp-ipso-list.js',
-//			array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-api' ),
-//			$ver,
-//			true
-//		);
+		// wp_enqueue_script(
+		// $this->mhwp_ipso . '_blocks',
+		// plugin_dir_url( __FILE__ ) . 'dist/mhwp-ipso-list.js',
+		// array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-api' ),
+		// $ver,
+		// true
+		// );
 
 		// TODO is this the place to enqueue this?
 		wp_enqueue_script(
@@ -259,6 +259,27 @@ class MHWP_IPSO_Blocks {
 	 * Register the block.
 	 */
 	public function register_blocks() {
+		/**
+		 * Set additional attributes depending on the test option.
+		 *
+		 * @param array $metadata the metadata.
+		 * @return array
+		 */
+		function filter_metadata( array $metadata ): array {
+			if ( 'mhwp-ipso/list' === $metadata['name'] ) {
+				// get the options we need.
+				$metadata['attributes']['rest_nonce'] = array(
+					'type'      => 'string',
+					'default'   => wp_create_nonce( 'wp_rest' ),
+					'source'    => 'attribute',
+					'selector'  => 'input#ipso-list-nonce',
+					'attribute' => 'value;',
+				);
+			}
+			return $metadata;
+		}
+		add_filter( 'block_type_metadata', 'filter_metadata' );
+
 		register_block_type(
 			plugin_dir_path( __FILE__ ) . 'list'
 		);

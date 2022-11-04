@@ -69,7 +69,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ): WP_REST_Response {
-		$data = array(
+		$testData = array(
 			array(
 				'activityID' => 4,
 				'extraInfo'  => 'Een stevig rondje lopen!',
@@ -93,10 +93,12 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			),
 		);
 
+		$client = new MHWP_IPSO_Client();
+		$data   = array(
+			'nrDays' => $request->get_param( 'nrDays' ),
+		);
 		return new WP_REST_Response( $data, 200 );
 
-		// $client = new MHWP_IPSO_Client();
-		// $json   = $request->get_json_params();
 		// return $client->add_participants( $json );
 	}
 

@@ -54,10 +54,15 @@ registerBlockType( metadata, {
             </div>
         ]
     },
-    save: () => {
+    save: ({attributes}) => {
         const blockProps = useBlockProps.save();
         return (
-            <div { ...blockProps } ><div id="#mhwp-ipso-list-container"></div></div>
+            <div { ...blockProps } >
+                <div id="mhwp-ipso-list-container">
+                    <input id="mhwp-ipso-list-nonce" type="hidden" value={attributes.rest_nonce}/>
+                </div>
+
+            </div>
         )
     }
 })
