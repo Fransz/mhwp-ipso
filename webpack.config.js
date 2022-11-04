@@ -1,38 +1,21 @@
-const path              =   require( 'path' );
-const webpack           =   require( 'webpack' );
-const MiniCssExtractPlugin  =   require( 'mini-css-extract-plugin' );
+const path = require( 'path' );
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
-// Extract CSS for Gutenberg Editor
-const editor_css_plugin =   new MiniCssExtractPlugin({
-    filename:               'mhwp-ipso-list.css'
-});
 
-module.exports          =   {
-    entry: './mhwp-ipso/blocks/app/index.js',
+module.exports = {
+    ...defaultConfig,
+
+    entry: {
+        'mhwp-ipso-list': './ipso-api/blocks/list/'
+    },
+
     output: {
-        path:               path.resolve( __dirname, 'mhwp-ipso/blocks/dist' ),
-        filename:           'bundle.js',
+        path: path.resolve( __dirname ) + '/ipso-api/blocks/dist',
+        filename: '[name].js'
     },
-    mode:                   'development',
-    devtool:                'eval-cheap-source-map',
+
     module: {
-        rules: [
-            {
-                test:       /\.js$/,
-                exclude:    /(node_modules)/,
-                use:        'babel-loader',
-            },
-            {
-                test:           /\.(sa|sc|c)ss$/,
-                use:            [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    'sass-loader'
-                ]
-            }
-        ]
+        ...defaultConfig.module,
     },
-    plugins: [
-        editor_css_plugin
-    ]
+
 };

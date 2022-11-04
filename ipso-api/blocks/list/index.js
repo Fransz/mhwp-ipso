@@ -1,7 +1,10 @@
-import icon from '../icons/index'
-import './mhwp-ipso-list.scss'
+import './frontend.js'
+import './bootstrap-collapse.js'
 
 import metadata from './block.json'
+
+import icon from './icons';
+import './mhwp-ipso-list.scss';
 
 const { blocks } = wp;
 const { __ } = wp.i18n;
@@ -28,7 +31,7 @@ blocks.registerBlockType( metadata, {
                         <p>{ __( 'Configure the ipso calendar here.', 'mhwp-ipso' ) }</p>
                     </PanelRow>
 
-                     <TextControl
+                    <TextControl
                         value={ props.attributes.nr_days }
                         label={ __( 'Aantal dagen', 'mhwp-ipso' ) }
                         help={ __( 'Aantal dagen dat in de kalender getoond wordt.', 'mhwp-ipso' ) }
