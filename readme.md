@@ -11,3 +11,7 @@ We need to add a nonce here when we implemented that.
     cookie:XDEBUG_SESSION=PHPSTORM \
     activityCalendarId=12055 email='frans.jaspers@marikenhuis.nl' firstName=Henk lastName=Jaspers \
     lastNamePrefix='' phoneNumber='0645267137'
+
+    http --json -p HBhb GET http://marikenhuis.localhost:8080/wp-json/mhwp-ipso/v1/activity \
+    cookie:XDEBUG_SESSION=PHPSTORM \
+    nrDays=7

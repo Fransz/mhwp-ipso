@@ -1,6 +1,6 @@
 jQuery.noConflict();
 
-jQuery(document).ready( function() {
+function makeReservation() {
     // TODO We want this from wp localizeScript, taking MHWP_IPSO__DEV_MODE into account.
     const url = new URL( "http://marikenhuis.localhost:8080/" );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
@@ -32,9 +32,6 @@ jQuery(document).ready( function() {
                 phoneNumber = phoneNumber === "" ? null : phoneNumber;
                 const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
 
-                console.log(data);
-                console.log(JSON.stringify( data ) ) ;
-
                 fetch( url, {
                     method: 'POST',
                     body: JSON.stringify( data ),
@@ -58,11 +55,11 @@ jQuery(document).ready( function() {
                     }
                     return json;
                 }).catch( (err) => {
-                    let message = 'Er gaat iets is, probeer het later nog eens';
-                    if (err instanceof TypeError) {
-                      message = err.message;
-                    }
-                    console.log(message);
+                        let message = 'Er gaat iets is, probeer het later nog eens';
+                        if (err instanceof TypeError) {
+                            message = err.message;
+                        }
+                        console.log(message);
                     }
                 )
             },
@@ -71,4 +68,54 @@ jQuery(document).ready( function() {
             }
         });
     });
-})
+}
+
+function getActivities() {
+    console.log('DOMContentLoaded');
+
+    // TODO: Use the proction URL.
+    const url = new URL( "http://localhost:8080/" );
+    url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+    nrDays = 1;
+    const query = new URLSearchParams({nrDays});
+
+    fetch( url, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    }).then( ( res  )=> {
+        console.log(res);
+        if ( ! res.ok ) {
+            const message = res['message'] ? res['message'] : '';
+            throw new TypeError( message );
+        }
+        return res.json();
+    }).then( (json) => {
+        console.log(json);
+        if ( json['mhwp_ipso_status'] !== 'ok' ) {
+            const message = json['mhwp-ipso-message'] ? json['mhwp-ipso-message'] : '';
+            throw new TypeError( message );
+        }
+        return json;
+    }).catch( (err) => {
+            let message = 'Er gaat iets is, probeer het later nog eens';
+            if (err instanceof TypeError) {
+                message = err.message;
+            }
+            console.log(message);
+        }
+    )
+}
+
+function domLoaded(fn) {
+    if(document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(fn ,1);
+    } else {
+        document.addEventListener('DOMContentLoaded', fn);
+    }
+}
+domLoaded(getActivities);

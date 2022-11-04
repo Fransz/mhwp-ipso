@@ -16,7 +16,7 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-
  * TODO: We want a nonce in the request, and check that.
  * 		 This makes it more difficult to make multiple reservations from the frontend.
  */
-class MHWP_IPSO_Rest_Controller extends WP_REST_Controller {
+class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 
 	/**
 	 * The route we handle here.
