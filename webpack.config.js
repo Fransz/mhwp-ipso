@@ -6,7 +6,7 @@ module.exports = {
     ...defaultConfig,
 
     entry: {
-        'ipso-list': './ipso-api/blocks/list/'
+        'mhwp-ipso-list': './ipso-api/blocks/list/'
     },
 
     output: {
