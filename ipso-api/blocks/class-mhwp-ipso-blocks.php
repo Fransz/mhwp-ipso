@@ -74,7 +74,7 @@ class MHWP_IPSO_Blocks {
 
 		wp_enqueue_script(
 			$this->mhwp_ipso . '_blocks',
-			plugin_dir_url( __FILE__ ) . 'dist/bundle.js',
+			plugin_dir_url( __FILE__ ) . 'dist/ipso-list.js',
 			array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-api' ),
 			$ver,
 			true
