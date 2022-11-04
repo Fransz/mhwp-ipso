@@ -72,13 +72,13 @@ class MHWP_IPSO_Blocks {
 	public function enqueue_scripts() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
 
-		wp_enqueue_script(
-			$this->mhwp_ipso . '_blocks',
-			plugin_dir_url( __FILE__ ) . 'dist/mhwp-ipso-list.js',
-			array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-api' ),
-			$ver,
-			true
-		);
+//		wp_enqueue_script(
+//			$this->mhwp_ipso . '_blocks',
+//			plugin_dir_url( __FILE__ ) . 'dist/mhwp-ipso-list.js',
+//			array( 'wp-i18n', 'wp-element', 'wp-blocks', 'wp-components', 'wp-editor', 'wp-api' ),
+//			$ver,
+//			true
+//		);
 
 		// TODO is this the place to enqueue this?
 		wp_enqueue_script(
@@ -260,10 +260,7 @@ class MHWP_IPSO_Blocks {
 	 */
 	public function register_blocks() {
 		register_block_type(
-			plugin_dir_path( __FILE__ ) . 'list',
-			array(
-				'render_callback' => array( $this, 'render' ),
-			)
+			plugin_dir_path( __FILE__ ) . 'list'
 		);
 	}
 
