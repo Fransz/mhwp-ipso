@@ -1,7 +1,7 @@
 import icon from '../icons/index'
-import './mhwp-ipso-list.scss'
+import '../mhwp-ipso-list.scss'
 
-import metadata from './block.json'
+import metadata from '../block.json'
 
 const { blocks } = wp;
 const { __ } = wp.i18n;
