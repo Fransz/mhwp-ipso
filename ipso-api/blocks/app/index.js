@@ -3,6 +3,9 @@ import './bootstrap-collapse.js'
 
 import metadata from './block.json'
 
+import icon from './icons';
+import './mhwp-ipso-list.scss';
+
 const { blocks } = wp;
 const { __ } = wp.i18n;
 const { InspectorControls } = wp.blockEditor;
