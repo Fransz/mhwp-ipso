@@ -8,9 +8,9 @@ const editor_css_plugin =   new MiniCssExtractPlugin({
 });
 
 module.exports          =   {
-    entry: './mhwp-ipso/blocks/app/index.js',
+    entry: './ipso-api/blocks/app/index.js',
     output: {
-        path:               path.resolve( __dirname, 'mhwp-ipso/blocks/dist' ),
+        path:               path.resolve( __dirname, 'ipso-api/blocks/dist' ),
         filename:           'bundle.js',
     },
     mode:                   'development',

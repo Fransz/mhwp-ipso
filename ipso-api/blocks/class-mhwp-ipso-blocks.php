@@ -16,7 +16,7 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-
  * enqueue the block-specific stylesheet and JavaScript.
  *
  * @package    MHWP_IPSO
- * @author     Your Name <frans.jaspers@marikenhuis.nl>
+ * @author     Frans Jaspers <frans.jaspers@marikenhuis.nl>
  */
 class MHWP_IPSO_Blocks {
 
@@ -260,7 +260,7 @@ class MHWP_IPSO_Blocks {
 	 */
 	public function register_blocks() {
 		register_block_type(
-			plugin_dir_path( __FILE__ ) . 'app/list',
+			plugin_dir_path( __FILE__ ) . 'app',
 			array(
 				'render_callback' => array( $this, 'render' ),
 			)
