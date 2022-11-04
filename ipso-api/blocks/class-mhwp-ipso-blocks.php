@@ -260,7 +260,7 @@ class MHWP_IPSO_Blocks {
 	 */
 	public function register_blocks() {
 		register_block_type(
-			plugin_dir_path( __FILE__ ) . 'app',
+			plugin_dir_path( __FILE__ ) . 'list',
 			array(
 				'render_callback' => array( $this, 'render' ),
 			)
