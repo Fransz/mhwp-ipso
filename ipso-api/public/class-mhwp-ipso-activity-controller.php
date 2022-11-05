@@ -93,13 +93,34 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			),
 		);
 
-		$client = new MHWP_IPSO_Client();
-		$data   = array(
-			'nrDays' => $request->get_param( 'nrDays' ),
-		);
-		return new WP_REST_Response( $data, 200 );
+		$nr_days = $request->get_param( 'nr_days' );
+		try {
+			$now      = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Amsterdam' ) );
+			$interval = new DateInterval( 'P' . $nr_days . 'D' );
+		} catch ( Exception $e ) {
+			$error = array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => $e->getCode(),
+				'mhwp_ipso_msg'    => 'er is een probleem op de server',
+			);
+			return new WP_REST_Response( $error, 500 );
+		}
 
-		// return $client->add_participants( $json );
+		$data = array(
+			'from' => $now->format( 'Y-m-d' ),
+			'till' => $now->add( $interval )->format( 'Y-m-d' ),
+		);
+
+		$client = new MHWP_IPSO_Client();
+		$response = $client->get_calendar_activities( $data );
+		// return new WP_REST_Response( $data, 200 );
+
+		$error = array(
+			'mhwp_ipso_status' => 'error',
+			'mhwp_ipso_code'   => 500,
+			'mhwp_ipso_msg'    => 'JUST KIDDING; THERE WAS NO ERROR',
+		);
+		return new WP_REST_Response( $error, 200 );
 	}
 
 	/**

@@ -147,7 +147,8 @@ class MHWP_IPSO_Client {
 		$this->url['path'] = '/api/Activities/GetCalendarActivities';
 		$this->data        = $data;
 
-		return $this->response( $this->request() );
+		$req = $this->request();
+		return $this->response( $req );
 	}
 
 	/**
