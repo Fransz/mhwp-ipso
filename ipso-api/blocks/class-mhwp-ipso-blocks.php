@@ -265,7 +265,7 @@ class MHWP_IPSO_Blocks {
 		 * @param array $metadata the metadata.
 		 * @return array
 		 */
-		function filter_metadata( array $metadata ): array {
+		function filter_block_metadata( array $metadata ): array {
 			if ( 'mhwp-ipso/list' === $metadata['name'] ) {
 				// get the options we need.
 				$metadata['attributes']['rest_nonce'] = array(
@@ -278,7 +278,7 @@ class MHWP_IPSO_Blocks {
 			}
 			return $metadata;
 		}
-		add_filter( 'block_type_metadata', 'filter_metadata' );
+		add_filter( 'block_type_metadata', 'filter_block_metadata' );
 
 		register_block_type(
 			plugin_dir_path( __FILE__ ) . 'list'
