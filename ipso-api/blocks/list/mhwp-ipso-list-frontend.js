@@ -1,7 +1,5 @@
 import './bootstrap-collapse';
 
-jQuery.noConflict();
-
 function prepareReservations() {
     // TODO We want this from wp localizeScript, taking MHWP_IPSO__DEV_MODE into account.
     // TODO: Use the production URL.
@@ -11,29 +9,34 @@ function prepareReservations() {
     /**
      * Dutch phone numbers have 10 digits (or 11 and start with +31).
      */
-    jQuery.validator.addMethod( "phoneNL", function( value, element ) {
+    $.validator.addMethod( "phoneNL", function( value, element ) {
         return this.optional( element ) || /^((\+|00(\s|\s?\-\s?)?)31(\s|\s?\-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?\-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
 
-    const forms = jQuery('form', '#mhwp-ipso-list-container');
+    const forms = $('form', '#mhwp-ipso-list-container');
     forms.each( (_, f) => {
-        jQuery( f ).validate({
+        $( f ).validate({
             // We only use one explicit validation rule. others are extracted from the HTML attributes
             rules: {
                 phoneNumber: {
                     phoneNL: true,
-                    normalizer: v => jQuery.trim( v )
+                    normalizer: v => $.trim( v )
                 }
             },
             submitHandler: function ( form, event ) {
-                const activityCalendarId = jQuery('input[name="activityCalendarId"]', form).val();
-                const firstName = jQuery('input[name="firstName"]', form).val();
-                const lastNamePrefix = jQuery('input[name="lastNamePrefix"]', form).val();
-                const lastName = jQuery('input[name="lastName"]', form).val();
-                const email = jQuery('input[name="email"]', form).val();
-                let phoneNumber = jQuery('input[name="phoneNumber"]', form).val();
+                const container = $(form).parent();
+
+                const activityCalendarId = $('input[name="activityCalendarId"]', form).val();
+                const firstName = $('input[name="firstName"]', form).val();
+                const lastNamePrefix = $('input[name="lastNamePrefix"]', form).val();
+                const lastName = $('input[name="lastName"]', form).val();
+                const email = $('input[name="email"]', form).val();
+                let phoneNumber = $('input[name="phoneNumber"]', form).val();
                 phoneNumber = phoneNumber === "" ? null : phoneNumber;
                 const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
+
+                clearErrors(container);
+                clearMessages(container);
 
                 fetch( url, {
                     method: 'POST',
@@ -44,25 +47,26 @@ function prepareReservations() {
                         'Content-Type': 'application/json',
                     }
                 }).then( ( res  )=> {
-                    console.log(res);
                     if ( ! res.ok ) {
                         const message = res['message'] ? res['message'] : '';
                         throw new TypeError( message );
                     }
                     return res.json();
                 }).then( (json) => {
-                    console.log(json);
                     if ( json['mhwp_ipso_status'] !== 'ok' ) {
-                        const message = json['mhwp-ipso-message'] ? json['mhwp-ipso-message'] : '';
+                        const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
                         throw new TypeError( message );
                     }
-                    return json;
+                    addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container);
                 }).catch( (err) => {
-                        let message = 'Er gaat iets is, probeer het later nog eens';
+                        let message = '';
                         if (err instanceof TypeError) {
                             message = err.message;
                         }
-                        console.log(message);
+                        if ('' === message) {
+                            message = 'Er gaat iets is, probeer het later nog eens';
+                        }
+                        addError(message, container);
                     }
                 )
             },
@@ -86,6 +90,8 @@ function getActivities() {
     // Get the container
     const container = document.getElementById('mhwp-ipso-list-container');
 
+    clearErrors(container);
+    clearMessages(container);
     fetch( url, {
         method: 'GET',
         cache: 'no-store',
@@ -114,9 +120,12 @@ function getActivities() {
 
         return json;
     }).catch( (err) => {
-            let message = 'Er gaat iets is, probeer het later nog eens';
+            let message = '';
             if (err instanceof TypeError) {
                 message = err.message;
+            }
+            if ('' === message) {
+                message = 'Er gaat iets is, probeer het later nog eens';
             }
             addError(message, container);
         }
@@ -189,17 +198,35 @@ function addActivities(activities, container) {
             </div>
         </li>`;
 
-        const node = jQuery(html);
-        jQuery(container).append(node);
+        const node = $(html);
+        $(container).append(node);
     }
 
     prepareReservations();
 }
 
+function addNode( message, className, container) {
+    const html = `<div class="${className}"><h3 class="message">${message}</h3></div>`;
+    const node = $(html);
+    $(container).append(node);
+
+}
 function addError( message, container ) {
-   const html = `<div class="error" style="display:block;"><h3 class="message">${message}</h3></div>`;
-   const node = jQuery(html);
-   jQuery(container).append(node);
+    addNode( message, 'error', container);
+}
+function addMessage( message, container ) {
+    addNode( message, 'message', container);
+}
+
+function clearNodes(className, container) {
+    const nodes = $(`.${className}`, container);
+    nodes.each(((n) => n.remove()));
+}
+function clearErrors(container) {
+    clearNodes('error', container);
+}
+function clearMessages(container) {
+    clearNodes('message', container);
 }
 
 function domLoaded(fn) {
