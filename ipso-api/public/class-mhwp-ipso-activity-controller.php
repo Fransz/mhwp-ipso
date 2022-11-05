@@ -111,16 +111,40 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'till' => $now->add( $interval )->format( 'Y-m-d' ),
 		);
 
-		$client = new MHWP_IPSO_Client();
-		$response = $client->get_calendar_activities( $data );
-		// return new WP_REST_Response( $data, 200 );
+		$client   = new MHWP_IPSO_Client();
+		$calendar = $client->get_calendar_activities( $data );
 
-		$error = array(
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 500,
-			'mhwp_ipso_msg'    => 'JUST KIDDING; THERE WAS NO ERROR',
-		);
-		return new WP_REST_Response( $error, 200 );
+		// The request returned an error; Bail out.
+		if ( 'error' === $calendar['mhwp_ipso_status'] ) {
+			return new WP_REST_Response( $calendar, 200 );
+		}
+
+		// Drop the mhwp_iipso_status field. It messes up the sorting.
+		unset( $calendar['mhwp_ipso_status'] );
+
+		/**
+		 * Sorting function for the activities.
+		 * TODO: We only sort by date.
+		 *
+		 * @param object $a1 the first activity in the comparison.
+		 * @param object $a2 the second activity in the comparison.
+		 *
+		 * @return int the order of the dates.
+		 */
+		function cmp( object $a1, object $a2 ): int {
+			$d1 = $a1->onDate;      // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$d2 = $a2->onDate;      // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+			if ( $d1 === $d2 ) {
+				return 0;
+			}
+			return ( $d1 < $d2 ) ? -1 : 1;
+		}
+		usort( $calendar, 'cmp' );
+
+		// re-add the mhwp_ipso_status.
+		$calendar['mhwp_ipso_status'] = 'ok';
+		return new WP_REST_Response( $calendar, 200 );
 	}
 
 	/**
