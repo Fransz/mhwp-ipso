@@ -1,9 +1,10 @@
 import './bootstrap-collapse';
 
+// TODO: Use the production URL.
+const marikenhuisURL ="http://localhost:8080/";
+
 function prepareReservations() {
-    // TODO We want this from wp localizeScript, taking MHWP_IPSO__DEV_MODE into account.
-    // TODO: Use the production URL.
-    const url = new URL( "http://localhost:8080/" );
+    const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
     /**
@@ -78,8 +79,7 @@ function prepareReservations() {
 }
 
 function getActivities() {
-    // TODO: Use the production URL.
-    const url = new URL( "http://localhost:8080/" );
+    const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
     url.searchParams.append('nr_days', '7');
 
