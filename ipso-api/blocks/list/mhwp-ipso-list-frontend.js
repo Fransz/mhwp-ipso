@@ -74,7 +74,7 @@ function getActivities() {
     // TODO: Use the production URL.
     const url = new URL( "http://localhost:8080/" );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
-    url.searchParams.append('nrDays', '7');
+    url.searchParams.append('nr_days', '7');
 
     // Get the nonce.
     const node = document.getElementById('mhwp-ipso-list-nonce');
