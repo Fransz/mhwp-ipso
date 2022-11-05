@@ -80,6 +80,9 @@ function getActivities() {
     const node = document.getElementById('mhwp-ipso-list-nonce');
     const nonce = node ?. value;
 
+    // Get the container
+    const container = document.getElementById('mhwp-ipso-list-container');
+
     fetch( url, {
         method: 'GET',
         cache: 'no-store',
@@ -98,7 +101,7 @@ function getActivities() {
     }).then( (json) => {
         console.log(json);
         if ( json['mhwp_ipso_status'] !== 'ok' ) {
-            const message = json['mhwp-ipso-message'] ? json['mhwp-ipso-message'] : '';
+            const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
             throw new TypeError( message );
         }
         return json;
@@ -107,9 +110,15 @@ function getActivities() {
             if (err instanceof TypeError) {
                 message = err.message;
             }
-            console.log(message);
+            addError(message, container);
         }
     )
+}
+
+function addError( message, container ) {
+   const html = `<div class="error"><h3 class="message">${message}</h3></div>`;
+   const node = jQuery(html);
+   jQuery(container).append(html);
 }
 
 function domLoaded(fn) {
