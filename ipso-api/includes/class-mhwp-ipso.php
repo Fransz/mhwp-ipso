@@ -166,6 +166,8 @@ class MHWP_IPSO {
 
 		$plugin_blocks = new MHWP_IPSO_Blocks( $this->get_mhwp_ipso(), $this->get_version() );
 
+		$this->loader->add_action( 'enqueue_block_assets', $plugin_blocks, 'enqueue_styles' );
+		$this->loader->add_action( 'enqueue_block_assets', $plugin_blocks, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_blocks, 'register_blocks' );
 
 	}

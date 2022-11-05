@@ -1,12 +1,12 @@
 <?php
 /**
+ * PHP version 7.2
  * The blocks-specific functionality of the plugin
  *
  * @package MHWP_IPSO
  * @author Frans Jaspers <frans.jaspers@marikenhuis.nl>
  * @link https://www.marikenhuis.nl
  */
-
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-client.php';
 
 /**
@@ -73,20 +73,22 @@ class MHWP_IPSO_Blocks {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
 
 		// TODO is this the place to enqueue this?
-		wp_enqueue_script(
-			$this->mhwp_ipso . '_blocks_validate',
-			'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js',
-			array( 'jquery' ),
-			$ver,
-			true
-		);
-		wp_enqueue_script(
-			$this->mhwp_ipso . '_blocks_validate_l10n',
-			'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_nl.min.js',
-			array( 'jquery', $this->mhwp_ipso . '_blocks_validate' ),
-			$ver,
-			true
-		);
+		if ( ! is_admin() ) {
+			wp_enqueue_script(
+				$this->mhwp_ipso . '_blocks_validate',
+				'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js',
+				array( 'jquery' ),
+				$ver,
+				true
+			);
+			wp_enqueue_script(
+				$this->mhwp_ipso . '_blocks_validate_l10n',
+				'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/localization/messages_nl.min.js',
+				array( 'jquery', $this->mhwp_ipso . '_blocks_validate' ),
+				$ver,
+				true
+			);
+		}
 	}
 
 	/**

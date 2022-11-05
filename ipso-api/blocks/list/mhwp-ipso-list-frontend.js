@@ -1,6 +1,8 @@
+import './bootstrap-collapse';
+
 jQuery.noConflict();
 
-function makeReservation() {
+function prepareReservations() {
     // TODO We want this from wp localizeScript, taking MHWP_IPSO__DEV_MODE into account.
     const url = new URL( "http://marikenhuis.localhost:8080/" );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
@@ -8,7 +10,7 @@ function makeReservation() {
     /**
      * Dutch phone numbers have 10 digits (or 11 and start with +31).
      */
-    $.validator.addMethod( "phoneNL", function( value, element ) {
+    jQuery.validator.addMethod( "phoneNL", function( value, element ) {
         return this.optional( element ) || /^((\+|00(\s|\s?\-\s?)?)31(\s|\s?\-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?\-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
 
@@ -138,10 +140,10 @@ function addActivities(activities, container) {
                     <span>Title: </span><span>${activity.title}</span>
                 </div>
                 <div class="col-md-4">
-                    <button class="pull-right btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample_<?php echo $cnt; ?>" aria-expanded="false" aria-controls="collapseExample">
+                    <button class="pull-right btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample_${cnt}" aria-expanded="false" aria-controls="collapseExample">
                         Lees meer
                     </button>
-                    <button class="pull-right btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseReserveer_<?php echo $cnt; ?>" aria-expanded="false" aria-controls="collapseReserveer">
+                    <button class="pull-right btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseReserveer_${cnt}" aria-expanded="false" aria-controls="collapseReserveer">
                         Reserveer
                     </button>
                 </div>
@@ -189,6 +191,8 @@ function addActivities(activities, container) {
         const node = jQuery(html);
         jQuery(container).append(node);
     }
+
+    prepareReservations();
 }
 
 function addError( message, container ) {
