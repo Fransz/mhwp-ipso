@@ -142,7 +142,7 @@ class MHWP_IPSO_Client {
 	 * @param array $data The data to send.
 	 * @return array
 	 */
-	public function get_calendar_activities( array $data ): array {
+	public function get_activities( array $data ): array {
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetCalendarActivities';
 		$this->data        = $data;

@@ -69,30 +69,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ): WP_REST_Response {
-		$testData = array(
-			array(
-				'activityID' => 4,
-				'extraInfo'  => 'Een stevig rondje lopen!',
-				'id'         => 2076,
-				'onDate'     => '2022-06-28T00:00:00',
-				'timeEnd'    => '2022-06-28T15:59:00',
-				'timeOpen'   => '2022-06-28T11:30:00',
-				'timeStart'  => '2022-06-28T12:00:00',
-				'title'      => 'Wandelen in het Goffertpark',
-			),
-
-			array(
-				'activityID' => 3,
-				'extraInfo'  => '',
-				'id'         => 2117,
-				'onDate'     => '2022-06-30T00:00:00',
-				'timeEnd'    => '2022-06-30T16:00:00',
-				'timeOpen'   => '2022-06-30T13:00:00',
-				'timeStart'  => '2022-06-30T14:00:00',
-				'title'      => 'Wereldkankerdag',
-			),
-		);
-
 		$nr_days = $request->get_param( 'nr_days' );
 		try {
 			$now      = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Amsterdam' ) );
@@ -112,7 +88,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 		);
 
 		$client   = new MHWP_IPSO_Client();
-		$calendar = $client->get_calendar_activities( $data );
+		$calendar = $client->get_activities( $data );
 
 		// The request returned an error; Bail out.
 		if ( 'error' === $calendar['mhwp_ipso_status'] ) {
