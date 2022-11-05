@@ -50,6 +50,19 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource . '/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
+				),
+				'schema' => array( $this, 'get_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -121,6 +134,35 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 		// re-add the mhwp_ipso_status.
 		$calendar['mhwp_ipso_status'] = 'ok';
 		return new WP_REST_Response( $calendar, 200 );
+	}
+
+	/**
+	 * Check permissions for getting the list of activities.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true True if the request has access to get_items, WP_Error object otherwise.
+	 */
+	public function get_item_permissions_check( $request ): bool {
+		return true;
+	}
+
+	/**
+	 * Get a single activity (really a type!) from the ipso system.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
+	 */
+	public function get_item( $request ): WP_REST_Response {
+		$activity_id = basename( $request->get_route() );
+
+		$data = array(
+			'activityID' => $activity_id,
+		);
+
+		$client   = new MHWP_IPSO_Client();
+		$activity = $client->get_activity( $data );
+		return new WP_REST_Response( $activity, 200 );
 	}
 
 	/**

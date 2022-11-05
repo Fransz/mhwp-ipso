@@ -139,6 +139,8 @@ function addActivities(activities, container) {
     for (let key in Object.keys(activities)) {
        let activity = activities[key];
 
+       let activityDetail = getActivityDetail(activity.activityID, container);
+
        light_dark = light_dark === 'light' ? 'dark' : 'light';
        cnt++;
 
@@ -203,6 +205,49 @@ function addActivities(activities, container) {
     }
 
     prepareReservations();
+}
+
+function getActivityDetail(activityId, container) {
+    const url = new URL( marikenhuisURL );
+    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
+
+    fetch( url, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+    }).then( ( res  )=> {
+        console.log("response", res);
+        if ( ! res.ok ) {
+            const message = res['message'] ? res['message'] : '';
+            throw new TypeError( message );
+        }
+        return res.json();
+    }).then( (json) => {
+        console.log("json", json);
+        if ( json['mhwp_ipso_status'] !== 'ok' ) {
+            const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
+            throw new TypeError( message );
+        }
+
+        // remove the mhwp_ipso_status. leaving only calendar objects.
+        delete json['mhwp_ipso_status'];
+        addActivities(json, container);
+
+        return json;
+    }).catch( (err) => {
+            let message = '';
+            if (err instanceof TypeError) {
+                message = err.message;
+            }
+            if ('' === message) {
+                message = 'Er gaat iets is, probeer het later nog eens';
+            }
+            addError(message, container);
+        }
+    )
 }
 
 function addNode( message, className, container) {
