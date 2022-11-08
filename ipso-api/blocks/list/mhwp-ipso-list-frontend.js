@@ -54,8 +54,8 @@ function prepareReservations() {
                     }
                     return res.json();
                 }).then( (json) => {
-                    if ( json['mhwp_ipso_status'] !== 'ok' ) {
-                        const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
+                    if ( json.mhwp_ipso_status !== 'ok' ) {
+                        const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
                         throw new TypeError( message );
                     }
                     addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container);
@@ -101,22 +101,19 @@ function getActivities() {
             'HTTP_X_WP_NONCE': nonce,
         }
     }).then( ( res  )=> {
-        console.log("response", res);
         if ( ! res.ok ) {
             const message = res['message'] ? res['message'] : '';
             throw new TypeError( message );
         }
         return res.json();
     }).then( (json) => {
-        console.log("json", json);
-        if ( json['mhwp_ipso_status'] !== 'ok' ) {
-            const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
+        if ( json.mhwp_ipso_status !== 'ok' ) {
+            const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
         }
 
         // remove the mhwp_ipso_status. leaving only calendar objects.
-        delete json['mhwp_ipso_status'];
-        addActivities(json, container);
+        addActivities(json.data, container);
 
         return json;
     }).catch( (err) => {
@@ -215,7 +212,6 @@ function getActivityDetail(activityId, container) {
         method: 'GET',
         cache: 'no-store',
         headers: {
-            'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
     }).then( ( res  )=> {
@@ -226,15 +222,17 @@ function getActivityDetail(activityId, container) {
         }
         return res.json();
     }).then( (json) => {
-        console.log("json", json);
-        if ( json['mhwp_ipso_status'] !== 'ok' ) {
-            const message = json['mhwp_ipso_msg'] ? json['mhwp_ipso_msg'] : '';
+        if ( json.mhwp_ipso_status !== 'ok' ) {
+            if (json.mhwp_ipso_code === 429) {
+                console.log('Too many requests (429)');
+                return [];
+            }
+            const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
         }
 
         // remove the mhwp_ipso_status. leaving only calendar objects.
-        delete json['mhwp_ipso_status'];
-        addActivities(json, container);
+        // addActivities(json.data, container);
 
         return json;
     }).catch( (err) => {
@@ -243,7 +241,7 @@ function getActivityDetail(activityId, container) {
                 message = err.message;
             }
             if ('' === message) {
-                message = 'Er gaat iets is, probeer het later nog eens';
+                message = 'Er gaat iets mis, probeer het later nog eens';
             }
             addError(message, container);
         }

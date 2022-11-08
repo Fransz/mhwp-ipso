@@ -17,42 +17,30 @@ class MHWP_IPSO_Client {
 	/**
 	 * The json response for failng to make the request.
 	 *
-	 * @var string[]
+	 * @var object
 	 */
-	private $error_failure = array(
-		'mhwp_ipso_status' => 'error',
-		'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
-	);
+	private $error_failure;
 
 	/**
 	 * The json response for a 404 error.
 	 *
-	 * @var string[]
+	 * @var object
 	 */
-	private $error_404 = array(
-		'mhwp_ipso_status' => 'error',
-		'mhwp_ipso_code'   => 404,
-		'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
-	);
+	private $error_404;
 
 	/**
 	 * The json response for all other http errors.
 	 *
-	 * @var string[]
+	 * @var object
 	 */
-	private $error = array(
-		'mhwp_ipso_status' => 'error',
-		'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
-	);
+	private $error;
 
 	/**
 	 * The json response for an ok response.
 	 *
-	 * @var string[]
+	 * @var object
 	 */
-	private $ok = array(
-		'mhwp_ipso_status' => 'ok',
-	);
+	private $ok;
 
 	/**
 	 * The method to use for the request.
@@ -90,9 +78,11 @@ class MHWP_IPSO_Client {
 	private $headers = array();
 
 	/**
-	 * Constructor, initialize the url array.
+	 * Constructor, initialize standard responses, initialize the url array.
 	 */
 	public function __construct() {
+		$this->init_std_repsonses();
+
 		$this->url = array(
 			'scheme' => 'https://',
 			'host'   => '',
@@ -109,13 +99,49 @@ class MHWP_IPSO_Client {
 	}
 
 	/**
+	 * Initialize our standard response.
+	 * The type casting cannot be done on the attributes directly.
+	 */
+	private function init_std_repsonses() {
+		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
+		$this->error_failure = (object) [
+			'mhwp_ipso_status' => 'error',
+			'mhwp_ipso_code'   => 0,
+			'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
+		];
+
+		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
+		$this->error_404 = (object) [
+			'mhwp_ipso_status' => 'error',
+			'mhwp_ipso_code'   => 404,
+			'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
+		];
+
+		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
+		$this->error = (object) [
+			'mhwp_ipso_status' => 'error',
+			'mhwp_ipso_code'   => 0,
+			'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
+		];
+
+		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
+		$this->ok = (object) [
+			'mhwp_ipso_status' => 'ok',
+			'mhwp_ipso_code'   => 200,
+			'mhwp_ipso_msg'    => '',
+			'data'             => array(),
+		];
+
+	}
+
+	/**
 	 * Request IPSO for Activities/addParticipants
 	 * We need to json encode the data so we have a string.
 	 *
 	 * @param array $data The data to send.
-	 * @return array
+	 * @return object
 	 */
-	public function add_participants( array $data ): array {
+	public function add_participants( array $data ): object {
 		$this->method      = 'POST';
 		$this->url['path'] = '/api/Activities/addParticipant';
 
@@ -125,11 +151,8 @@ class MHWP_IPSO_Client {
 		// Encode the data as a json string.
 		$json = wp_json_encode( $data );
 		if ( false === $json ) {
-			return array(
-				'mhwp_ipso_status' => 'error',
-				'mhwp_ipso_code'   => 0,
-				'mhwp_ipso_msg'    => 'Ongeldige data',
-			);
+			$this->error->mhwp_ipso_msg = 'Ongeldige data';
+			return $this->error;
 		}
 		$this->data = $json;
 
@@ -140,9 +163,9 @@ class MHWP_IPSO_Client {
 	 * Request IPSO for Activities/getCalendarActivities
 	 *
 	 * @param array $data The data to send.
-	 * @return array
+	 * @return object
 	 */
-	public function get_activities( array $data ): array {
+	public function get_activities( array $data ): object {
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetCalendarActivities';
 		$this->data        = $data;
@@ -154,9 +177,9 @@ class MHWP_IPSO_Client {
 	 * Request IPSO for Activities/getActivityInfo
 	 *
 	 * @param array $data The data to send.
-	 * @return array
+	 * @return object
 	 */
-	public function get_activity( array $data ): array {
+	public function get_activity( array $data ): object {
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetActivityInfo';
 		$this->data        = $data;
@@ -207,11 +230,12 @@ class MHWP_IPSO_Client {
 	 * Checks the request for errors and returns an array of the received json data.
 	 *
 	 * @param array | WP_Error $resp The response we received from the server.
-	 * @return array An array with at least a status code.
-	 */
-	private function response( $resp ) : array {
+	 *
+	 * @return object An array with at least a status code.
+	 * @noinspection PhpUndefinedFieldInspection*/
+	private function response( $resp ) : object {
 		if ( is_wp_error( $resp ) ) {
-			$this->error_failure['mhwp_ipso_code'] = $resp->get_error_code();
+			$this->error_failure->mhwp_ipso_code = $resp->get_error_code();
 			return $this->error_failure;
 		}
 
@@ -220,15 +244,14 @@ class MHWP_IPSO_Client {
 		}
 
 		if ( 200 !== $resp['response']['code'] ) {
-			$this->error['mhwp_ipso_code'] = $resp['response']['code'];
+			$this->error->mhwp_ipso_code = $resp['response']['code'];
 			return $this->error;
 		}
 
-		if ( empty( $resp['body'] ) ) {
-			return $this->ok;
-		} else {
-			$arr = json_decode( $resp['body'] );
-			return array_merge( $this->ok, $arr );
+		if ( ! empty( $resp['body'] ) ) {
+			$arr            = json_decode( $resp['body'] );
+			$this->ok->data = $arr;
 		}
+		return $this->ok;
 	}
 }

@@ -87,7 +87,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			$now      = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Amsterdam' ) );
 			$interval = new DateInterval( 'P' . $nr_days . 'D' );
 		} catch ( Exception $e ) {
-			$error = array(
+			$error = (object) array(
 				'mhwp_ipso_status' => 'error',
 				'mhwp_ipso_code'   => $e->getCode(),
 				'mhwp_ipso_msg'    => 'er is een probleem op de server',
@@ -104,12 +104,9 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 		$calendar = $client->get_activities( $data );
 
 		// The request returned an error; Bail out.
-		if ( 'error' === $calendar['mhwp_ipso_status'] ) {
+		if ( 'error' === $calendar->mhwp_ipso_status ) {
 			return new WP_REST_Response( $calendar, 200 );
 		}
-
-		// Drop the mhwp_iipso_status field. It messes up the sorting.
-		unset( $calendar['mhwp_ipso_status'] );
 
 		/**
 		 * Sorting function for the activities.
@@ -129,10 +126,8 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			}
 			return ( $d1 < $d2 ) ? -1 : 1;
 		}
-		usort( $calendar, 'cmp' );
+		usort( $calendar->data, 'cmp' );
 
-		// re-add the mhwp_ipso_status.
-		$calendar['mhwp_ipso_status'] = 'ok';
 		return new WP_REST_Response( $calendar, 200 );
 	}
 
