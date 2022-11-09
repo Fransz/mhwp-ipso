@@ -10,6 +10,8 @@
     "html": false
   },
   "style": "file:../dist/mhwp-ipso-list.css",
+  "editorScript": "file:../dist/mhwp-ipso-list.js",
+  "viewScript": "file:../dist/mhwp-ipso-list-frontend.js",
   "attributes": {
     "nr_days": {
       "type": "string",

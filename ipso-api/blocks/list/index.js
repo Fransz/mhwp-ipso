@@ -1,27 +1,24 @@
-import './frontend.js'
-import './bootstrap-collapse.js'
+// import './mhwp-ipso-list-frontend.js'
+// import './bootstrap-collapse.js'
 
 import metadata from './block.json'
 
 import icon from './icons';
 import './mhwp-ipso-list.scss';
 
-const { blocks } = wp;
-const { __ } = wp.i18n;
-const { InspectorControls } = wp.blockEditor;
-const {
-    useBlockProps
-} = wp.blockEditor
-const {
+import { registerBlockType } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
+import{ InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import {
     PanelBody,
     PanelRow,
-    NumberControl,
     TextControl
-} = wp.components
+} from '@wordpress/components';
 
-blocks.registerBlockType( metadata, {
+registerBlockType( metadata, {
     icon: icon(),
     edit: ( props ) => {
+        console.log('My backend script');
         const blockProps = useBlockProps();
 
         return [
@@ -57,11 +54,15 @@ blocks.registerBlockType( metadata, {
             </div>
         ]
     },
-    // save: () => {
-    //     const blockProps = useBlockProps.save();
-    //     return (
-    //         <div { ...blockProps } ><span>Not Yet?</span></div>
-    //     )
-    // }
-    save: () => null
+    save: ({attributes}) => {
+        const blockProps = useBlockProps.save();
+        return (
+            <div { ...blockProps } >
+                <div id="mhwp-ipso-list-container">
+                    <input id="mhwp-ipso-list-nonce" type="hidden" value={attributes.rest_nonce}/>
+                </div>
+
+            </div>
+        )
+    }
 })

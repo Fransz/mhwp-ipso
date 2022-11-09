@@ -7,7 +7,8 @@
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
-require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-rest-controller.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-reservation-controller.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-activity-controller.php';
 
 /**
  * The public-facing functionality of the plugin.
@@ -63,7 +64,9 @@ class MHWP_IPSO_Public {
 	 * Register the api endpoints.
 	 */
 	public function register_rest_endpoints() {
-		$rest_controller = new MHWP_IPSO_REST_Controller();
-		$rest_controller->register_routes();
+		$reservation_controller = new MHWP_IPSO_Reservation_Controller();
+		$reservation_controller->register_routes();
+		$activity_controller = new MHWP_IPSO_Activity_Controller();
+		$activity_controller->register_routes();
 	}
 }

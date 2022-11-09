@@ -1,5 +1,5 @@
 // Front end styles.
-div.mhwp-ipso-activities-list {
+div#mhwp-ipso-list-container {
   .list-group-item-light {
     background-color: #d3d3d3;
   }
@@ -7,6 +7,9 @@ div.mhwp-ipso-activities-list {
     background-color: #fefefe;
   }
 
+  img {
+    height:100px;
+  }
   div.reserveer {
     label {
       display:inline-block;
@@ -22,6 +25,22 @@ div.mhwp-ipso-activities-list {
     input.error {
       color: black;
       border: 1px solid red;
+    }
+  }
+
+  div.message {
+    border:2px solid green;
+    padding:1em 1em;
+    h3 {
+      color: green;
+    }
+  }
+
+  div.error {
+    border:2px solid red;
+    padding:1em 1em;
+    h3 {
+      color: red;
     }
   }
 }

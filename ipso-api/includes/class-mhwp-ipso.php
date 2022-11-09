@@ -49,7 +49,6 @@ class MHWP_IPSO {
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
 	 * Load the dependencies, define the locale, and set the hooks for the admin area and
 	 * the public-facing side of the site.
-	 *
 	 */
 	public function __construct() {
 		if ( defined( 'MHWP_IPSO__VERSION' ) ) {
@@ -122,7 +121,6 @@ class MHWP_IPSO {
 	 *
 	 * Uses the MHWP_IPSO_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
-	 *
 	 */
 	private function set_locale() {
 
@@ -135,7 +133,6 @@ class MHWP_IPSO {
 	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
-	 *
 	 */
 	private function define_admin_hooks() {
 
@@ -151,7 +148,6 @@ class MHWP_IPSO {
 	/**
 	 * Register all of the hooks related to the public-facing functionality
 	 * of the plugin.
-	 *
 	 */
 	private function define_public_hooks() {
 
@@ -165,13 +161,12 @@ class MHWP_IPSO {
 	/**
 	 * Register all of the hooks related to the block functionality
 	 * of the plugin.
-	 *
 	 */
 	private function define_block_hooks() {
 
 		$plugin_blocks = new MHWP_IPSO_Blocks( $this->get_mhwp_ipso(), $this->get_version() );
 
-		$this->loader->add_action( 'enqueue_block_editor_assets', $plugin_blocks, 'enqueue_styles' );
+		$this->loader->add_action( 'enqueue_block_assets', $plugin_blocks, 'enqueue_styles' );
 		$this->loader->add_action( 'enqueue_block_assets', $plugin_blocks, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_blocks, 'register_blocks' );
 
@@ -179,7 +174,6 @@ class MHWP_IPSO {
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
-	 *
 	 */
 	public function run() {
 		$this->loader->run();

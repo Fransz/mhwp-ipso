@@ -14,9 +14,9 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-
  *
  * TODO: Do we need to make a difference between priviliged and unpriviliged users?
  * TODO: We want a nonce in the request, and check that.
- * 		 This makes it more difficult to make multiple reservations from the frontend.
+ *       This makes it more difficult to make multiple reservations from the frontend.
  */
-class MHWP_IPSO_Rest_Controller extends WP_REST_Controller {
+class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 
 	/**
 	 * The route we handle here.
@@ -66,12 +66,13 @@ class MHWP_IPSO_Rest_Controller extends WP_REST_Controller {
 	 * Make a reservation in the ipso system.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return string[] Response object on success, or WP_Error object on failure.
+	 * @return object Response object on success, or WP_Error object on failure.
 	 */
-	public function create_item( $request ): array {
-		$client = new MHWP_IPSO_Client();
-		$json   = $request->get_json_params();
-		return $client->add_participants( $json );
+	public function create_item( $request ): object {
+		$client      = new MHWP_IPSO_Client();
+		$json        = $request->get_json_params();
+		$reservation = $client->add_participants( $json );
+		return new WP_REST_Response( $reservation, 200 );
 	}
 
 	/**
