@@ -3,6 +3,9 @@ import './bootstrap-collapse';
 // TODO: Use the production URL.
 const marikenhuisURL ="http://localhost:8080/";
 
+// TODO: This has to be test or live.
+const ipsoURL = "https://api.test.ipso.community/";
+
 function prepareReservations() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
@@ -112,10 +115,13 @@ function getActivities() {
             throw new TypeError( message );
         }
 
-        // remove the mhwp_ipso_status. leaving only calendar objects.
+    //     let activity = json.data[0];
+    //     return getActivityDetail(activity.activityID, container);
+    //
+    // }).then((json) => {
+    //    console.log(json);
         addActivities(json.data, container);
 
-        return json;
     }).catch( (err) => {
             let message = '';
             if (err instanceof TypeError) {
@@ -129,15 +135,23 @@ function getActivities() {
     )
 }
 
-function addActivities(activities, container) {
+async function addActivities(activities, container) {
     let light_dark = 'light';
     let cnt = 0;
 
     for (let key in Object.keys(activities)) {
        let activity = activities[key];
+       let activityDetail = await wait(375).then(() => getActivityDetail(activity.activityID, container));
+       console.log(activityDetail);
 
-       let activityDetail = getActivityDetail(activity.activityID, container);
+       activity.date = activity.onDate.replace(/T\d\d:\d\d:\d\d/, '');
+       activity.time = activity.onDate.replace(/\d{4}-\d{2}-\d{2}T/, '');
 
+       if(activityDetail) {
+           const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
+           activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
+
+       }
        light_dark = light_dark === 'light' ? 'dark' : 'light';
        cnt++;
 
@@ -145,8 +159,10 @@ function addActivities(activities, container) {
            <li class="activity list-group-item list-group-item-${light_dark }">
             <div class="row lead">
                 <div class="col-md-8">
-                    <span>Datum: </span><span>${activity.onDate}</span>
-                    <span>Title: </span><span>${activity.title}</span>
+                    <span>${activity.title}</span>
+                    <span>${activity.date}</span>
+                    <span>${activity.time}</span>
+                    ${activity.img ? activity.img : ''}
                 </div>
                 <div class="col-md-4">
                     <button class="pull-right btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample_${cnt}" aria-expanded="false" aria-controls="collapseExample">
@@ -208,14 +224,13 @@ function getActivityDetail(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
 
-    fetch( url, {
+    return fetch( url, {
         method: 'GET',
         cache: 'no-store',
         headers: {
             'Accept': 'application/json',
         }
     }).then( ( res  )=> {
-        console.log("response", res);
         if ( ! res.ok ) {
             const message = res['message'] ? res['message'] : '';
             throw new TypeError( message );
@@ -225,14 +240,11 @@ function getActivityDetail(activityId, container) {
         if ( json.mhwp_ipso_status !== 'ok' ) {
             if (json.mhwp_ipso_code === 429) {
                 console.log('Too many requests (429)');
-                return [];
+                return "to many requests;";
             }
             const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
         }
-
-        // remove the mhwp_ipso_status. leaving only calendar objects.
-        // addActivities(json.data, container);
 
         return json;
     }).catch( (err) => {
@@ -246,6 +258,13 @@ function getActivityDetail(activityId, container) {
             addError(message, container);
         }
     )
+}
+
+function wait(duration) {
+    return new Promise((resolve, reject) => {
+        if(duration < 0) reject( new Error("Cannot wait negative time"));
+        setTimeout(resolve, duration);
+    })
 }
 
 function addNode( message, className, container) {
