@@ -50,10 +50,21 @@ async function addActivities(activities, container) {
        activity.date = activity.onDate.replace(/T\d\d:\d\d:\d\d/, '');
        activity.time = activity.onDate.replace(/\d{4}-\d{2}-\d{2}T/, '');
 
+       // TODO Do we want to check for this. No details and still showing the activity?
+       // TODO We'd better retrow the error in fetchWpRest.
        if(activityDetail) {
            const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
            activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
 
+           let intro = activityDetail.data.intro;
+           intro = JSON.parse(intro);
+           intro = intro.ops.reduce((p, c) => p + c.insert, "");
+           activity.intro = intro;
+
+           let description = activityDetail.data.description;
+           description = JSON.parse(description);
+           description = description.ops.reduce((p, c) => p + c.insert, "");
+           activity.description = description;
        }
        light_dark = light_dark === 'light' ? 'dark' : 'light';
        cnt++;
