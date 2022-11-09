@@ -8,6 +8,11 @@ const marikenhuisURL ="http://localhost:8080/";
 // TODO: This has to be test or live.
 const ipsoURL = "https://api.test.ipso.community/";
 
+/**
+ * Find all forms adde by the calendar, attach a validator and a submit handler to each.
+ *
+ * TODO: On a second click of the reserveren button in the form, the page gets reloaded. This shouldnt happen.
+ */
 function prepareReservations() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
@@ -83,12 +88,17 @@ function prepareReservations() {
     });
 }
 
+/**
+ * Main function called upon onDOMContentLoaded.
+ * Fetch all wanted activities, and ther details. For each create a large HTML.
+ */
 function getActivities() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
     url.searchParams.append('nr_days', '7');
 
     // Get the nonce.
+    // Todo: we want to drop the nonce. It invalidates the block in the backend.
     const node = document.getElementById('mhwp-ipso-list-nonce');
     const nonce = node ?. value;
 
@@ -117,11 +127,6 @@ function getActivities() {
             throw new TypeError( message );
         }
 
-    //     let activity = json.data[0];
-    //     return getActivityDetail(activity.activityID, container);
-    //
-    // }).then((json) => {
-    //    console.log(json);
         addActivities(json.data, container);
 
     }).catch( (err) => {
@@ -137,6 +142,12 @@ function getActivities() {
     )
 }
 
+/**
+ * For all activities create and add html (data, form, details) to the DOM.
+ * @param activities All activities.
+ * @param container The parent container for all html.
+ * @returns {Promise<void>}
+ */
 async function addActivities(activities, container) {
     let light_dark = 'light';
     let cnt = 0;
@@ -145,6 +156,7 @@ async function addActivities(activities, container) {
        let activity = activities[key];
        let activityDetail = await wait(400).then(() => getActivityDetail(activity.activityID, container));
 
+       // TODO the time is not correct here. Its timeStart (timeOpen);
        activity.date = activity.onDate.replace(/T\d\d:\d\d:\d\d/, '');
        activity.time = activity.onDate.replace(/\d{4}-\d{2}-\d{2}T/, '');
 
@@ -164,6 +176,13 @@ async function addActivities(activities, container) {
     prepareReservations();
 }
 
+/**
+ * For an activity fetch its details.
+ *
+ * @param activityId The activity for which to fetch the detail
+ * @param container The parent for messages.
+ * @returns {Promise<any>}
+ */
 function getActivityDetail(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
@@ -203,6 +222,12 @@ function getActivityDetail(activityId, container) {
     )
 }
 
+/**
+ * Helper for setTimeout in a Promise style.
+ *
+ * @param duration
+ * @returns {Promise<unknown>}
+ */
 function wait(duration) {
     return new Promise((resolve, reject) => {
         if(duration < 0) reject( new Error("Cannot wait negative time"));
@@ -210,6 +235,13 @@ function wait(duration) {
     })
 }
 
+/**
+ * Helper for adding a message text to a container.
+ *
+ * @param message The text message.
+ * @param className The messages classname
+ * @param container The containter where to add the message.
+ */
 function addNode( message, className, container) {
     const html = `<div class="${className}"><h3 class="message">${message}</h3></div>`;
     const node = $(html);
@@ -223,6 +255,11 @@ function addMessage( message, container ) {
     addNode( message, 'message', container);
 }
 
+/**
+ * Helper for reming messages within a container.
+ * @param className The classname for selecting.
+ * @param container The container where to search.
+ */
 function clearNodes(className, container) {
     const nodes = $(`.${className}`, container);
     nodes.each(((n) => n.remove()));
