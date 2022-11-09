@@ -98,6 +98,8 @@ class MHWP_IPSO_Blocks {
 		/**
 		 * Set additional attributes depending on the test option.
 		 *
+		 * TODO: The nonce invalidates the block in the backend. We want to drop it.
+		 *
 		 * @param array $metadata the metadata.
 		 * @return array
 		 */
