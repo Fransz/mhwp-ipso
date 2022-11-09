@@ -9,90 +9,10 @@ const marikenhuisURL ="http://localhost:8080/";
 const ipsoURL = "https://api.test.ipso.community/";
 
 /**
- * Find all forms adde by the calendar, attach a validator and a submit handler to each.
- *
- * TODO: On a second click of the reserveren button in the form, the page gets reloaded. This shouldnt happen.
- */
-function prepareReservations() {
-    const url = new URL( marikenhuisURL );
-    url.pathname = "wp-json/mhwp-ipso/v1/reservation";
-
-    /**
-     * Dutch phone numbers have 10 digits (or 11 and start with +31).
-     */
-    $.validator.addMethod( "phoneNL", function( value, element ) {
-        return this.optional( element ) || /^((\+|00(\s|\s?\-\s?)?)31(\s|\s?\-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?\-\s?)?[0-9]){8}$/.test( value );
-    }, "Vul een geldig telefoonnummer in." );
-
-    const forms = $('form', '#mhwp-ipso-list-container');
-    forms.each( (_, f) => {
-        $( f ).validate({
-            // We only use one explicit validation rule. others are extracted from the HTML attributes
-            rules: {
-                phoneNumber: {
-                    phoneNL: true,
-                    normalizer: v => $.trim( v )
-                }
-            },
-            submitHandler: function ( form, event ) {
-                const container = $(form).parent();
-
-                const activityCalendarId = $('input[name="activityCalendarId"]', form).val();
-                const firstName = $('input[name="firstName"]', form).val();
-                const lastNamePrefix = $('input[name="lastNamePrefix"]', form).val();
-                const lastName = $('input[name="lastName"]', form).val();
-                const email = $('input[name="email"]', form).val();
-                let phoneNumber = $('input[name="phoneNumber"]', form).val();
-                phoneNumber = phoneNumber === "" ? null : phoneNumber;
-                const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
-
-                clearErrors(container);
-                clearMessages(container);
-
-                fetch( url, {
-                    method: 'POST',
-                    body: JSON.stringify( data ),
-                    cache: 'no-store',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                }).then( ( res  )=> {
-                    if ( ! res.ok ) {
-                        const message = res['message'] ? res['message'] : '';
-                        throw new TypeError( message );
-                    }
-                    return res.json();
-                }).then( (json) => {
-                    if ( json.mhwp_ipso_status !== 'ok' ) {
-                        const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
-                        throw new TypeError( message );
-                    }
-                    addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container);
-                }).catch( (err) => {
-                        let message = '';
-                        if (err instanceof TypeError) {
-                            message = err.message;
-                        }
-                        if ('' === message) {
-                            message = 'Er gaat iets is, probeer het later nog eens';
-                        }
-                        addError(message, container);
-                    }
-                )
-            },
-            invalidHandler: function ( form ) {
-                console.log( 'invalid' );
-            }
-        });
-    });
-}
-
-/**
  * Main function called upon onDOMContentLoaded.
  * Fetch all wanted activities, and ther details. For each create a large HTML.
  */
-function getActivities() {
+async function getActivities() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
     url.searchParams.append('nr_days', '7');
@@ -107,39 +27,9 @@ function getActivities() {
 
     clearErrors(container);
     clearMessages(container);
-    fetch( url, {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'HTTP_X_WP_NONCE': nonce,
-        }
-    }).then( ( res  )=> {
-        if ( ! res.ok ) {
-            const message = res['message'] ? res['message'] : '';
-            throw new TypeError( message );
-        }
-        return res.json();
-    }).then( (json) => {
-        if ( json.mhwp_ipso_status !== 'ok' ) {
-            const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
-            throw new TypeError( message );
-        }
-
-        addActivities(json.data, container);
-
-    }).catch( (err) => {
-            let message = '';
-            if (err instanceof TypeError) {
-                message = err.message;
-            }
-            if ('' === message) {
-                message = 'Er gaat iets is, probeer het later nog eens';
-            }
-            addError(message, container);
-        }
-    )
+    const fetchInit = {'HTTP_X_WP_NONCE': nonce };
+    const activities = await fetchWpRest(url, fetchInit, nonce, container);
+    await addActivities(activities.data, container);
 }
 
 /**
@@ -183,31 +73,104 @@ async function addActivities(activities, container) {
  * @param container The parent for messages.
  * @returns {Promise<any>}
  */
-function getActivityDetail(activityId, container) {
+async function getActivityDetail(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
 
-    return fetch( url, {
+
+    clearErrors(container);
+    clearMessages(container);
+    return fetchWpRest(url, 0, container);
+}
+
+/**
+ * Find all forms adde by the calendar, attach a validator and a submit handler to each.
+ *
+ * TODO: If something goes wrong in fetchWpRest, the promise still resolves because of the catch, and the success message is written.
+ */
+function prepareReservations() {
+    const url = new URL( marikenhuisURL );
+    url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+
+    /**
+     * Dutch phone numbers have 10 digits (or 11 and start with +31).
+     */
+    $.validator.addMethod( "phoneNL", function( value, element ) {
+        return this.optional( element ) || /^((\+|00(\s|\s?\-\s?)?)31(\s|\s?\-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?\-\s?)?[0-9]){8}$/.test( value );
+    }, "Vul een geldig telefoonnummer in." );
+
+    const forms = $('form', '#mhwp-ipso-list-container');
+    forms.each( (_, f) => {
+        $( f ).validate({
+            // We only use one explicit validation rule. others are extracted from the HTML attributes
+            rules: {
+                phoneNumber: {
+                    phoneNL: true,
+                    normalizer: v => $.trim( v )
+                }
+            },
+            submitHandler: async function ( form, event ) {
+                event.preventDefault();
+                const container = $(form).parent();
+
+                const activityCalendarId = $('input[name="activityCalendarId"]', form).val();
+                const firstName = $('input[name="firstName"]', form).val();
+                const lastNamePrefix = $('input[name="lastNamePrefix"]', form).val();
+                const lastName = $('input[name="lastName"]', form).val();
+                const email = $('input[name="email"]', form).val();
+                let phoneNumber = $('input[name="phoneNumber"]', form).val();
+                phoneNumber = phoneNumber === "" ? null : phoneNumber;
+                const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
+
+                clearErrors(container);
+                clearMessages(container);
+
+                const fetchInit = {
+                    method: 'POST',
+                    body: JSON.stringify( data )
+                }
+                await fetchWpRest(url, fetchInit, 0, container).then(
+                    () => addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+                );
+                return true;
+            },
+            invalidHandler: function ( form ) {
+                console.log( 'invalid' );
+            }
+        });
+    });
+}
+
+
+/**
+ * Helper method for accessing the rest api in our wordpress installation.
+ *
+ * @param url The URL of the worpress installation.
+ * @param init Additional settings for the fetch init object.
+ * @param nonce
+ * @param errorContainer A container for error messages.
+ * @returns {Promise<any>}
+ */
+function fetchWpRest (url, init, nonce, errorContainer) {
+    const defaults = {
         method: 'GET',
         cache: 'no-store',
         headers: {
+            'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
-    }).then( ( res  )=> {
+    }
+    return fetch( url, Object.assign({}, defaults, init)).then((res)=> {
         if ( ! res.ok ) {
             const message = res['message'] ? res['message'] : '';
             throw new TypeError( message );
         }
         return res.json();
-    }).then( (json) => {
+    }).then((json) => {
         if ( json.mhwp_ipso_status !== 'ok' ) {
-            if (json.mhwp_ipso_code === 429) {
-                console.log('Too many requests (429)');
-            }
             const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
         }
-
         return json;
     }).catch( (err) => {
             let message = '';
@@ -215,9 +178,9 @@ function getActivityDetail(activityId, container) {
                 message = err.message;
             }
             if ('' === message) {
-                message = 'Er gaat iets mis, probeer het later nog eens';
+                message = 'Er gaat iets is, probeer het later nog eens';
             }
-            addError(message, container);
+            addError(message, errorContainer);
         }
     )
 }
@@ -243,7 +206,7 @@ function wait(duration) {
  * @param container The containter where to add the message.
  */
 function addNode( message, className, container) {
-    const html = `<div class="${className}"><h3 class="message">${message}</h3></div>`;
+    const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
     const node = $(html);
     $(container).append(node);
 
@@ -261,8 +224,7 @@ function addMessage( message, container ) {
  * @param container The container where to search.
  */
 function clearNodes(className, container) {
-    const nodes = $(`.${className}`, container);
-    nodes.each(((n) => n.remove()));
+    $(`.${className}-container`, container).remove();
 }
 function clearErrors(container) {
     clearNodes('error', container);
