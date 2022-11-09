@@ -1,0 +1,61 @@
+// Front end styles.
+div#mhwp-ipso-list-container {
+  .list-group-item-light {
+    background-color: #d3d3d3;
+  }
+  .list-group-item-dark {
+    background-color: #fefefe;
+  }
+
+  img {
+    height:100px;
+  }
+  div.reserveer {
+    label {
+      display:inline-block;
+    }
+    .required {
+      color:red;
+    }
+
+    .error {
+      color:red;
+    }
+
+    input.error {
+      color: black;
+      border: 1px solid red;
+    }
+  }
+
+  div.message {
+    border:2px solid green;
+    padding:1em 1em;
+    h3 {
+      color: green;
+    }
+  }
+
+  div.error {
+    border:2px solid red;
+    padding:1em 1em;
+    h3 {
+      color: red;
+    }
+  }
+}
+
+
+// Editor styles.
+.wp-block-mhwp-ipso-list{
+  ul.list-unstyled{
+    padding-left: 0;
+    list-style: none;
+  }
+
+  li{
+    margin: 0;
+    padding: 0;
+    color:blue;
+  }
+}

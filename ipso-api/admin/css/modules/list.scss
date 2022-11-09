@@ -1,0 +1,17 @@
+$blueish: rgba(0, 0, 128, 0.15);
+
+ul.ui-list {
+  display: flex;
+  box-shadow: 0 5px 4px -2px $blueish;
+
+  li {
+    flex: 2 1 auto;
+    margin-bottom: 1.33em;
+
+    form {
+      display: inline-block;
+      margin: 1.33em 1em 1.33em 0;
+    }
+  }
+}
+
