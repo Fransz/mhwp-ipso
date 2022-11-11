@@ -46,6 +46,9 @@ async function addActivities(activities, container) {
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
     const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
+    // Sort the array with activities.
+    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
     for (let key in Object.keys(activities)) {
         let activity = activities[key];
         let activityDetail = await wait(

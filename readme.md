@@ -7,10 +7,12 @@ Release 0.1.0  - Initial release.
 ## Roadmap
 
 Release 0.2.0 Afmaken frontend; 
-- Datums, tijd, sorteer json in fe; Fout afhandeling promises
+- Datums, tijd, 
+- Disable button zolang een reservering verwerkt wordt.
+- Fout afhandeling promises
+- sorteer json in fe; 
 - Zo sober mogelijke html;
 - Drop dependency aan bootstrap;
-- Disable button zolang een reservering verwerkt wordt.
 - Deploy op server;
 
 Release 0.3.0

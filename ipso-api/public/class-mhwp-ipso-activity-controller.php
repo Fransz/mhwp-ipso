@@ -101,31 +101,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 		$client   = new MHWP_IPSO_Client();
 		$calendar = $client->get_activities( $data );
 
-		// The request returned an error; Bail out.
-		if ( 'error' === $calendar->mhwp_ipso_status ) {
-			return new WP_REST_Response( $calendar, 200 );
-		}
-
-		/**
-		 * Sorting function for the activities.
-		 * TODO: We only sort by date.
-		 *
-		 * @param object $a1 the first activity in the comparison.
-		 * @param object $a2 the second activity in the comparison.
-		 *
-		 * @return int the order of the dates.
-		 */
-		function cmp( object $a1, object $a2 ): int {
-			$d1 = $a1->onDate;      // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			$d2 = $a2->onDate;      // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-
-			if ( $d1 === $d2 ) {
-				return 0;
-			}
-			return ( $d1 < $d2 ) ? -1 : 1;
-		}
-		usort( $calendar->data, 'cmp' );
-
 		return new WP_REST_Response( $calendar, 200 );
 	}
 
