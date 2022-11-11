@@ -48,23 +48,36 @@ async function addActivities(activities, container) {
 
     for (let key in Object.keys(activities)) {
         let activity = activities[key];
-        let activityDetail = await wait(400).then(() => getActivityDetail(activity.activityID, container));
+        let activityDetail = await wait(
+            400
+        ).then(() =>
+            getActivityDetail(activity.activityID, container)
+        ).catch((e) => {
+            console.log(e);
+
+            // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
+            activity.intro = "Er was een probleem met het ophalen van de data";
+            activity.description = "Er was een probleem met het ophalen van de data";
+            activity.image = "";
+
+            return null;
+        });
 
         const date = new Date(activity.timeStart);
         activity.date = dateFormat(date);
         activity.time = timeFormat(date);
 
-       // TODO Do we want to check for this. No details and still showing the activity?
-       // TODO We'd better retrow the error in fetchWpRest.
        if(activityDetail) {
            const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
            activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
 
+           // TODO: We want to get html from IPSO.
            let intro = activityDetail.data.intro;
            intro = JSON.parse(intro);
            intro = intro.ops.reduce((p, c) => p + c.insert, "");
            activity.intro = intro;
 
+           // TODO: We want to get html from IPSO.
            let description = activityDetail.data.description;
            description = JSON.parse(description);
            description = description.ops.reduce((p, c) => p + c.insert, "");
@@ -100,16 +113,13 @@ async function getActivityDetail(activityId, container) {
 
 /**
  * Find all forms adde by the calendar, attach a validator and a submit handler to each.
- *
- * TODO: If something goes wrong in fetchWpRest, the promise still resolves because of the catch, and the success message is written.
  */
 function prepareReservations() {
+    // The URL for making the reservation
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-    /**
-     * Dutch phone numbers have 10 digits (or 11 and start with +31).
-     */
+    // Dutch phone numbers have 10 digits (or 11 and start with +31).
     $.validator.addMethod( "phoneNL", function( value, element ) {
         return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
@@ -117,11 +127,11 @@ function prepareReservations() {
     const forms = $('form', '#mhwp-ipso-list-container');
     forms.each( (_, f) => {
         $( f ).validate({
-            // We only use one explicit validation rule. others are extracted from the HTML attributes
             rules: {
+                // We only use one explicit validation rule. others are extracted from the HTML attributes
                 phoneNumber: {
                     phoneNL: true,
-                    "normalizer": v => $.trim( v )
+                    "normalizer": v => $.trim(v)
                 }
             },
             "submitHandler": async function ( form, event ) {
@@ -144,10 +154,14 @@ function prepareReservations() {
                     method: 'POST',
                     body: JSON.stringify( data )
                 }
-                await fetchWpRest(url, fetchInit, 0, container).then(
+                await fetchWpRest(
+                    url, fetchInit, 0, container
+                ).then(
                     () => addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
-                );
-                return true;
+                ).catch((_) => {
+                    // No op. We had an error making a reservation. We still want to continue, maybe an other one
+                    // succeeds.
+                });
             },
             "invalidHandler": function () {
                 console.log( 'invalid' );
@@ -196,6 +210,9 @@ function fetchWpRest (url, init, nonce, errorContainer) {
                 message = 'Er gaat iets is, probeer het later nog eens';
             }
             addError(message, errorContainer);
+
+            // retrow the error. Users of this call decide what should happen.
+            throw(err);
         }
     )
 }
