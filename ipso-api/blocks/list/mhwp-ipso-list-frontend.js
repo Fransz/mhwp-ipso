@@ -139,6 +139,7 @@ function prepareReservations() {
             },
             "submitHandler": async function ( form, event ) {
                 event.preventDefault();
+                $('button', form).prop('disabled', true);
                 const container = $(form).parent();
 
                 const activityCalendarId = $('input[name="activityCalendarId"]', form).val();
@@ -159,9 +160,13 @@ function prepareReservations() {
                 }
                 await fetchWpRest(
                     url, fetchInit, 0, container
-                ).then(
-                    () => addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
-                ).catch((_) => {
+                ).then(() => {
+                    addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+                    setTimeout(() => {
+                        clearMessages(container);
+                        $('button', form).prop('disabled', false);
+                    }, 2500);
+                }).catch((_) => {
                     // No op. We had an error making a reservation. We still want to continue, maybe an other one
                     // succeeds.
                 });

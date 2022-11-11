@@ -55,7 +55,8 @@ function template(activity, cnt, light_dark) {
                                 <span class="validity"></span>
                             </fieldset>
                             <div class="col-md-4">
-                                <button type="submit" class="pull-right right btn btn-default">Reserveer</button>
+                                <!-- @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing  -->
+                                <button type="submit" autocomplete="off" class="pull-right right btn btn-default">Reserveer</button>
                             </div>
                         </div>
                 </form>
