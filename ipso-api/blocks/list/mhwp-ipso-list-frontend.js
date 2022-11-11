@@ -47,8 +47,8 @@ async function addActivities(activities, container) {
     const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
     for (let key in Object.keys(activities)) {
-       let activity = activities[key];
-       let activityDetail = await wait(400).then(() => getActivityDetail(activity.activityID, container));
+        let activity = activities[key];
+        let activityDetail = await wait(400).then(() => getActivityDetail(activity.activityID, container));
 
         const date = new Date(activity.timeStart);
         activity.date = dateFormat(date);
@@ -121,10 +121,10 @@ function prepareReservations() {
             rules: {
                 phoneNumber: {
                     phoneNL: true,
-                    normalizer: v => $.trim( v )
+                    "normalizer": v => $.trim( v )
                 }
             },
-            submitHandler: async function ( form, event ) {
+            "submitHandler": async function ( form, event ) {
                 event.preventDefault();
                 const container = $(form).parent();
 
@@ -149,7 +149,7 @@ function prepareReservations() {
                 );
                 return true;
             },
-            invalidHandler: function ( form ) {
+            "invalidHandler": function () {
                 console.log( 'invalid' );
             }
         });
@@ -158,7 +158,7 @@ function prepareReservations() {
 
 
 /**
- * Helper method for accessing the rest api in our wordpress installation.
+ * Helper method for accessing the rest api in our wordPress installation.
  *
  * @param url The URL of the worpress installation.
  * @param init Additional settings for the fetch init object.

@@ -20,9 +20,10 @@ Afmaken backend;
 - Juiste URL doorgeven aan Frontend.
 - Log
 
-Release 0.4.0; IPSO Button
+Release 0.4.0; front-end en IPSO Button
+- Better user experience while loading the ipso-list. (Fetch details after calendar, but what to do with the image)
+- A spinner on the calendar when we are still loading.
 
 Release 0.5.0; Filter op categorien.
 
 Release 0.6.0; Collapse activiteiten met meerdere tijdslots op dezelfde dag.
-- Better user experience while loading the ipso-list. (Fetch details after calendar, but what to do with the image)
