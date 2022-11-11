@@ -42,13 +42,17 @@ async function addActivities(activities, container) {
     let light_dark = 'light';
     let cnt = 0;
 
+    // Formatters for time/date
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+
     for (let key in Object.keys(activities)) {
        let activity = activities[key];
        let activityDetail = await wait(400).then(() => getActivityDetail(activity.activityID, container));
 
-       // TODO the time is not correct here. Its timeStart (timeOpen);
-       activity.date = activity.onDate.replace(/T\d\d:\d\d:\d\d/, '');
-       activity.time = activity.onDate.replace(/\d{4}-\d{2}-\d{2}T/, '');
+        const date = new Date(activity.timeStart);
+        activity.date = dateFormat(date);
+        activity.time = timeFormat(date);
 
        // TODO Do we want to check for this. No details and still showing the activity?
        // TODO We'd better retrow the error in fetchWpRest.
@@ -107,7 +111,7 @@ function prepareReservations() {
      * Dutch phone numbers have 10 digits (or 11 and start with +31).
      */
     $.validator.addMethod( "phoneNL", function( value, element ) {
-        return this.optional( element ) || /^((\+|00(\s|\s?\-\s?)?)31(\s|\s?\-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?\-\s?)?[0-9]){8}$/.test( value );
+        return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
 
     const forms = $('form', '#mhwp-ipso-list-container');
