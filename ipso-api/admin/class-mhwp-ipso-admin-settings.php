@@ -1,13 +1,14 @@
 <?php
-	/**
-	 * @since      1.0.0
-	 * @package    MHWP_IPSO
-	 * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
-	 */
+/**
+ * Admin Settings.
+ *
+ * @package    MHWP_IPSO
+ * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
+ */
 
-	/**
-	 * Class for managing admin settings
-	 */
+/**
+ * Class for managing admin settings
+ */
 class MHWP_IPSO_Admin_Settings {
 
 	/**

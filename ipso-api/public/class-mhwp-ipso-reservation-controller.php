@@ -2,7 +2,6 @@
 /**
  * Define the rest controller for the ipso rest calls.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */

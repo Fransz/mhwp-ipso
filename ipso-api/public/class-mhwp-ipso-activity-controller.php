@@ -1,8 +1,7 @@
 <?php
 /**
- * Define the rest controller for the activity. endpoints.
+ * Define the rest controller for the activity endpoints
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */

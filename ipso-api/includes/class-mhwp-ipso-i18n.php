@@ -5,7 +5,6 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */

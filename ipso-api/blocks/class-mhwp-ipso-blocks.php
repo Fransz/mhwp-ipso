@@ -1,12 +1,11 @@
 <?php
 /**
- * PHP version 7.2
  * The blocks-specific functionality of the plugin
  *
- * @package MHWP_IPSO
- * @author Frans Jaspers <frans.jaspers@marikenhuis.nl>
- * @link https://www.marikenhuis.nl
+ * @package    MHWP_IPSO
+ * @author     Frans Jaspers <frans.jaspers@marikenhuis.nl>
  */
+
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-client.php';
 
 /**
@@ -23,7 +22,6 @@ class MHWP_IPSO_Blocks {
 	/**
 	 * The ID of this plugin.
 	 *
-	 * @since    1.0.0
 	 * @access   private
 	 * @var      string    $mhwp_ipso    The ID of this plugin.
 	 */
@@ -32,7 +30,6 @@ class MHWP_IPSO_Blocks {
 	/**
 	 * The version of this plugin.
 	 *
-	 * @since    1.0.0
 	 * @access   private
 	 * @var      string    $version    The current version of this plugin.
 	 */
@@ -41,7 +38,6 @@ class MHWP_IPSO_Blocks {
 	/**
 	 * Initialize the class and set its properties.
 	 *
-	 * @since    1.0.0
 	 * @param      string $mhwp_ipso       The name of this plugin.
 	 * @param      string $version    The version of this plugin.
 	 */
@@ -55,7 +51,6 @@ class MHWP_IPSO_Blocks {
 	/**
 	 * Register the stylesheets for blocks.
 	 *
-	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
@@ -67,7 +62,6 @@ class MHWP_IPSO_Blocks {
 	/**
 	 * Register the JavaScript for the blocks.
 	 *
-	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;

@@ -2,7 +2,6 @@
 /**
  * Connects to the ipso system
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */

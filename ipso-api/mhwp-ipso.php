@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The plugin bootstrap file
  *
@@ -8,14 +7,13 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @since             1.0.0
  * @package           MHWP_IPSO
  *
  * @wordpress-plugin
  * Plugin Name:       MHWP_IPSO
  * Plugin URI:        http://marikenhuis.nl/
  * Description:       marikenhuis plugin. integratie met IPSO.
- * Version:           1.0.0
+ * Version:           0.1.0
  * Author:            Frans Jaspers
  * Author URI:        http://fransjaspers.com/
  * License:           GPL-2.0+
@@ -30,15 +28,11 @@ if ( ! defined( 'WPINC' ) ) {
 
 /**
  * Currently plugin version.
- * Start at version 1.0.0 and use SemVer - https://semver.org
- * Rename this for your plugin and update it as you release new versions.
  */
-const MHWP_IPSO__VERSION = '1.0.0';
+const MHWP_IPSO__VERSION = '0.1.0';
 
 /**
  * Currently plugin version.
- * Start at version 1.0.0 and use SemVer - https://semver.org
- * Rename this for your plugin and update it as you release new versions.
  */
 const MHWP_IPSO__DEV_MODE = true;
 
@@ -75,8 +69,6 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-mhwp-ipso.php';
  * Since everything within the plugin is registered via hooks,
  * then kicking off the plugin from this point in the file does
  * not affect the page life cycle.
- *
- * @since    1.0.0
  */
 function run_mhwp_ipso() {
 
