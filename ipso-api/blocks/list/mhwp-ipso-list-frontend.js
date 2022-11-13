@@ -107,14 +107,12 @@ async function getActivityDetail(activityId, container) {
 
     clearErrors(container);
     clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, true).then((json) => {
+    return fetchWpRest(url, {}, 0, container, false).then((json) => {
         // Upon a 429 error (Too many requests), We try again.
         if ( json.mhwp_ipso_code === 429) {
             console.log('Error 429, retrying');
-            return wait(
-                800
-            ).then(() => {
-                return fetchWpRest(url, {}, 0, container, false);
+            return wait(800).then(() => {
+                return fetchWpRest(url, {}, 0, container, true);
             });
         }
         return json;
@@ -193,10 +191,10 @@ function prepareReservations() {
  * @param init Additional settings for the fetch init object.
  * @param nonce
  * @param errorContainer A container for error messages.
- * @param handle_429 whether the caller handles 429 errors.
+ * @param throw_429 whether we should throw 429 errors.
  * @returns {Promise<any>}
  */
-function fetchWpRest (url, init, nonce, errorContainer, handle_429=false) {
+function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
     const defaults = {
         method: 'GET',
         cache: 'no-store',
@@ -214,7 +212,7 @@ function fetchWpRest (url, init, nonce, errorContainer, handle_429=false) {
     }).then((json) => {
         if ( json.mhwp_ipso_status !== 'ok' ) {
             // Upon a 429 error and if the caller can handle it, we return our JSON.
-            if ( json.mhwp_ipso_code === 429 && handle_429) {
+            if ( json.mhwp_ipso_code === 429 && ! throw_429) {
                 return json;
             }
             const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
