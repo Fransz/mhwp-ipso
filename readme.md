@@ -2,15 +2,18 @@
 
 ## Releases
 
-Release 0.1.0  - Initial release.
-
-## Roadmap
-
 Release 0.2.0 - Frontend; 
 - Datums, tijd, 
 - Disable button zolang een reservering verwerkt wordt.
 - Fout afhandeling promises
-- sorteer json in fe; 
+- Sorteer json in fe; 
+- Probeer nog eens een fetch na een http 429 fout.
+
+Release 0.1.0  - Initial release.
+
+## Roadmap
+
+Release 0.2.1 - Frontend;
 - Zo sober mogelijke html;
 - Drop dependency aan bootstrap;
 - Deploy op server;
