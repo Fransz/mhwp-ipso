@@ -1,15 +1,14 @@
 <?php
-	/**
-	 * Class for admin pages.
-	 *
-	 * @since      1.0.0
-	 * @package    MHWP_IPSO
-	 * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
-	 */
+/**
+ * Class for admin pages.
+ *
+ * @package    MHWP_IPSO
+ * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
+ */
 
-	/**
-	 * Class for admin pages
-	 */
+/**
+ * Class for admin pages
+ */
 class MHWP_IPSO_Admin_Pages {
 
 	/**

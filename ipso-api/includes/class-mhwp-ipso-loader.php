@@ -2,7 +2,6 @@
 /**
  * Register all actions and filters for the plugin
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */

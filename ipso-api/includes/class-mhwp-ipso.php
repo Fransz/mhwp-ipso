@@ -5,7 +5,6 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
@@ -54,7 +53,7 @@ class MHWP_IPSO {
 		if ( defined( 'MHWP_IPSO__VERSION' ) ) {
 			$this->version = MHWP_IPSO__VERSION;
 		} else {
-			$this->version = '1.0.0';
+			$this->version = '0.1.0';
 		}
 		$this->mhwp_ipso = 'mhwp-ipso';
 
