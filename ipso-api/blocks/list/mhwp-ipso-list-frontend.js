@@ -2,10 +2,11 @@ import './bootstrap-collapse';
 
 import template from './mhwp-ipso-list-template';
 
-// TODO: Use the production URL.
-const marikenhuisURL ="http://localhost:8080/";
+
+const marikenhuisURL = document.location.origin;
 
 // TODO: This has to be test or live.
+// We need this for images.
 const ipsoURL = "https://api.test.ipso.community/";
 
 /**
