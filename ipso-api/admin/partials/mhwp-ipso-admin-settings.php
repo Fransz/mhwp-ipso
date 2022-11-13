@@ -1,12 +1,12 @@
 <?php
-	/**
-	 * Short description for file
-	 *
-	 * @category
-	 * @package
-	 * @author   Frans Jasper
-	 * @license  https://opensource.org/licenses/gpl-2.0.php GPL2
-	 */
+/**
+ * Short description for file
+ *
+ * @package  MHWP_IPSO
+ * @author   Frans Jasper
+ * @license  https://opensource.org/licenses/gpl-2.0.php GPL2
+ */
+
 ?>
 
 

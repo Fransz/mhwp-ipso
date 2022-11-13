@@ -2,7 +2,6 @@
 /**
  * Define the rest controller for the ipso rest calls.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
@@ -13,8 +12,6 @@ require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-
  * Class for our rest api.
  *
  * TODO: Do we need to make a difference between priviliged and unpriviliged users?
- * TODO: We want a nonce in the request, and check that.
- *       This makes it more difficult to make multiple reservations from the frontend.
  */
 class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 

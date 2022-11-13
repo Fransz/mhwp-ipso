@@ -2,7 +2,6 @@
 /**
  * Fired during plugin activation
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
@@ -12,7 +11,6 @@
  *
  * This class defines all code necessary to run during the plugin's activation.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  */
 class MHWP_IPSO_Activator {

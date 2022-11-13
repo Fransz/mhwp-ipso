@@ -3,7 +3,6 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * @since      1.0.0
  * @package    MHWP_IPSO
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
@@ -37,7 +36,6 @@ class MHWP_IPSO_Public {
 	 * @param string $mhwp_ipso The name of the plugin.
 	 * @param string $version   The version of this plugin.
 	 *
-	 * @since    1.0.0
 	 */
 	public function __construct( string $mhwp_ipso, string $version ) {
 
