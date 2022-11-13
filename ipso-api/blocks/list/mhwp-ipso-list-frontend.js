@@ -51,11 +51,7 @@ async function addActivities(activities, container) {
 
     for (let key in Object.keys(activities)) {
         let activity = activities[key];
-        let activityDetail = await wait(
-            400
-        ).then(() =>
-            getActivityDetail(activity.activityID, container)
-        ).catch((e) => {
+        let activityDetail = await getActivityDetail(activity.activityID, container).catch((e) => {
             console.log(e);
 
             // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
@@ -186,9 +182,10 @@ function prepareReservations() {
  * @param init Additional settings for the fetch init object.
  * @param nonce
  * @param errorContainer A container for error messages.
+ * @param rec Wheter we are called recursive.
  * @returns {Promise<any>}
  */
-function fetchWpRest (url, init, nonce, errorContainer) {
+function fetchWpRest (url, init, nonce, errorContainer, rec=false) {
     const defaults = {
         method: 'GET',
         cache: 'no-store',
@@ -203,8 +200,18 @@ function fetchWpRest (url, init, nonce, errorContainer) {
             throw new TypeError( message );
         }
         return res.json();
-    }).then((json) => {
+    }).then(async (json) => {
         if ( json.mhwp_ipso_status !== 'ok' ) {
+            // Upon a 429 error (Too many requests), We try again, but only once.
+            // We have to wait until the promise of the recursive call resolves.
+            if ( json.mhwp_ipso_code === 429 && !rec) {
+                console.log('Error 429, retrying');
+                return json = await wait(
+                   1000
+                ).then(() => {
+                    return fetchWpRest(url, init,nonce,errorContainer, true);
+                });
+            }
             const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
         }
