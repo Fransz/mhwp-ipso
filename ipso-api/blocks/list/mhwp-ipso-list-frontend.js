@@ -107,7 +107,18 @@ async function getActivityDetail(activityId, container) {
 
     clearErrors(container);
     clearMessages(container);
-    return fetchWpRest(url, 0, container);
+    return fetchWpRest(url, {}, 0, container, true).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(
+                800
+            ).then(() => {
+                return fetchWpRest(url, {}, 0, container, false);
+            });
+        }
+        return json;
+    });
 }
 
 /**
@@ -182,10 +193,10 @@ function prepareReservations() {
  * @param init Additional settings for the fetch init object.
  * @param nonce
  * @param errorContainer A container for error messages.
- * @param rec Wheter we are called recursive.
+ * @param handle_429 whether the caller handles 429 errors.
  * @returns {Promise<any>}
  */
-function fetchWpRest (url, init, nonce, errorContainer, rec=false) {
+function fetchWpRest (url, init, nonce, errorContainer, handle_429=false) {
     const defaults = {
         method: 'GET',
         cache: 'no-store',
@@ -200,17 +211,11 @@ function fetchWpRest (url, init, nonce, errorContainer, rec=false) {
             throw new TypeError( message );
         }
         return res.json();
-    }).then(async (json) => {
+    }).then((json) => {
         if ( json.mhwp_ipso_status !== 'ok' ) {
-            // Upon a 429 error (Too many requests), We try again, but only once.
-            // We have to wait until the promise of the recursive call resolves.
-            if ( json.mhwp_ipso_code === 429 && !rec) {
-                console.log('Error 429, retrying');
-                return json = await wait(
-                   1000
-                ).then(() => {
-                    return fetchWpRest(url, init,nonce,errorContainer, true);
-                });
+            // Upon a 429 error and if the caller can handle it, we return our JSON.
+            if ( json.mhwp_ipso_code === 429 && handle_429) {
+                return json;
             }
             const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
             throw new TypeError( message );
