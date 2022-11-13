@@ -1,4 +1,6 @@
-import './bootstrap-collapse';
+// for local development on old fashioned theme.
+// import './bootstrap-collapse';
+// import template from './mhwp-ipso-list-template_bootstrap';
 
 import template from './mhwp-ipso-list-template';
 
