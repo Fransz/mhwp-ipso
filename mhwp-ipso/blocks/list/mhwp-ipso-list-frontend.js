@@ -1,11 +1,14 @@
-import './bootstrap-collapse';
+// for local development on old fashioned theme.
+// import './bootstrap-collapse';
+// import template from './mhwp-ipso-list-template_bootstrap';
 
 import template from './mhwp-ipso-list-template';
 
-// TODO: Use the production URL.
-const marikenhuisURL ="http://localhost:8080/";
+
+const marikenhuisURL = document.location.origin;
 
 // TODO: This has to be test or live.
+// We need this for images.
 const ipsoURL = "https://api.test.ipso.community/";
 
 /**
@@ -28,6 +31,9 @@ async function getActivities() {
     clearErrors(container);
     clearMessages(container);
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
+    // const activities = await fetchWpRest(url, fetchInit, nonce, container).then((json) => {
+    //    if not 200 showError;
+    // };
     const activities = await fetchWpRest(url, fetchInit, nonce, container);
     await addActivities(activities.data, container);
 }
@@ -166,6 +172,7 @@ function prepareReservations() {
                 await fetchWpRest(
                     url, fetchInit, 0, container
                 ).then(() => {
+                    // if ! 200 addError
                     addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
                     setTimeout(() => {
                         clearMessages(container);
