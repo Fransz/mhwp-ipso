@@ -8,6 +8,8 @@ module.exports = {
     entry: {
         'list/mhwp-ipso-list': './mhwp-ipso/blocks/list/',
         'list/mhwp-ipso-list-frontend': './mhwp-ipso/blocks/list/mhwp-ipso-list-frontend.js',
+        'button/mhwp-ipso-button': './mhwp-ipso/blocks/button/',
+        'button/mhwp-ipso-button-frontend': './mhwp-ipso/blocks/button/mhwp-ipso-button-frontend.js',
     },
 
     output: {

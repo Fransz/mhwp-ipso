@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "mhwp-ipso/button",
+  "title": "ipsobutton",
+  "description": "Defenieer een ipso reserverings button",
+  "category": "text",
+  "keywords": [ "ipso" ],
+  "supports": {
+    "html": false
+  },
+  "style": "file:../dist/button/mhwp-ipso-button.css",
+  "editorScript": "file:../dist/button/mhwp-ipso-button.js",
+  "viewScript": "file:../dist/button/mhwp-ipso-button-frontend.js",
+  "attributes": {
+    "nr_days": {
+      "type": "string",
+      "default": 10
+    }
+  }
+}
