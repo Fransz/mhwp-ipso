@@ -2,6 +2,11 @@
 
 ## Releases
 
+Release 0.2.1 - Frontend;
+- Zo sober mogelijke html;
+- Drop dependency aan bootstrap;
+- Deploy op server;
+
 Release 0.2.0 - Frontend; 
 - Datums, tijd, 
 - Disable button zolang een reservering verwerkt wordt.
@@ -12,11 +17,6 @@ Release 0.2.0 - Frontend;
 Release 0.1.0  - Initial release.
 
 ## Roadmap
-
-Release 0.2.1 - Frontend;
-- Zo sober mogelijke html;
-- Drop dependency aan bootstrap;
-- Deploy op server;
 
 Release 0.3.0 - Front-end en IPSO Button
 - Better user experience while loading the ipso-list.
