@@ -6,12 +6,12 @@ module.exports = {
     ...defaultConfig,
 
     entry: {
-        'mhwp-ipso-list': './ipso-api/blocks/list/',
-        'mhwp-ipso-list-frontend': './ipso-api/blocks/list/mhwp-ipso-list-frontend.js',
+        'mhwp-ipso-list': './mhwp-ipso/blocks/list/',
+        'mhwp-ipso-list-frontend': './mhwp-ipso/blocks/list/mhwp-ipso-list-frontend.js',
     },
 
     output: {
-        path: path.resolve( __dirname ) + '/ipso-api/blocks/dist',
+        path: path.resolve( __dirname ) + '/mhwp-ipso/blocks/dist',
         filename: '[name].js'
     },
 
