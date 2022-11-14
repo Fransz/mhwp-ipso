@@ -2,6 +2,9 @@
 
 ## Releases
 
+Release 0.2.2 - hotfix
+- Make jQuery accessible in the frontend.;
+
 Release 0.2.1 - Frontend;
 - Zo sober mogelijke html;
 - Drop dependency aan bootstrap;
