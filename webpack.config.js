@@ -6,8 +6,8 @@ module.exports = {
     ...defaultConfig,
 
     entry: {
-        'mhwp-ipso-list': './mhwp-ipso/blocks/list/',
-        'mhwp-ipso-list-frontend': './mhwp-ipso/blocks/list/mhwp-ipso-list-frontend.js',
+        'list/mhwp-ipso-list': './mhwp-ipso/blocks/list/',
+        'list/mhwp-ipso-list-frontend': './mhwp-ipso/blocks/list/mhwp-ipso-list-frontend.js',
     },
 
     output: {
