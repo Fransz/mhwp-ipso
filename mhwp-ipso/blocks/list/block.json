@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "mhwp-ipso/list",
+  "title": "ipsolist",
+  "description": "Defenieer een ipso activiteiten lijst",
+  "category": "text",
+  "keywords": [ "ipso" ],
+  "supports": {
+    "html": false
+  },
+  "style": "file:../dist/mhwp-ipso-list.css",
+  "editorScript": "file:../dist/mhwp-ipso-list.js",
+  "viewScript": "file:../dist/mhwp-ipso-list-frontend.js",
+  "attributes": {
+    "nr_days": {
+      "type": "string",
+      "default": 10
+    }
+  }
+}
