@@ -13,9 +13,26 @@
   "editorScript": "file:../dist/button/mhwp-ipso-button.js",
   "viewScript": "file:../dist/button/mhwp-ipso-button-frontend.js",
   "attributes": {
-    "nr_days": {
+    "activity_id": {
+      "type": "number",
+      "default": 0,
+      "source": "attribute",
+      "selector": "#activity_id",
+      "attribute": "value"
+    },
+    "activity_date": {
       "type": "string",
-      "default": 10
+      "default": "",
+      "source": "attribute",
+      "selector": "#activity_date",
+      "attribute": "value"
+    },
+    "activity_title": {
+      "type": "string",
+      "default": "",
+      "source": "attribute",
+      "selector": "#activity_title",
+      "attribute": "value"
     }
   }
 }

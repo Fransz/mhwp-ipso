@@ -18,7 +18,6 @@ import {
 registerBlockType( metadata, {
     icon: icon(),
     edit: ( props ) => {
-        console.log('My backend script');
         const blockProps = useBlockProps();
 
         return [

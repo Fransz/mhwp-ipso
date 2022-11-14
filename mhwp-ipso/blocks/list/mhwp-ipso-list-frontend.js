@@ -198,7 +198,7 @@ function prepareReservations() {
  * @param init Additional settings for the fetch init object.
  * @param nonce
  * @param errorContainer A container for error messages.
- * @param throw_429 whether we should throw 429 errors.
+ * @param throw_429 whether we should throw upon 429 errors. If this is false the caller should retry.
  * @returns {Promise<any>}
  */
 function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
