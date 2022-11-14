@@ -31,6 +31,9 @@ async function getActivities() {
     clearErrors(container);
     clearMessages(container);
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
+    // const activities = await fetchWpRest(url, fetchInit, nonce, container).then((json) => {
+    //    if not 200 showError;
+    // };
     const activities = await fetchWpRest(url, fetchInit, nonce, container);
     await addActivities(activities.data, container);
 }
@@ -169,6 +172,7 @@ function prepareReservations() {
                 await fetchWpRest(
                     url, fetchInit, 0, container
                 ).then(() => {
+                    // if ! 200 addError
                     addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
                     setTimeout(() => {
                         clearMessages(container);

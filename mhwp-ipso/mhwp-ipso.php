@@ -71,9 +71,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-mhwp-ipso.php';
  * not affect the page life cycle.
  */
 function run_mhwp_ipso() {
-
 	$plugin = new MHWP_IPSO();
 	$plugin->run();
-
 }
 run_mhwp_ipso();

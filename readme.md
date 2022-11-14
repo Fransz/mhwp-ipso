@@ -18,16 +18,17 @@ Release 0.2.1 - Frontend;
 - Drop dependency aan bootstrap;
 - Deploy op server;
 
-Release 0.3.0 - Backend;
+Release 0.3.0 - Front-end en IPSO Button
+- Better user experience while loading the ipso-list.
+  Fetch details after calendar, but what to do with the image
+- A spinner on the calendar when we are still loading.
+- Refactor fetchWpRest, it shouldnt throw on ipso api errors.
+
+Release 0.4.0 - Backend;
 - nonces bij formulieren, en nieuwe na een reservering;
 - Settings; API key; live <-> test knop;
 - Juiste URL doorgeven aan Frontend.
 - Log
-
-Release 0.4.0 - Front-end en IPSO Button
-- Better user experience while loading the ipso-list. 
-  Fetch details after calendar, but what to do with the image
-- A spinner on the calendar when we are still loading.
 
 Release 0.5.0 - Filter op categorien.
 
