@@ -2,10 +2,8 @@
 // import './bootstrap-collapse';
 // import template from './mhwp-ipso-list-template_bootstrap';
 
-import template from './mhwp-ipso-list-template';
+// import template from './mhwp-ipso-list-template';
 
-console.log('No cache');
-const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
 
@@ -94,8 +92,8 @@ async function addActivities(activities, container) {
        cnt++;
 
        const html = template(activity, cnt, light_dark);
-       const node = $jq(html);
-       $jq(container).append(node);
+       const node = $(html);
+       $(container).append(node);
     }
 
     prepareReservations();
@@ -136,31 +134,31 @@ function prepareReservations() {
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
     // Dutch phone numbers have 10 digits (or 11 and start with +31).
-    $jq.validator.addMethod( "phoneNL", function( value, element ) {
+    $.validator.addMethod( "phoneNL", function( value, element ) {
         return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
 
-    const forms = $jq('form', '#mhwp-ipso-list-container');
+    const forms = $('form', '#mhwp-ipso-list-container');
     forms.each( (_, f) => {
-        $jq( f ).validate({
+        $( f ).validate({
             rules: {
                 // We only use one explicit validation rule. others are extracted from the HTML attributes
                 phoneNumber: {
                     phoneNL: true,
-                    "normalizer": v => $jq.trim(v)
+                    "normalizer": v => $.trim(v)
                 }
             },
             "submitHandler": async function ( form, event ) {
                 event.preventDefault();
-                $jq('button', form).prop('disabled', true);
-                const container = $jq(form).parent();
+                $('button', form).prop('disabled', true);
+                const container = $(form).parent();
 
-                const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
-                const firstName = $jq('input[name="firstName"]', form).val();
-                const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
-                const lastName = $jq('input[name="lastName"]', form).val();
-                const email = $jq('input[name="email"]', form).val();
-                let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
+                const activityCalendarId = $('input[name="activityCalendarId"]', form).val();
+                const firstName = $('input[name="firstName"]', form).val();
+                const lastNamePrefix = $('input[name="lastNamePrefix"]', form).val();
+                const lastName = $('input[name="lastName"]', form).val();
+                const email = $('input[name="email"]', form).val();
+                let phoneNumber = $('input[name="phoneNumber"]', form).val();
                 phoneNumber = phoneNumber === "" ? null : phoneNumber;
                 const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
 
@@ -178,7 +176,7 @@ function prepareReservations() {
                     addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
                     setTimeout(() => {
                         clearMessages(container);
-                        $jq('button', form).prop('disabled', false);
+                        $('button', form).prop('disabled', false);
                     }, 2500);
                 }).catch((_) => {
                     // No op. We had an error making a reservation. We still want to continue, maybe an other one
@@ -200,7 +198,7 @@ function prepareReservations() {
  * @param init Additional settings for the fetch init object.
  * @param nonce
  * @param errorContainer A container for error messages.
- * @param throw_429 whether we should throw upon 429 errors. If this is false the caller should retry.
+ * @param throw_429 whether we should throw 429 errors.
  * @returns {Promise<any>}
  */
 function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
@@ -266,8 +264,8 @@ function wait(duration) {
  */
 function addNode( message, className, container) {
     const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
-    const node = $jq(html);
-    $jq(container).append(node);
+    const node = $(html);
+    $(container).append(node);
 
 }
 function addError( message, container ) {
@@ -283,7 +281,7 @@ function addMessage( message, container ) {
  * @param container The container where to search.
  */
 function clearNodes(className, container) {
-    $jq(`.${className}-container`, container).remove();
+    $(`.${className}-container`, container).remove();
 }
 function clearErrors(container) {
     clearNodes('error', container);
@@ -292,4 +290,4 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
-$jq(document).ready(getActivities);
+$(document).ready(getActivities);

@@ -2,10 +2,10 @@ function template(activity, cnt, light_dark) {
     return `
            <li class="activity">
             <div>
-                <div>
-                    <span>${activity.title}</span>
-                    <span>${activity.date}</span>
-                    <span>${activity.time}</span>
+                <div class="activity-header">
+                    <span class="activity-header-title">${activity.title}</span>
+                    <span class="activity-header-date">${activity.date}</span>
+                    <span class="activity-header-time">${activity.time}</span>
                     ${activity.img ? activity.img : ''}
                 </div>
                 <div>
@@ -59,11 +59,11 @@ function template(activity, cnt, light_dark) {
                 </form>
             </div>
             
-            <div id="collapseDetail_${cnt}">
+            <div class="activit_detail" id="collapseDetail_${cnt}">
                 ${activity.img ? activity.img : ''}
-                <div>${activity.title}</div>
-                <div>${activity.intro}</div>
-                <div>${activity.description}</div>
+                <div class="activity_detail_title">${activity.title}</div>
+                <div class="activity_detail_intro">${activity.intro}</div>
+                <div class="activity_detail_description">${activity.description}</div>
             </div>
         </li>`;
 }
