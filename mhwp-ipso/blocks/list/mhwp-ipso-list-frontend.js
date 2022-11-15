@@ -4,7 +4,6 @@
 
 import template from './mhwp-ipso-list-template';
 
-console.log('No cache');
 const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;

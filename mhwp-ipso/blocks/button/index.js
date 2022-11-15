@@ -31,7 +31,6 @@ registerBlockType( metadata, {
                         label={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
-                            console.log(new_value);
                             props.setAttributes( { activity_date: new_value })
                         }} />
 
@@ -69,48 +68,73 @@ registerBlockType( metadata, {
     },
     save: ({attributes}) => {
         const blockProps = useBlockProps.save();
+
+        const dateInput = ({activity_date}) => {
+            if (activity_date) {
+                const d = new Date(activity_date);
+                return <input type="hidden" name="activity-date" id="mhwp-activity-date"
+                              value={`${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`} />
+            } else {
+                return null;
+            }
+        }
+        const idInput = ({activity_id}) => {
+            if (activity_id !== '' && activity_id !== '0') {
+                return <input type="hidden" name="activity_id" id="mhwp-activity-id" value={activity_id}/>
+            } else {
+                return null;
+            }
+        }
+        const titleInput = ({activity_title}) => {
+            if (activity_title) {
+                return <input type="hidden" name="activity-title" id="mhwp-activity-title" value={activity_title} />
+            } else {
+                return null;
+            }
+        }
         // Calculate correct hidden properties here, put them in the form, for filtering on the server.
         // => Calculate correct hidden properties here, for filtering in the client.
         return (
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container">
 
-                    <form>
-                        <input type="hidden" name="activity_id" id="activity_id" value={attributes.activity_id} />
-                        <input type="hidden" name="activity_date" id="activity_date" value={attributes.activity_date} />
-                        <input type="hidden" name="activity_title" id="activity_title" value={attributes.activity_title} />
+                    {dateInput(attributes)}
+                    {idInput(attributes)}
+                    {titleInput(attributes)}
 
+                    <form className={"mhwp_reserveer_button"}>
+                        <div></div>
                         <div>
                             <fieldset>
-                                <label for="mhwp_ipso_voornaam_${cnt}">Voornaam</label>
-                                <span class="required">*</span>
-                                <input type="text" id="mhwp_ipso_voornaam_${cnt}" name="firstName" required placeholder="" />
+                                <label htmlFor="mhwp_ipso_voornaam">Voornaam</label>
+                                <span className="required">*</span>
+                                <input type="text" id="mhwp_ipso_voornaam" name="firstName" required placeholder="" />
                             </fieldset>
                             <fieldset>
-                                <label for="mhwp_ipso_tussenvoegsel_${cnt}">Tussenvoegsel</label>
-                                <input type="text" id="mhwp_ipso_tussenvoegsel_${cnt}" name="lastNamePrefix" placeholder="" />
+                                <label htmlFor="mhwp_ipso_tussenvoegsel">Tussenvoegsel</label>
+                                <input type="text" id="mhwp_ipso_tussenvoegsel" name="lastNamePrefix" placeholder="" />
                             </fieldset>
                             <fieldset>
-                                <label for="mhwp_ipso_achternaam_${cnt}">Achternaam</label>
-                                <span class="required">*</span>
-                                <input type="text" id="mhwp_ipso_achternaam_${cnt}" name="lastName" required placeholder="" />
+                                <label htmlFor="mhwp_ipso_achternaam">Achternaam</label>
+                                <span className="required">*</span>
+                                <input type="text" id="mhwp_ipso_achternaam" name="lastName" required placeholder="" />
                             </fieldset>
                         </div>
 
                         <div>
                             <fieldset>
-                                <label for="mhwp_ipso_telefoon_${cnt}">Telefoonnummer</label>
-                                <input type="tel" id="mhwp_ipso_telefoon_${cnt}" name="phoneNumber" placeholder="" />
-                                <span class="validity"></span>
+                                <label htmlFor="mhwp_ipso_telefoon">Telefoonnummer</label>
+                                <input type="tel" id="mhwp_ipso_telefoon" name="phoneNumber" placeholder="" />
+                                <span className="validity"></span>
                             </fieldset>
                             <fieldset>
-                                <label for="mhwp_ipso_email_${cnt}">Emailadres</label>
-                                <span class="required">*</span>
-                                <input type="email" id="mhwp_ipso_email_${cnt}" name="email" required placeholder="" />
-                                <span class="validity"></span>
+                                <label htmlFor="mhwp_ipso_email">Emailadres</label>
+                                <span className="required">*</span>
+                                <input type="email" id="mhwp_ipso_email" name="email" required placeholder="" />
+                                <span className="validity"></span>
                             </fieldset>
-                            <div class="col-md-4">
-                                <button type="submit" autocomplete="off">Reserveer</button>
+                            <div>
+                                <button type="submit">Reserveer</button>
                             </div>
                         </div>
                     </form>
