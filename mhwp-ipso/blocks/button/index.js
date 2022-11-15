@@ -70,7 +70,7 @@ registerBlockType( metadata, {
     save: ({attributes}) => {
         const blockProps = useBlockProps.save();
         // Calculate correct hidden properties here, put them in the form, for filtering on the server.
-        // Calculate correct hidden properties here, for filtering in the client.
+        // => Calculate correct hidden properties here, for filtering in the client.
         return (
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container">
