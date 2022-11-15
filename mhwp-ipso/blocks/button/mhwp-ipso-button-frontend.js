@@ -16,6 +16,7 @@ async function getActivities() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
+    // TODO: parseInt(id); hasID... = !!id
     const date = $jq('#mhwp-activity-date').val();
     const id = $jq('#mhwp-activity-id').val();
     const title = $jq('#mhwp-activity-title').val();
@@ -26,14 +27,34 @@ async function getActivities() {
 
     if ( ! hasDate || (! hasId && ! hasTitle)) {
         // TODO FrontEnd Error if date is empty + exception?
-
         console.log ('error invalid form' );
     }
-    url.searchParams.append('from', date);
-    url.searchParams.append('till', date);
+
+    // use the for mhwp-ipso-list also; drop the ti nrDays request parrametr.
+    let d = new Date(date);
+    d = d.toISOString().slice(0, -14);
+    url.searchParams.append('from', d);
+    url.searchParams.append('till', d);
+    url.searchParams.append('nrDays', 1);
     console.log (url.href);
 
-    //const activities = await fetchWpRest(url, fetchInit, nonce, container);
+    const fetchInit = {'HTTP_X_WP_NONCE': 0};
+    const container = $jq('#mhwp-ipso-button-container');
+    const activities = await fetchWpRest(url, fetchInit, 0, container);
+
+    let filtered = [];
+    if ( hasId ) {
+        filtered = activities.data.filter((act) => act.id === parseInt(id) )
+    } else {
+        filtered = activities.data.filter((act) =>
+            act.title.replace(/\W+/g, '').toLowerCase() === title.replace(/\W+/g, '').toLowerCase()
+        )
+    }
+    if ( filtered.length !== 1 ) {
+        // TODO FrontEnd Error if date is empty + exception?
+        console.log ('error invalid form' );
+    }
+    console.log(filtered);
 }
 
 /**

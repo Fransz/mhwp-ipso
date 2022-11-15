@@ -157,12 +157,11 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'properties' => array(
 				'from'   => array(
 					'description' => esc_html__( 'Start date in the calendar', 'mhwp-ipso' ),
-					'type'        => 'number',
-					'default'     => 7,
+					'type'        => 'string',
 				),
 				'till'   => array(
 					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
-					'type'        => 'number',
+					'type'        => 'string',
 					'default'     => 7,
 				),
 				'nrDays' => array(

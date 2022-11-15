@@ -194,6 +194,7 @@ function prepareReservations() {
 
 /**
  * Helper method for accessing the rest api in our wordPress installation.
+ *  TODO we can drop nonce here.
  *
  * @param url The URL of the worpress installation.
  * @param init Additional settings for the fetch init object.

@@ -20,6 +20,14 @@ registerBlockType( metadata, {
     edit: ( props ) => {
         const blockProps = useBlockProps();
 
+        const formatDate = (d) => {
+            if (! d) {
+                return '';
+            }
+            const day = new Date(d);
+            return `${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()}`
+        }
+
         return [
             <InspectorControls>
                 <PanelBody title={ __( 'Basics', 'mhwp-ipso' )}>
@@ -59,8 +67,16 @@ registerBlockType( metadata, {
                 <h4>IPSO Agenda Block</h4>
                 <ul className="list-unstyled">
                     <li>
-                        <strong>{ __( 'XXXX Aantal dagen vooruit', 'mhwp-ipso' ) }: </strong>
-                        <span className="mhwp-ipso-nr-days">{ props.attributes.nr_days }</span>
+                        <span>{ __( 'Datum', 'mhwp-ipso' ) }: </span>
+                        <span>{ formatDate(props.attributes.activity_date) }</span>
+                    </li>
+                    <li>
+                        <span>{ __( 'Id', 'mhwp-ipso' ) }: </span>
+                        <span>{ props.attributes.activity_id }</span>
+                    </li>
+                    <li>
+                        <span>{ __( 'Title', 'mhwp-ipso' ) }: </span>
+                        <span>{ props.attributes.activity_title }</span>
                     </li>
                 </ul>
             </div>
@@ -71,9 +87,8 @@ registerBlockType( metadata, {
 
         const dateInput = ({activity_date}) => {
             if (activity_date) {
-                const d = new Date(activity_date);
                 return <input type="hidden" name="activity-date" id="mhwp-activity-date"
-                              value={`${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`} />
+                              value={activity_date} />
             } else {
                 return null;
             }
@@ -138,7 +153,7 @@ registerBlockType( metadata, {
                             </div>
                         </div>
                     </form>
-                    <button />
+                    <button>Reserveer</button>
                 </div>
 
             </div>
