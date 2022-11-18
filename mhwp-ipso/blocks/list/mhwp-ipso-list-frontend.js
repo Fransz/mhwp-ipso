@@ -292,4 +292,5 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
+// Todo get a proper top level function.
 $jq(document).ready(getActivities);
