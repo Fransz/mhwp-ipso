@@ -18,12 +18,15 @@ async function getActivities() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
+    const container = $jq('#mhwp-ipso-button-container');
+
     const date = $jq('#mhwp-activity-date').val();
     const id = parseInt($jq('#mhwp-activity-id').val());
     const title = $jq('#mhwp-activity-title').val();
 
     if ( ! date || (! id && ! title)) {
         // TODO add a frontEnd Error
+        addError('Ongeldig formulier. Reserveren is niet mogelijk', container);
         throw new Error('MHWP error invalid form - incorrect parameters.');
     }
 
@@ -32,8 +35,6 @@ async function getActivities() {
     d = d.toISOString().slice(0, -14);
     url.searchParams.append('from', d);
     url.searchParams.append('till', d);
-
-    const container = $jq('#mhwp-ipso-button-container');
 
     // TODO: Drop the nonce on the GET request.
     const fetchInit = {'HTTP_X_WP_NONCE': 0};
@@ -48,7 +49,7 @@ async function getActivities() {
         )
     }
     if ( filtered.length !== 1 ) {
-        // TODO FrontEnd Error if date is empty + exception?
+        addError('Geen activiteit gevonden. Reserveren is niet mogelijk', container);
         throw new Error('MHWP error invalid form - no activities found.');
     }
 
