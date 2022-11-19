@@ -38,7 +38,16 @@ async function allActivities() {
 async function getActivities(container) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
-    url.searchParams.append('nr_days', '7');
+
+    // TODO: Get nrDays from the blocks html;
+    const nrDays = 7;
+    let d = new Date();
+
+    const from = d.toISOString().slice(0, -14);
+    d.setDate(d.getDate() + nrDays);
+    const till = d.toISOString().slice(0, -14);
+    url.searchParams.append('from', from);
+    url.searchParams.append('till', till);
 
     // Get the nonce.
     // Todo: we want to drop the nonce. It invalidates the block in the backend.
