@@ -17,7 +17,7 @@ import {
 
 registerBlockType( metadata, {
     icon: 'smiley',
-    edit: ( props ) => {
+    edit: ( {attributes, setAttributes} ) => {
         const blockProps = useBlockProps();
 
         const formatDate = (d) => {
@@ -25,7 +25,7 @@ registerBlockType( metadata, {
                 return '';
             }
             const day = new Date(d);
-            return `${day.getFullYear()}-${day.getMonth() + 1}-${day.getDate()}`
+            return `${day.getDate()}-${day.getMonth() + 1}-${day.getFullYear()}`
         }
 
         return [
@@ -39,24 +39,24 @@ registerBlockType( metadata, {
                         label={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
-                            props.setAttributes( { activity_date: new_value })
+                            setAttributes( { activity_date: new_value })
                         }} />
 
                     <TextControl
-                        value={ props.attributes.activity_title }
+                        value={ attributes.activity_title }
                         label={ __( 'De naam van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De datum van de activiteit, precies zo als in het IPSO systeem', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
-                            props.setAttributes( { activity_title: new_value })
+                            setAttributes( { activity_title: new_value })
                         }} />
 
                     <TextControl
-                        value={ props.attributes.activity_id }
+                        value={ attributes.activity_id }
                         label={ __( 'De id van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De id van de activiteit, precies zo als in het IPSO system', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
                             if (/^\d*$/.test(new_value)) {
-                                props.setAttributes({activity_id: new_value})
+                                setAttributes({activity_id: new_value})
                             }
                         }} />
 
@@ -68,15 +68,15 @@ registerBlockType( metadata, {
                 <ul className="list-unstyled">
                     <li>
                         <span>{ __( 'Datum', 'mhwp-ipso' ) }: </span>
-                        <span>{ formatDate(props.attributes.activity_date) }</span>
+                        <span>{ formatDate(attributes.activity_date) }</span>
                     </li>
                     <li>
                         <span>{ __( 'Id', 'mhwp-ipso' ) }: </span>
-                        <span>{ props.attributes.activity_id }</span>
+                        <span>{ attributes.activity_id }</span>
                     </li>
                     <li>
                         <span>{ __( 'Title', 'mhwp-ipso' ) }: </span>
-                        <span>{ props.attributes.activity_title }</span>
+                        <span>{ attributes.activity_title }</span>
                     </li>
                 </ul>
             </div>
