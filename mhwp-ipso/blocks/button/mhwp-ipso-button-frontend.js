@@ -33,9 +33,10 @@ async function getActivities() {
     url.searchParams.append('from', d);
     url.searchParams.append('till', d);
 
+    const container = $jq('#mhwp-ipso-button-container');
+
     // TODO: Drop the nonce on the GET request.
     const fetchInit = {'HTTP_X_WP_NONCE': 0};
-    const container = $jq('#mhwp-ipso-button-container');
     const activities = await fetchWpRest(url, fetchInit, 0, container);
 
     let filtered = [];
@@ -50,13 +51,21 @@ async function getActivities() {
         // TODO FrontEnd Error if date is empty + exception?
         throw new Error('MHWP error invalid form - no activities found.');
     }
-    console.log(filtered);
+
+    const form = $jq('form', container);
+    const input = $jq('input[name=activityCalendarId', form);
+
+    input.val(filtered[0].id);
+
+    prepareReservation(form);
 }
 
 /**
- * Find all forms adde by the calendar, attach a validator and a submit handler to each.
+ * prepare the form belonging to this button.
+ *
+ * @param form The form belonging to this button.
  */
-function prepareReservations() {
+function prepareReservation(form) {
     // The URL for making the reservation
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
@@ -66,55 +75,52 @@ function prepareReservations() {
         return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
     }, "Vul een geldig telefoonnummer in." );
 
-    const forms = $jq('form', '#mhwp-ipso-list-container');
-    forms.each( (_, f) => {
-        $jq( f ).validate({
-            rules: {
-                // We only use one explicit validation rule. others are extracted from the HTML attributes
-                phoneNumber: {
-                    phoneNL: true,
-                    "normalizer": v => $jq.trim(v)
-                }
-            },
-            "submitHandler": async function ( form, event ) {
-                event.preventDefault();
-                $jq('button', form).prop('disabled', true);
-                const container = $jq(form).parent();
-
-                const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
-                const firstName = $jq('input[name="firstName"]', form).val();
-                const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
-                const lastName = $jq('input[name="lastName"]', form).val();
-                const email = $jq('input[name="email"]', form).val();
-                let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
-                phoneNumber = phoneNumber === "" ? null : phoneNumber;
-                const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
-
-                clearErrors(container);
-                clearMessages(container);
-
-                const fetchInit = {
-                    method: 'POST',
-                    body: JSON.stringify( data )
-                }
-                await fetchWpRest(
-                    url, fetchInit, 0, container
-                ).then(() => {
-                    // if ! 200 addError
-                    addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
-                    setTimeout(() => {
-                        clearMessages(container);
-                        $jq('button', form).prop('disabled', false);
-                    }, 2500);
-                }).catch((_) => {
-                    // No op. We had an error making a reservation. We still want to continue, maybe an other one
-                    // succeeds.
-                });
-            },
-            "invalidHandler": function () {
-                console.log( 'invalid' );
+    form.validate({
+        rules: {
+            // We only use one explicit validation rule. others are extracted from the HTML attributes
+            phoneNumber: {
+                phoneNL: true,
+                "normalizer": v => $jq.trim(v)
             }
-        });
+        },
+        "submitHandler": async function ( form, event ) {
+            event.preventDefault();
+            $jq('button', form).prop('disabled', true);
+            const container = $jq(form).parent();
+
+            const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
+            const firstName = $jq('input[name="firstName"]', form).val();
+            const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
+            const lastName = $jq('input[name="lastName"]', form).val();
+            const email = $jq('input[name="email"]', form).val();
+            let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
+            phoneNumber = phoneNumber === "" ? null : phoneNumber;
+            const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
+
+            clearErrors(container);
+            clearMessages(container);
+
+            const fetchInit = {
+                method: 'POST',
+                body: JSON.stringify( data )
+            }
+            await fetchWpRest(
+                url, fetchInit, 0, container
+            ).then(() => {
+                // if ! 200 addError
+                addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+                setTimeout(() => {
+                    clearMessages(container);
+                    $jq('button', form).prop('disabled', false);
+                }, 2500);
+            }).catch((_) => {
+                // No op. We had an error making a reservation. We still want to continue, maybe an other one
+                // succeeds.
+            });
+        },
+        "invalidHandler": function () {
+            console.log( 'invalid' );
+        }
     });
 }
 

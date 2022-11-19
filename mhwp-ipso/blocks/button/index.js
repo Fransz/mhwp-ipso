@@ -118,7 +118,7 @@ registerBlockType( metadata, {
                     {titleInput(attributes)}
 
                     <form className={"mhwp_reserveer_button"}>
-                        <div></div>
+                        <input type="hidden" name="activityCalendarId" value="" />
                         <div>
                             <fieldset>
                                 <label htmlFor="mhwp_ipso_voornaam">Voornaam</label>
