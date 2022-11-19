@@ -32,23 +32,26 @@ registerBlockType( metadata, {
             <InspectorControls>
                 <PanelBody title={ __( 'Basics', 'mhwp-ipso' )}>
                     <PanelRow>
-                        <p>{ __( 'Configure the ipso button here.', 'mhwp-ipso' ) }</p>
+                        <p>{ __( 'Configureer de ipso knop hier.', 'mhwp-ipso' ) }</p>
                     </PanelRow>
 
                     <DatePicker
                         label={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
-                            setAttributes( { activity_date: new_value })
-                        }} />
+                            setAttributes({activity_date: new_value})
+                        }}
+                        currentDate={ attributes.activity_date }
+                    />
 
                     <TextControl
                         value={ attributes.activity_title }
                         label={ __( 'De naam van de activiteit', 'mhwp-ipso' ) }
                         help={ __( 'De datum van de activiteit, precies zo als in het IPSO systeem', 'mhwp-ipso' ) }
-                        onChange={ (  new_value  ) => {
-                            setAttributes( { activity_title: new_value })
-                        }} />
+                        onChange={ (new_value) => {
+                            setAttributes({activity_title: new_value})
+                        }}
+                    />
 
                     <TextControl
                         value={ attributes.activity_id }
@@ -58,13 +61,13 @@ registerBlockType( metadata, {
                             if (/^\d*$/.test(new_value)) {
                                 setAttributes({activity_id: new_value})
                             }
-                        }} />
-
+                        }}
+                    />
                 </PanelBody>
             </InspectorControls>,
 
             <div { ...blockProps } >
-                <h4>IPSO Agenda Block</h4>
+                <h4>IPSO agenda knop</h4>
                 <ul className="list-unstyled">
                     <li>
                         <span>{ __( 'Datum', 'mhwp-ipso' ) }: </span>

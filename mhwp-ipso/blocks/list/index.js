@@ -24,12 +24,12 @@ registerBlockType( metadata, {
             <InspectorControls>
                 <PanelBody title={ __( 'Basics', 'mhwp-ipso' )}>
                     <PanelRow>
-                        <p>{ __( 'Configure the ipso calendar here.', 'mhwp-ipso' ) }</p>
+                        <p>{ __( 'Configureer de IPSO agenda lijst hier.', 'mhwp-ipso' ) }</p>
                     </PanelRow>
 
                     <TextControl
                         value={ props.attributes.nr_days }
-                        label={ __( 'Aantal dagen', 'mhwp-ipso' ) }
+                        label={ __( 'Aantal dagen vooruit', 'mhwp-ipso' ) }
                         help={ __( 'Aantal dagen dat in de kalender getoond wordt.', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
                             if ( new_value === '' ) new_value = '10';
@@ -37,16 +37,17 @@ registerBlockType( metadata, {
                             if (/^\d+$/.test(new_value)) {
                                 props.setAttributes( { nr_days: new_value })
                             }
-                        }} />
+                        }}
+                    />
 
                 </PanelBody>
             </InspectorControls>,
 
             <div { ...blockProps } >
-                <h4>IPSO Agenda Block</h4>
+                <h4>IPSO agenda lijst</h4>
                 <ul className="list-unstyled">
                     <li>
-                        <strong>{ __( 'Aantal dagen vooruit', 'mhwp-ipso' ) }: </strong>
+                        <span>{ __( 'Aantal dagen vooruit', 'mhwp-ipso' ) }: </span>
                         <span className="mhwp-ipso-nr-days">{ props.attributes.nr_days }</span>
                     </li>
                 </ul>
