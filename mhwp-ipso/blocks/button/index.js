@@ -107,8 +107,9 @@ registerBlockType( metadata, {
                 return null;
             }
         }
-        // Calculate correct hidden properties here, put them in the form, for filtering on the server.
-        // => Calculate correct hidden properties here, for filtering in the client.
+
+        // TODO check classNames and id. English and hyphens. mhwp-button prefix.
+        // TODO toggle reservation.
         return (
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container">

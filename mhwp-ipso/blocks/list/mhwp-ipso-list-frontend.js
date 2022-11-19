@@ -14,10 +14,28 @@ const marikenhuisURL = document.location.origin;
 const ipsoURL = "https://api.test.ipso.community/";
 
 /**
- * Main function called upon onDOMContentLoaded.
- * Fetch all wanted activities, and ther details. For each create a large HTML.
+ * Top level function. Tobe called on DomContentLoaded.
+ *
+ * @returns {Promise<void>}
  */
-async function getActivities() {
+async function allActivities() {
+    const container = document.getElementById('mhwp-ipso-list-container');
+
+    const activities = await getActivities(container);
+    await addActivities(activities.data, container);
+    prepareReservations();
+
+    // TODO better flow:
+    // getActivities; addActivities; getDetails; addDetails; addForms
+}
+
+/**
+ * Fetch all wanted activities, and their details. For each create a large HTML.
+ *
+ * @param container Container for error messages.
+ * @returns {Promise<void>}
+ */
+async function getActivities(container) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
     url.searchParams.append('nr_days', '7');
@@ -27,17 +45,10 @@ async function getActivities() {
     const node = document.getElementById('mhwp-ipso-list-nonce');
     const nonce = node ?. value;
 
-    // Get the container
-    const container = document.getElementById('mhwp-ipso-list-container');
-
     clearErrors(container);
     clearMessages(container);
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
-    // const activities = await fetchWpRest(url, fetchInit, nonce, container).then((json) => {
-    //    if not 200 showError;
-    // };
-    const activities = await fetchWpRest(url, fetchInit, nonce, container);
-    await addActivities(activities.data, container);
+    return await fetchWpRest(url, fetchInit, nonce, container);
 }
 
 /**
@@ -97,8 +108,6 @@ async function addActivities(activities, container) {
        const node = $jq(html);
        $jq(container).append(node);
     }
-
-    prepareReservations();
 }
 
 /**
@@ -192,6 +201,4 @@ function prepareReservations() {
     });
 }
 
-
-// Todo get a proper top level function.
-$jq(document).ready(getActivities);
+$jq(document).ready(allActivities);
