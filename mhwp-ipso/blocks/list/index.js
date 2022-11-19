@@ -58,6 +58,7 @@ registerBlockType( metadata, {
         return (
             <div { ...blockProps } >
                 <div id="mhwp-ipso-list-container">
+                    <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
                     <input id="mhwp-ipso-list-nonce" type="hidden" value={attributes.rest_nonce}/>
                 </div>
 

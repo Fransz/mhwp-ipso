@@ -9,7 +9,7 @@ const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
 
-// TODO: This has to be test or live.
+// TODO: This has to be test or live. We probably want the wp to fix the image urls.
 // We need this for images.
 const ipsoURL = "https://api.test.ipso.community/";
 
@@ -39,14 +39,16 @@ async function getActivities(container) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-    // TODO: Get nrDays from the blocks html;
-    const nrDays = 7;
-    let d = new Date();
+    // Get the parameter for in the query, We always have value in nr-days.
+    let nrDays = document.getElementById('mhwp-ipso-list-nr-days');
+    nrDays = parseInt(nrDays.value);
 
+    let d = new Date();
     const from = d.toISOString().slice(0, -14);
+    url.searchParams.append('from', from);
+
     d.setDate(d.getDate() + nrDays);
     const till = d.toISOString().slice(0, -14);
-    url.searchParams.append('from', from);
     url.searchParams.append('till', till);
 
     // Get the nonce.

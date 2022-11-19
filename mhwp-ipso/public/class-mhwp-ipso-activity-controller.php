@@ -81,31 +81,11 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ): WP_REST_Response {
-		$nr_days = $request->get_param( 'nr_days' );
-		if ( $nr_days ) {
-			try {
-				$now      = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Amsterdam' ) );
-				$interval = new DateInterval( 'P' . $nr_days . 'D' );
-			} catch ( Exception $e ) {
-				$error = (object) array(
-					'mhwp_ipso_status' => 'error',
-					'mhwp_ipso_code'   => $e->getCode(),
-					'mhwp_ipso_msg'    => 'er is een probleem met timestamps op de server',
-				);
-				return new WP_REST_Response( $error, 500 );
-			}
-
-			$data = array(
-				'from' => $now->format( 'Y-m-d' ),
-				'till' => $now->add( $interval )->format( 'Y-m-d' ),
-			);
-		} else {
-			// We assume from and till are in the correct format.
-			$data = array(
-				'from' => $request->get_param( 'from' ),
-				'till' => $request->get_param( 'till' ),
-			);
-		}
+		// We assume we get from and till are in the correct format from the front end.
+		$data = array(
+			'from' => $request->get_param( 'from' ),
+			'till' => $request->get_param( 'till' ),
+		);
 
 		$client   = new MHWP_IPSO_Client();
 		$calendar = $client->get_activities( $data );
@@ -157,18 +137,13 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'title'      => 'activity',
 			'type'       => 'object',
 			'properties' => array(
-				'from'   => array(
+				'from' => array(
 					'description' => esc_html__( 'Start date in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
 				),
-				'till'   => array(
+				'till' => array(
 					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
-					'default'     => 7,
-				),
-				'nrDays' => array(
-					'description' => esc_html__( 'The number of days to show in the calendar', 'mhwp-ipso' ),
-					'type'        => 'number',
 					'default'     => 7,
 				),
 			),
