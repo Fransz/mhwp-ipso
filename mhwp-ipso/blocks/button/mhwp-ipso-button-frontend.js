@@ -4,6 +4,8 @@
 
 // import template from './mhwp-ipso-list-template';
 
+import { addError, addMessage, clearErrors, clearMessages, fetchWpRest } from "../includes/mhwp-lib";
+
 const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
@@ -49,93 +51,6 @@ async function getActivities() {
         throw new Error('MHWP error invalid form - no activities found.');
     }
     console.log(filtered);
-}
-
-/**
- * For all activities create and add html (data, form, details) to the DOM.
- * @param activities All activities.
- * @param container The parent container for all html.
- * @returns {Promise<void>}
- */
-async function addActivities(activities, container) {
-    let light_dark = 'light';
-    let cnt = 0;
-
-    // Formatters for time/date
-    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
-
-    // Sort the array with activities.
-    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-    for (let key in Object.keys(activities)) {
-        let activity = activities[key];
-        let activityDetail = await getActivityDetail(activity.activityID, container).catch((e) => {
-            console.log(e);
-
-            // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
-            activity.intro = "Er was een probleem met het ophalen van de data";
-            activity.description = "Er was een probleem met het ophalen van de data";
-            activity.image = "";
-
-            return null;
-        });
-
-        const date = new Date(activity.timeStart);
-        activity.date = dateFormat(date);
-        activity.time = timeFormat(date);
-
-       if(activityDetail) {
-           const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
-           activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
-
-           // TODO: We want to get html from IPSO.
-           let intro = activityDetail.data.intro;
-           intro = JSON.parse(intro);
-           intro = intro.ops.reduce((p, c) => p + c.insert, "");
-           activity.intro = intro;
-
-           // TODO: We want to get html from IPSO.
-           let description = activityDetail.data.description;
-           description = JSON.parse(description);
-           description = description.ops.reduce((p, c) => p + c.insert, "");
-           activity.description = description;
-       }
-       light_dark = light_dark === 'light' ? 'dark' : 'light';
-       cnt++;
-
-       const html = template(activity, cnt, light_dark);
-       const node = $jq(html);
-       $jq(container).append(node);
-    }
-
-    prepareReservations();
-}
-
-/**
- * For an activity fetch its details.
- *
- * @param activityId The activity for which to fetch the detail
- * @param container The parent for messages.
- * @returns {Promise<any>}
- */
-async function getActivityDetail(activityId, container) {
-    const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
-
-
-    clearErrors(container);
-    clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, false).then((json) => {
-        // Upon a 429 error (Too many requests), We try again.
-        if ( json.mhwp_ipso_code === 429) {
-            console.log('Error 429, retrying');
-            return wait(800).then(() => {
-                return fetchWpRest(url, {}, 0, container, true);
-            });
-        }
-        return json;
-    });
 }
 
 /**
@@ -205,57 +120,6 @@ function prepareReservations() {
 
 
 /**
- * Helper method for accessing the rest api in our wordPress installation.
- *
- * @param url The URL of the worpress installation.
- * @param init Additional settings for the fetch init object.
- * @param nonce
- * @param errorContainer A container for error messages.
- * @param throw_429 whether we should throw 429 errors.
- * @returns {Promise<any>}
- */
-function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
-    const defaults = {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-    }
-    return fetch( url, Object.assign({}, defaults, init)).then((res)=> {
-        if ( ! res.ok ) {
-            const message = res['message'] ? res['message'] : '';
-            throw new TypeError( message );
-        }
-        return res.json();
-    }).then((json) => {
-        if ( json.mhwp_ipso_status !== 'ok' ) {
-            // Upon a 429 error and if the caller can handle it, we return our JSON.
-            if ( json.mhwp_ipso_code === 429 && ! throw_429) {
-                return json;
-            }
-            const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
-            throw new TypeError( message );
-        }
-        return json;
-    }).catch( (err) => {
-            let message = '';
-            if (err instanceof TypeError) {
-                message = err.message;
-            }
-            if ('' === message) {
-                message = 'Er gaat iets is, probeer het later nog eens';
-            }
-            addError(message, errorContainer);
-
-            // retrow the error. Users of this call decide what should happen.
-            throw(err);
-        }
-    )
-}
-
-/**
  * Helper for setTimeout in a Promise style.
  *
  * @param duration
@@ -266,41 +130,6 @@ function wait(duration) {
         if(duration < 0) reject( new Error("Cannot wait negative time"));
         setTimeout(resolve, duration);
     })
-}
-
-/**
- * Helper for adding a message text to a container.
- *
- * @param message The text message.
- * @param className The messages classname
- * @param container The containter where to add the message.
- */
-function addNode( message, className, container) {
-    const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
-    const node = $jq(html);
-    $jq(container).append(node);
-
-}
-function addError( message, container ) {
-    addNode( message, 'error', container);
-}
-function addMessage( message, container ) {
-    addNode( message, 'message', container);
-}
-
-/**
- * Helper for reming messages within a container.
- * @param className The classname for selecting.
- * @param container The container where to search.
- */
-function clearNodes(className, container) {
-    $jq(`.${className}-container`, container).remove();
-}
-function clearErrors(container) {
-    clearNodes('error', container);
-}
-function clearMessages(container) {
-    clearNodes('message', container);
 }
 
 $jq(document).ready(getActivities);
