@@ -39,6 +39,11 @@ async function getActivities() {
     const fetchInit = {'HTTP_X_WP_NONCE': 0};
     const activities = await fetchWpRest(url, fetchInit, 0, container);
 
+    // form and input for the activityCalendarid
+    const form = $jq('form', container);
+    const input = $jq('input[name=activityCalendarId', form);
+
+    // filter activities.
     let filtered = [];
     if ( id ) {
         filtered = activities.data.filter((act) => act.id === parseInt(id) )
@@ -49,11 +54,9 @@ async function getActivities() {
     }
     if ( filtered.length !== 1 ) {
         addError('Geen activiteit gevonden. Reserveren is niet mogelijk', container);
+        form.remove();
         throw new Error('MHWP error invalid form - no activities found.');
     }
-
-    const form = $jq('form', container);
-    const input = $jq('input[name=activityCalendarId', form);
 
     input.val(filtered[0].id);
 
