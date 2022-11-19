@@ -1,41 +1,6 @@
 const $jq = jQuery.noConflict();
 
 /**
- * Helper for adding a message text to a container.
- *
- * @param message The text message.
- * @param className The messages classname
- * @param container The containter where to add the message.
- */
-function addNode( message, className, container) {
-    const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
-    const node = $jq(html);
-    $jq(container).append(node);
-
-}
-function addError( message, container ) {
-    addNode( message, 'error', container);
-}
-function addMessage( message, container ) {
-    addNode( message, 'message', container);
-}
-
-/**
- * Helper for reming messages within a container.
- * @param className The classname for selecting.
- * @param container The container where to search.
- */
-function clearNodes(className, container) {
-    $jq(`.${className}-container`, container).remove();
-}
-function clearErrors(container) {
-    clearNodes('error', container);
-}
-function clearMessages(container) {
-    clearNodes('message', container);
-}
-
-/**
  * Helper method for accessing the rest api in our wordPress installation.
  *  TODO we can drop nonce here.
  *
@@ -77,7 +42,7 @@ function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
                 message = err.message;
             }
             if ('' === message) {
-                message = 'Er gaat iets is, probeer het later nog eens';
+                message = 'Er gaat iets mis, probeer het later nog eens';
             }
             addError(message, errorContainer);
 
@@ -87,5 +52,52 @@ function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
     )
 }
 
+/**
+ * Helper for setTimeout in a Promise style.
+ *
+ * @param duration
+ * @returns {Promise<unknown>}
+ */
+function wait(duration) {
+    return new Promise((resolve, reject) => {
+        if(duration < 0) reject( new Error("Cannot wait negative time"));
+        setTimeout(resolve, duration);
+    })
+}
 
-export {addError, addMessage, clearErrors, clearMessages, fetchWpRest}
+/**
+ * Helper for adding a message text to a container.
+ *
+ * @param message The text message.
+ * @param className The messages classname
+ * @param container The containter where to add the message.
+ */
+function addNode( message, className, container) {
+    const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
+    const node = $jq(html);
+    $jq(container).append(node);
+
+}
+function addError( message, container ) {
+    addNode( message, 'error', container);
+}
+function addMessage( message, container ) {
+    addNode( message, 'message', container);
+}
+
+/**
+ * Helper for reming messages within a container.
+ * @param className The classname for selecting.
+ * @param container The container where to search.
+ */
+function clearNodes(className, container) {
+    $jq(`.${className}-container`, container).remove();
+}
+function clearErrors(container) {
+    clearNodes('error', container);
+}
+function clearMessages(container) {
+    clearNodes('message', container);
+}
+
+export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages}

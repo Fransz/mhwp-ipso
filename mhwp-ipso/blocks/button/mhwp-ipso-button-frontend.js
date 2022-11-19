@@ -25,7 +25,6 @@ async function getActivities() {
     const title = $jq('#mhwp-activity-title').val();
 
     if ( ! date || (! id && ! title)) {
-        // TODO add a frontEnd Error
         addError('Ongeldig formulier. Reserveren is niet mogelijk', container);
         throw new Error('MHWP error invalid form - incorrect parameters.');
     }
