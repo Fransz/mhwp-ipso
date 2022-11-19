@@ -16,34 +16,28 @@ async function getActivities() {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-    // TODO: parseInt(id); hasID... = !!id
     const date = $jq('#mhwp-activity-date').val();
-    const id = $jq('#mhwp-activity-id').val();
+    const id = parseInt($jq('#mhwp-activity-id').val());
     const title = $jq('#mhwp-activity-title').val();
 
-    const hasDate =  date !== undefined;
-    const hasId = id !== undefined && id !== '0';
-    const hasTitle = title !== undefined && title !== '';
-
-    if ( ! hasDate || (! hasId && ! hasTitle)) {
-        // TODO FrontEnd Error if date is empty + exception?
-        console.log ('error invalid form' );
+    if ( ! date || (! id && ! title)) {
+        // TODO add a frontEnd Error
+        throw new Error('MHWP error invalid form - incorrect parameters.');
     }
 
-    // use the for mhwp-ipso-list also; drop the ti nrDays request parrametr.
+    // TODO: use this for mhwp-ipso-list also; drop the nrDays request parameter.
     let d = new Date(date);
     d = d.toISOString().slice(0, -14);
     url.searchParams.append('from', d);
     url.searchParams.append('till', d);
-    url.searchParams.append('nrDays', 1);
-    console.log (url.href);
 
+    // TODO: Drop the nonce on the GET request.
     const fetchInit = {'HTTP_X_WP_NONCE': 0};
     const container = $jq('#mhwp-ipso-button-container');
     const activities = await fetchWpRest(url, fetchInit, 0, container);
 
     let filtered = [];
-    if ( hasId ) {
+    if ( id ) {
         filtered = activities.data.filter((act) => act.id === parseInt(id) )
     } else {
         filtered = activities.data.filter((act) =>
@@ -52,7 +46,7 @@ async function getActivities() {
     }
     if ( filtered.length !== 1 ) {
         // TODO FrontEnd Error if date is empty + exception?
-        console.log ('error invalid form' );
+        throw new Error('MHWP error invalid form - no activities found.');
     }
     console.log(filtered);
 }
