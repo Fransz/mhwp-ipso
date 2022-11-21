@@ -22,20 +22,29 @@ Release 0.1.0  - Initial release.
 ## Roadmap
 
 Release 0.3.0 - Front-end en IPSO Button
-- Better user experience while loading the ipso-list.
-  Fetch details after calendar, but what to do with the image
-- A spinner on the calendar when we are still loading.
+- Juiste WP URL gebruiken in frontend. (localhost vs test.marikenhuis.nl vs marikenhuis.nl)
 - Refactor fetchWpRest, it shouldnt throw on ipso api errors.
+- IPSO Button;
+- Common code in a seperate file;
+- Different query parameters for GET activities;
+- Notice 'geen activiteiten' if none where found.
+- Renamed classes and ids in rendered html.
 
 Release 0.4.0 - Backend;
-- nonces bij formulieren, en nieuwe na een reservering;
-- Settings; API key; live <-> test knop;
-- Juiste URL doorgeven aan Frontend.
+- Nonces bij formulieren, en nieuwe na een reservering;
+- Settings: API key; live <-> test knop; 
+- Rest API Live <-> test uitlezen, Juiste API aanspreken , Image URL's aanpassen.
+- LimeQuery URL's gekoppeld aan ActivityId's
+
+Release 0.5.0 - Backend;
 - Log
+- IPSO informatie in backend (agendaId's activityId's)
 
-Release 0.5.0 - Filter op categorien.
-
-Release 0.6.0 - Collapse activiteiten met meerdere tijdslots op dezelfde dag.
+Release 0.6.0 - Frontend Filter.
+- Better user experience while loading the ipso-list.
+- Fetch details after calendar, but what to do with the image
+- A spinner on the calendar when we are still loading.
+- Collapse activiteiten met meerdere tijdslots op dezelfde dag.
 
 ## Deployment
 

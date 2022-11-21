@@ -14,25 +14,16 @@
   "viewScript": "file:../dist/button/mhwp-ipso-button-frontend.js",
   "attributes": {
     "activity_id": {
-      "type": "number",
-      "default": 0,
-      "source": "attribute",
-      "selector": "#activity_id",
-      "attribute": "value"
+      "type": "string",
+      "default": ""
     },
     "activity_date": {
       "type": "string",
-      "default": "",
-      "source": "attribute",
-      "selector": "#activity_date",
-      "attribute": "value"
+      "default": ""
     },
     "activity_title": {
       "type": "string",
-      "default": "",
-      "source": "attribute",
-      "selector": "#activity_title",
-      "attribute": "value"
+      "default": ""
     }
   }
 }

@@ -15,7 +15,10 @@
   "attributes": {
     "nr_days": {
       "type": "string",
-      "default": 10
+      "default": 10,
+      "source": "attribute",
+      "selector": "input#mhwp-ipso-list-nr-days",
+      "attribute": "value"
     }
   }
 }
