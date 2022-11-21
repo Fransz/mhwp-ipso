@@ -3,41 +3,63 @@
 // import template from './mhwp-ipso-list-template_bootstrap';
 
 import template from './mhwp-ipso-list-template';
+import { fetchWpRest, wait, addMessage, clearErrors, clearMessages } from "../includes/mhwp-lib";
 
-console.log('No cache');
 const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
 
-// TODO: This has to be test or live.
+// TODO: This has to be test or live. We probably want the wp to fix the image urls.
 // We need this for images.
 const ipsoURL = "https://api.test.ipso.community/";
 
 /**
- * Main function called upon onDOMContentLoaded.
- * Fetch all wanted activities, and ther details. For each create a large HTML.
+ * Top level function. Tobe called on DomContentLoaded.
+ *
+ * @returns {Promise<void>}
  */
-async function getActivities() {
+async function allActivities() {
+    const container = document.getElementById('mhwp-ipso-list-container');
+
+    const activities = await getActivities(container);
+    await addActivities(activities.data, container);
+    prepareReservations();
+
+    // TODO better flow:
+    // getActivities; addActivities; getDetails; addDetails; addForms
+}
+
+/**
+ * Fetch all wanted activities, and their details. For each create a large HTML.
+ *
+ * @param container Container for error messages.
+ * @returns {Promise<void>}
+ */
+async function getActivities(container) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
-    url.searchParams.append('nr_days', '7');
+
+    // Get the parameter for in the query, We always have value in nr-days.
+    let nrDays = document.getElementById('mhwp-ipso-list-nr-days');
+    nrDays = parseInt(nrDays.value);
+
+    let d = new Date();
+    const from = d.toISOString().slice(0, -14);
+    url.searchParams.append('from', from);
+
+    d.setDate(d.getDate() + nrDays);
+    const till = d.toISOString().slice(0, -14);
+    url.searchParams.append('till', till);
 
     // Get the nonce.
     // Todo: we want to drop the nonce. It invalidates the block in the backend.
     const node = document.getElementById('mhwp-ipso-list-nonce');
     const nonce = node ?. value;
 
-    // Get the container
-    const container = document.getElementById('mhwp-ipso-list-container');
-
     clearErrors(container);
     clearMessages(container);
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
-    // const activities = await fetchWpRest(url, fetchInit, nonce, container).then((json) => {
-    //    if not 200 showError;
-    // };
-    const activities = await fetchWpRest(url, fetchInit, nonce, container);
-    await addActivities(activities.data, container);
+    return await fetchWpRest(url, fetchInit, nonce, container);
 }
 
 /**
@@ -97,8 +119,6 @@ async function addActivities(activities, container) {
        const node = $jq(html);
        $jq(container).append(node);
     }
-
-    prepareReservations();
 }
 
 /**
@@ -128,7 +148,7 @@ async function getActivityDetail(activityId, container) {
 }
 
 /**
- * Find all forms adde by the calendar, attach a validator and a submit handler to each.
+ * Find all forms added by the calendar, attach a validator and a submit handler to each.
  */
 function prepareReservations() {
     // The URL for making the reservation
@@ -192,104 +212,4 @@ function prepareReservations() {
     });
 }
 
-
-/**
- * Helper method for accessing the rest api in our wordPress installation.
- *
- * @param url The URL of the worpress installation.
- * @param init Additional settings for the fetch init object.
- * @param nonce
- * @param errorContainer A container for error messages.
- * @param throw_429 whether we should throw 429 errors.
- * @returns {Promise<any>}
- */
-function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
-    const defaults = {
-        method: 'GET',
-        cache: 'no-store',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        }
-    }
-    return fetch( url, Object.assign({}, defaults, init)).then((res)=> {
-        if ( ! res.ok ) {
-            const message = res['message'] ? res['message'] : '';
-            throw new TypeError( message );
-        }
-        return res.json();
-    }).then((json) => {
-        if ( json.mhwp_ipso_status !== 'ok' ) {
-            // Upon a 429 error and if the caller can handle it, we return our JSON.
-            if ( json.mhwp_ipso_code === 429 && ! throw_429) {
-                return json;
-            }
-            const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
-            throw new TypeError( message );
-        }
-        return json;
-    }).catch( (err) => {
-            let message = '';
-            if (err instanceof TypeError) {
-                message = err.message;
-            }
-            if ('' === message) {
-                message = 'Er gaat iets is, probeer het later nog eens';
-            }
-            addError(message, errorContainer);
-
-            // retrow the error. Users of this call decide what should happen.
-            throw(err);
-        }
-    )
-}
-
-/**
- * Helper for setTimeout in a Promise style.
- *
- * @param duration
- * @returns {Promise<unknown>}
- */
-function wait(duration) {
-    return new Promise((resolve, reject) => {
-        if(duration < 0) reject( new Error("Cannot wait negative time"));
-        setTimeout(resolve, duration);
-    })
-}
-
-/**
- * Helper for adding a message text to a container.
- *
- * @param message The text message.
- * @param className The messages classname
- * @param container The containter where to add the message.
- */
-function addNode( message, className, container) {
-    const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
-    const node = $jq(html);
-    $jq(container).append(node);
-
-}
-function addError( message, container ) {
-    addNode( message, 'error', container);
-}
-function addMessage( message, container ) {
-    addNode( message, 'message', container);
-}
-
-/**
- * Helper for reming messages within a container.
- * @param className The classname for selecting.
- * @param container The container where to search.
- */
-function clearNodes(className, container) {
-    $jq(`.${className}-container`, container).remove();
-}
-function clearErrors(container) {
-    clearNodes('error', container);
-}
-function clearMessages(container) {
-    clearNodes('message', container);
-}
-
-$jq(document).ready(getActivities);
+$jq(document).ready(allActivities);

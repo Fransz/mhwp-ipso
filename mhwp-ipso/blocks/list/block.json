@@ -9,13 +9,16 @@
   "supports": {
     "html": false
   },
-  "style": "file:../dist/mhwp-ipso-list.css",
-  "editorScript": "file:../dist/mhwp-ipso-list.js",
-  "viewScript": "file:../dist/mhwp-ipso-list-frontend.js",
+  "style": "file:../dist/list/mhwp-ipso-list.css",
+  "editorScript": "file:../dist/list/mhwp-ipso-list.js",
+  "viewScript": "file:../dist/list/mhwp-ipso-list-frontend.js",
   "attributes": {
     "nr_days": {
       "type": "string",
-      "default": 10
+      "default": 10,
+      "source": "attribute",
+      "selector": "input#mhwp-ipso-list-nr-days",
+      "attribute": "value"
     }
   }
 }

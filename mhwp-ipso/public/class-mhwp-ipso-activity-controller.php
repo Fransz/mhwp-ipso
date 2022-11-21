@@ -75,26 +75,16 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	/**
 	 * Get the list of activities in the ipso system.
 	 *
+	 * TODO: drop the nrDays query parameter.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ): WP_REST_Response {
-		$nr_days = $request->get_param( 'nr_days' );
-		try {
-			$now      = new DateTimeImmutable( 'now', new DateTimeZone( 'Europe/Amsterdam' ) );
-			$interval = new DateInterval( 'P' . $nr_days . 'D' );
-		} catch ( Exception $e ) {
-			$error = (object) array(
-				'mhwp_ipso_status' => 'error',
-				'mhwp_ipso_code'   => $e->getCode(),
-				'mhwp_ipso_msg'    => 'er is een probleem op de server',
-			);
-			return new WP_REST_Response( $error, 500 );
-		}
-
+		// We assume we get from and till are in the correct format from the front end.
 		$data = array(
-			'from' => $now->format( 'Y-m-d' ),
-			'till' => $now->add( $interval )->format( 'Y-m-d' ),
+			'from' => $request->get_param( 'from' ),
+			'till' => $request->get_param( 'till' ),
 		);
 
 		$client   = new MHWP_IPSO_Client();
@@ -147,9 +137,13 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'title'      => 'activity',
 			'type'       => 'object',
 			'properties' => array(
-				'nrDays' => array(
-					'description' => esc_html__( 'The number of days to show in the calendar', 'mhwp-ipso' ),
-					'type'        => 'number',
+				'from' => array(
+					'description' => esc_html__( 'Start date in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
+				),
+				'till' => array(
+					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
 					'default'     => 7,
 				),
 			),

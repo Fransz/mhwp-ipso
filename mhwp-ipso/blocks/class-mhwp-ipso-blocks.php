@@ -115,5 +115,9 @@ class MHWP_IPSO_Blocks {
 		register_block_type(
 			plugin_dir_path( __FILE__ ) . 'list'
 		);
+
+		register_block_type(
+			plugin_dir_path( __FILE__ ) . 'button'
+		);
 	}
 }
