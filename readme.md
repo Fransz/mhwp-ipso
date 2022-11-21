@@ -2,6 +2,15 @@
 
 ## Releases
 
+Release 0.3.0 - Front-end en IPSO Button
+- Juiste WP URL gebruiken in frontend. (localhost vs test.marikenhuis.nl vs marikenhuis.nl)
+- Refactor fetchWpRest, it shouldnt throw on ipso api errors.
+- IPSO Button;
+- Common code in a seperate file;
+- Different query parameters for GET activities;
+- Notice 'geen activiteiten' if none where found.
+- Renamed classes and ids in rendered html.
+
 Release 0.2.2 - hotfix
 - Make jQuery accessible in the frontend.;
 
@@ -20,15 +29,6 @@ Release 0.2.0 - Frontend;
 Release 0.1.0  - Initial release.
 
 ## Roadmap
-
-Release 0.3.0 - Front-end en IPSO Button
-- Juiste WP URL gebruiken in frontend. (localhost vs test.marikenhuis.nl vs marikenhuis.nl)
-- Refactor fetchWpRest, it shouldnt throw on ipso api errors.
-- IPSO Button;
-- Common code in a seperate file;
-- Different query parameters for GET activities;
-- Notice 'geen activiteiten' if none where found.
-- Renamed classes and ids in rendered html.
 
 Release 0.4.0 - Backend;
 - Nonces bij formulieren, en nieuwe na een reservering;
