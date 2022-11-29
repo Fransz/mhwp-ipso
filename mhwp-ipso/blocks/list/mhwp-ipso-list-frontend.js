@@ -101,16 +101,10 @@ async function addActivities(activities, container) {
            activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
 
            // TODO: We want to get html from IPSO.
-           let intro = activityDetail.data.intro;
-           intro = JSON.parse(intro);
-           intro = intro.ops.reduce((p, c) => p + c.insert, "");
-           activity.intro = intro;
+           activity.intro = activityDetail.data.intro;
 
            // TODO: We want to get html from IPSO.
-           let description = activityDetail.data.description;
-           description = JSON.parse(description);
-           description = description.ops.reduce((p, c) => p + c.insert, "");
-           activity.description = description;
+           activity.description = activityDetail.data.description;
        }
        light_dark = light_dark === 'light' ? 'dark' : 'light';
        cnt++;
