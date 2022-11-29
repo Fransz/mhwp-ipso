@@ -88,7 +88,7 @@ registerBlockType( metadata, {
     save: ({attributes}) => {
         const blockProps = useBlockProps.save();
 
-        const dateInput = ({activity_date}) => {
+        const dateInput = (activity_date) => {
             if (activity_date) {
                 return <input type="hidden" name="activity-date" id="mhwp-activity-date"
                               value={activity_date} />
@@ -96,14 +96,14 @@ registerBlockType( metadata, {
                 return null;
             }
         }
-        const idInput = ({activity_id}) => {
+        const idInput = (activity_id) => {
             if (activity_id !== '' && activity_id !== '0') {
-                return <input type="hidden" name="activity_id" id="mhwp-activity-id" value={activity_id}/>
+                return <input type="hidden" name="activity-id" id="mhwp-activity-id" value={activity_id}/>
             } else {
                 return null;
             }
         }
-        const titleInput = ({activity_title}) => {
+        const titleInput = (activity_title) => {
             if (activity_title) {
                 return <input type="hidden" name="activity-title" id="mhwp-activity-title" value={activity_title} />
             } else {
@@ -117,9 +117,10 @@ registerBlockType( metadata, {
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container">
 
-                    {dateInput(attributes)}
-                    {idInput(attributes)}
-                    {titleInput(attributes)}
+                    /* Use hidden input to communicate data to the rendered html/js */
+                    {dateInput(attributes.activity_date)}
+                    {idInput(attributes.activity_id)}
+                    {titleInput(attributes.activity_title)}
 
                     <form className={"mhwp_reserveer_button"}>
                         <input type="hidden" name="activityCalendarId" value="" />
