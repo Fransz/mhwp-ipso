@@ -26,7 +26,6 @@ async function getActivities() {
         throw new Error('MHWP error invalid form - incorrect parameters.');
     }
 
-    // TODO: use this for mhwp-ipso-list also; drop the nrDays request parameter.
     let d = new Date(date);
     d = d.toISOString().slice(0, -14);
     url.searchParams.append('from', d);
