@@ -100,10 +100,7 @@ async function addActivities(activities, container) {
            const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
            activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
 
-           // TODO: We want to get html from IPSO.
            activity.intro = activityDetail.data.intro;
-
-           // TODO: We want to get html from IPSO.
            activity.description = activityDetail.data.description;
        }
        light_dark = light_dark === 'light' ? 'dark' : 'light';
