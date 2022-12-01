@@ -1,4 +1,5 @@
-function template(activity, cnt, light_dark) {
+function template(activity, cnt) {
+    // We just return an evaluated template string.
     return `
         <li class="mhwp-ipso-activity panel">
             <div>
@@ -18,12 +19,12 @@ function template(activity, cnt, light_dark) {
                     <div class="mhwp-ipso-activity-detail-intro">${activity.intro}</div>
                     <div class="mhwp-ipso-activity-detail-description">${activity.description}</div>
                     <button class="mhwp-ipso-activity-show-reservation" type="button"
-                       data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${cnt}" data-parent="#mhwp-ipso-list-container"
-                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}">
+                       data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation-${cnt}"
+                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation-${cnt}">
                         Reserveer
                     </button>
                 </div>
-                <div class="mhwp-ipso-activity-reservation">
+                <div class="mhwp-ipso-activity-reservation collapse" id="mhwp-ipso-collapse-reservation-${cnt}">
                     <form>
                         <input type="hidden" name="activityCalendarId" value="${activity.id}" />
                         

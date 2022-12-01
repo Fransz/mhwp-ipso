@@ -122,7 +122,13 @@ registerBlockType( metadata, {
                     {idInput(attributes.activity_id)}
                     {titleInput(attributes.activity_title)}
 
-                    <form>
+                    <button className="mhwp-ipso-reservation-show-reservation" type="button"
+                            data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation"
+                            aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation">
+                        Reserveer
+                    </button>
+
+                    <form className="collapse" id="mhwp-ipso-collapse-reservation">
                         <input type="hidden" name="activityCalendarId" value="" />
                         <div>
                             <fieldset className="mhwp-ipso-reservation-firstname">

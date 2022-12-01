@@ -1,9 +1,6 @@
-// for local development on old fashioned theme.
-// import template from './mhwp-ipso-list-template_bootstrap';
-
 import template from './mhwp-ipso-list-template';
-import './bootstrap-collapse';
-import './bootstrap-transition';
+import '../includes/bootstrap-collapse';
+import '../includes/bootstrap-transition';
 
 import { fetchWpRest, wait, addMessage, clearErrors, clearMessages } from "../includes/mhwp-lib";
 
@@ -32,7 +29,7 @@ async function allActivities() {
 }
 
 /**
- * Fetch all wanted activities, and their details. For each create a large HTML.
+ * Fetch all wanted activities.
  *
  * @param container Container for error messages.
  * @returns {Promise<void>}
@@ -71,7 +68,6 @@ async function getActivities(container) {
  * @returns {Promise<void>}
  */
 async function addActivities(activities, container) {
-    let light_dark = 'light';
     let cnt = 0;
 
     // Formatters for time/date
@@ -105,10 +101,9 @@ async function addActivities(activities, container) {
            activity.intro = activityDetail.data.intro;
            activity.description = activityDetail.data.description;
        }
-       light_dark = light_dark === 'light' ? 'dark' : 'light';
        cnt++;
 
-       const html = template(activity, cnt, light_dark);
+       const html = template(activity, cnt);
        const node = $jq(html);
        $jq(container).append(node);
     }
