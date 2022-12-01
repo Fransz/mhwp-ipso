@@ -7,17 +7,21 @@ function template(activity, cnt, light_dark) {
                     <span class="mhwp-ipso-activity-header-date">${activity.date}</span>
                     <span class="mhwp-ipso-activity-header-time">${activity.time}</span>
                 </div>
-                <div>
-                    <button class ="mhwp-ipso-activity-show-detail" 
+                <button class="mhwp-ipso-activity-show-detail"  type="button"
+                   data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${cnt}" data-parent="#mhwp-ipso-list-container"
+                   aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}">
+                   Lees meer
+                </button>
+                <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${cnt}">
+                    ${activity.img ? activity.img : ''}
+                    <div class="mhwp-ipso-activity-detail-title">${activity.title}</div>
+                    <div class="mhwp-ipso-activity-detail-intro">${activity.intro}</div>
+                    <div class="mhwp-ipso-activity-detail-description">${activity.description}</div>
+                    <button class="mhwp-ipso-activity-show-reservation" type="button"
                        data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${cnt}" data-parent="#mhwp-ipso-list-container"
-                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}" type="button">Lees meer</button>
-                    <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${cnt}">
-                        ${activity.img ? activity.img : ''}
-                        <div class="mhwp-ipso-activity-detail-title">${activity.title}</div>
-                        <div class="mhwp-ipso-activity-detail-intro">${activity.intro}</div>
-                        <div class="mhwp-ipso-activity-detail-description">${activity.description}</div>
-                        <button class ="mhwp-ipso-activity-show-reservation" type="button">Reserveer</button>
-                    </div>
+                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}">
+                        Reserveer
+                    </button>
                 </div>
                 <div class="mhwp-ipso-activity-reservation">
                     <form>
