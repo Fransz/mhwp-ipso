@@ -1,6 +1,6 @@
 function template(activity, cnt, light_dark) {
     return `
-        <li class="mhwp-ipso-activity">
+        <li class="mhwp-ipso-activity panel">
             <div>
                 <div class="mhwp-ipso-activity-header">
                     <span class="mhwp-ipso-activity-header-title">${activity.title}</span>
@@ -8,8 +8,10 @@ function template(activity, cnt, light_dark) {
                     <span class="mhwp-ipso-activity-header-time">${activity.time}</span>
                 </div>
                 <div>
-                    <button class ="mhwp-ipso-activity-show-detail" type="button">Lees meer</button>
-                    <div class="mhwp-ipso-activity-detail" id="mhwp-ipso-collapseDetail-${cnt}">
+                    <button class ="mhwp-ipso-activity-show-detail" 
+                       data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${cnt}" data-parent="#mhwp-ipso-list-container"
+                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}" type="button">Lees meer</button>
+                    <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${cnt}">
                         ${activity.img ? activity.img : ''}
                         <div class="mhwp-ipso-activity-detail-title">${activity.title}</div>
                         <div class="mhwp-ipso-activity-detail-intro">${activity.intro}</div>

@@ -1,8 +1,10 @@
 // for local development on old fashioned theme.
-// import './bootstrap-collapse';
 // import template from './mhwp-ipso-list-template_bootstrap';
 
 import template from './mhwp-ipso-list-template';
+import './bootstrap-collapse';
+import './bootstrap-transition';
+
 import { fetchWpRest, wait, addMessage, clearErrors, clearMessages } from "../includes/mhwp-lib";
 
 const $jq = jQuery.noConflict();
