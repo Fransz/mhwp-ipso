@@ -1,8 +1,5 @@
-// for local development on old fashioned theme.
-// import './bootstrap-collapse';
-// import template from './mhwp-ipso-list-template_bootstrap';
-
-// import template from './mhwp-ipso-list-template';
+import '../includes/bootstrap-collapse';
+import '../includes/bootstrap-transition';
 
 import { addError, addMessage, clearErrors, clearMessages, fetchWpRest } from "../includes/mhwp-lib";
 
@@ -29,7 +26,6 @@ async function getActivities() {
         throw new Error('MHWP error invalid form - incorrect parameters.');
     }
 
-    // TODO: use this for mhwp-ipso-list also; drop the nrDays request parameter.
     let d = new Date(date);
     d = d.toISOString().slice(0, -14);
     url.searchParams.append('from', d);

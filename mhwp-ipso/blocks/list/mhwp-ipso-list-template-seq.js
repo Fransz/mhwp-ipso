@@ -1,4 +1,5 @@
-function template(activity, cnt) {
+function template(activity) {
+    const id = activity.id;
     // We just return an evaluated template string.
     return `
         <li class="mhwp-ipso-activity panel">
@@ -9,49 +10,48 @@ function template(activity, cnt) {
                     <span class="mhwp-ipso-activity-header-time">${activity.time}</span>
                 </div>
                 <button class="mhwp-ipso-activity-show-detail"  type="button"
-                   data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${cnt}" data-parent="#mhwp-ipso-list-container"
-                   aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${cnt}">
+                   data-toggle="collapse" data-target="#mhwp-ipso-collapse-detail-${id}" data-parent="#mhwp-ipso-list-container"
+                   aria-expanded="false" aria-controls="mhwp-ipso-collapse-detail-${id}">
                    Lees meer
                 </button>
-                <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${cnt}">
+                <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${id}">
                     ${activity.img ? activity.img : ''}
-                    <div class="mhwp-ipso-activity-detail-title">${activity.title}</div>
                     <div class="mhwp-ipso-activity-detail-intro">${activity.intro}</div>
                     <div class="mhwp-ipso-activity-detail-description">${activity.description}</div>
                     <button class="mhwp-ipso-activity-show-reservation" type="button"
-                       data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation-${cnt}"
-                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation-${cnt}">
+                       data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation-${id}"
+                       aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation-${id}">
                         Reserveer
                     </button>
                 </div>
-                <div class="mhwp-ipso-activity-reservation collapse" id="mhwp-ipso-collapse-reservation-${cnt}">
+                <div class="mhwp-ipso-activity-reservation collapse" id="mhwp-ipso-collapse-reservation-${id}">
                     <form>
                         <input type="hidden" name="activityCalendarId" value="${activity.id}" />
                         
                         <div>
                             <fieldset class="mhwp-ipso-reservation-firstname">
-                                <label for="mhwp-ipso-firstname-${cnt}">Voornaam</label>
+                                <label for="mhwp-ipso-firstname-${id}">Voornaam</label>
                                 <span class="required">*</span>
-                                <input type="text" id="mhwp-ipso-firstname-${cnt}" name="firstName" required placeholder="" />
+                                <input type="text" id="mhwp-ipso-firstname-${id}" name="firstName" required placeholder="" />
                             </fieldset>
                             <fieldset class="mhwp-ipso-reservation-prefix">
-                                <label for="mhwp-ipso-prefix-${cnt}">Tussenvoegsel</label>
-                                <input type="text" id="mhwp-ipso-prefix-${cnt}" name="lastNamePrefix" placeholder="" />
+                                <label for="mhwp-ipso-prefix-${id}">Tussenvoegsel</label>
+                                <input type="text" id="mhwp-ipso-prefix-${id}" name="lastNamePrefix" placeholder="" />
                             </fieldset>
                             <fieldset class="mhwp-ipso-reservation-lastname">
-                                <label for="mhwp-ipso-lastname-${cnt}">Achternaam</label>
+                                <label for="mhwp-ipso-lastname-${id}">Achternaam</label>
                                 <span class="required">*</span>
-                                <input type="text" id="mhwp-ipso-lastname-${cnt}" name="lastName" required placeholder="" />
+                                <input type="text" id="mhwp-ipso-lastname-${id}" name="lastName" required placeholder="" />
                             </fieldset>
                             <fieldset class="mhwp-ipso-reservation-telephone">
-                                <label for="mhwp-ipso-telephone-${cnt}">Telefoonnummer</label>
-                                <input type="tel" id="mhwp-ipso-telephone-${cnt}" name="phoneNumber" placeholder="" />
+                                <label for="mhwp-ipso-telephone-${id}">Telefoonnummer</label>
+                                <input type="tel" id="mhwp-ipso-telephone-${id}" name="phoneNumber" placeholder="" />
                                 <span class="validity"></span>
                             </fieldset>
                             <fieldset class="mhwp-ipso-reservation-email">
-                                <label for="mhwp-ipso-email-${cnt}">Emailadres</label>
+                                <label for="mhwp-ipso-email-${id}">Emailadres</label>
                                 <span class="required">*</span>
-                                <input type="email" id="mhwp-ipso-email-${cnt}" name="email" required placeholder="" />
+                                <input type="email" id="mhwp-ipso-email-${id}" name="email" required placeholder="" />
                                 <span class="validity"></span>
                             </fieldset>
                         <div>
