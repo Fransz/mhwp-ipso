@@ -1,6 +1,11 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.3.1 - Front-end.
+- IPSO now returns HTML. Process that.
+- Changed classname/ids
+- Taking care of collapsing without using all off bootstrap.
+- Less info in the header.
 
 Release 0.3.0 - Front-end en IPSO Button
 - Juiste WP URL gebruiken in frontend. (localhost vs test.marikenhuis.nl vs marikenhuis.nl)
