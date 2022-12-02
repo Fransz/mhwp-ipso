@@ -1,6 +1,11 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.3.1 - Front-end.
+- IPSO now returns HTML. Process that.
+- Changed classname/ids
+- Taking care of collapsing without using all off bootstrap.
+- Less info in the header.
 
 Release 0.3.0 - Front-end en IPSO Button
 - Juiste WP URL gebruiken in frontend. (localhost vs test.marikenhuis.nl vs marikenhuis.nl)
@@ -56,6 +61,7 @@ We willen de plugin soms op deze site installeren om te demonstreren.
 
 #### Endpoints.
 De vrijwilligers site draait in een subdirectory. Je moet de paden van de endpoints aanpassen.
+Let op doe dit voor de button, en de list.
 
 #### Divi
 Maar deze vrijwilligers site is gemaakt met divi, en kent niet zomaar bootstrap.
@@ -73,3 +79,11 @@ Voeg wat extra css toe om in iedergeval 'reserveer' en 'lees meer' in en uit te 
         display:none;
         overflow:hidden;
     }
+
+Of laat het block bootstrap laden. in class-mhwp-ipso-blocks.php; function enqueue\_styles
+		wp_enqueue_style(
+			$this->mhwp_ipso . '_bootstrap',
+			'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
+			array(),
+			$ver
+        );

@@ -20,8 +20,21 @@ const ipsoURL = "https://api.test.ipso.community/";
 async function allActivities() {
     const container = document.getElementById('mhwp-ipso-list-container');
 
+    // Get all activities from our wp. Sorted
     const activities = await getActivities(container);
-    await addActivities(activities.data, container);
+    activities.data.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+
+    // Add a node to the dom for each activity, return a activityId (not itemId), node pair.
+    // Get the activity details, and add them to the correct node
+    // Both are async actions.
+    const pairs = activities.data.map( (activity) => {
+        const node = addActivity(activity, container);
+        return [activity.activityID, node]
+    })
+    pairs.map( ([activityId, node]) => fillDetail(activityId, node));
+
+    // Prepare the form for each node.
     prepareReservations();
 
     // TODO better flow:
@@ -59,6 +72,42 @@ async function getActivities(container) {
     clearMessages(container);
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
     return await fetchWpRest(url, fetchInit, nonce, container);
+}
+
+function addActivity(activity, container) {
+    // Formatters for time/date
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+
+    const date = new Date(activity.timeStart);
+    activity.date = dateFormat(date);
+    activity.time = timeFormat(date);
+
+    // fill the template make it jQuery and add it to the dom.
+    const node = $jq(template(activity));
+    $jq(container).append(node);
+
+    return node;
+}
+
+async function fillDetail(id, container) {
+    let {img, intro, descr} = await getActivityDetail(id, container).then((detail) => {
+        const imageUrl = new URL(detail.data.mainImage, ipsoURL);
+        return {
+            img: `<img src="${imageUrl}" alt="${detail.data.title}" />`,
+            intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.data.intro}</div>`,
+            descr: `<div class="mhwp-ipso-activity-detail-description">${detail.data.description}</div>`
+        }
+    }).catch((e) => {
+        // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
+        return {
+            intro: "Er was een probleem met het ophalen van de data",
+            description: "Er was een probleem met het ophalen van de data",
+            image: ""
+        }
+    });
+
+    $jq(".mhwp-ipso-activity-detail", container).prepend(img, intro, descr)
 }
 
 /**
@@ -120,18 +169,23 @@ async function getActivityDetail(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
 
+    const duration= 1000 + Math.floor(Math.random() * 1000);
+    console.log(duration);
 
     clearErrors(container);
     clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, false).then((json) => {
-        // Upon a 429 error (Too many requests), We try again.
-        if ( json.mhwp_ipso_code === 429) {
-            console.log('Error 429, retrying');
-            return wait(800).then(() => {
-                return fetchWpRest(url, {}, 0, container, true);
-            });
-        }
-        return json;
+    return wait(duration).then(() => {
+        console.log(Date.now());
+        fetchWpRest(url, {}, 0, container, false).then((json) => {
+            // Upon a 429 error (Too many requests), We try again.
+            if ( json.mhwp_ipso_code === 429) {
+                console.log('Error 429, retrying');
+                return wait(800).then(() => {
+                    return fetchWpRest(url, {}, 0, container, true);
+                });
+            }
+            return json;
+        })
     });
 }
 
@@ -182,7 +236,7 @@ function prepareReservations() {
                 await fetchWpRest(
                     url, fetchInit, 0, container
                 ).then(() => {
-                    // if ! 200 addError
+                    // TODO if ! 200 addError
                     addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
                     setTimeout(() => {
                         clearMessages(container);
