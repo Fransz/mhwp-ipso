@@ -117,7 +117,6 @@ registerBlockType( metadata, {
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container" className="mhwp-ipso-button-reservation">
 
-                    /* Use hidden input to communicate data to the rendered html/js */
                     {dateInput(attributes.activity_date)}
                     {idInput(attributes.activity_id)}
                     {titleInput(attributes.activity_title)}
@@ -164,7 +163,6 @@ registerBlockType( metadata, {
                             </div>
                         </div>
                     </form>
-                    <button>Reserveer</button>
                 </div>
 
             </div>
