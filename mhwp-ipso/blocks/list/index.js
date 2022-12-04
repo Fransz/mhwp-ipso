@@ -1,6 +1,3 @@
-// import './mhwp-ipso-list-frontend.js'
-// import './bootstrap-collapse.js'
-
 import metadata from './block.json'
 
 import icon from './icons';
