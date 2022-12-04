@@ -1,4 +1,8 @@
-import template from './mhwp-ipso-list-template';
+// TODO: We fetch the activities sequentially now.
+// TODO: Drop the altrnative functions/template; Clean up
+// import template from './mhwp-ipso-list-template';
+import templateSeq from './mhwp-ipso-list-template-seq';
+
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
@@ -23,9 +27,43 @@ async function allActivities() {
     const activities = await getActivities(container);
     await addActivities(activities.data, container);
     prepareReservations();
+}
 
-    // TODO better flow:
-    // getActivities; addActivities; getDetails; addDetails; addForms
+/**
+ * Top level function. Tobe called on DomContentLoaded.
+ *
+ * @returns {Promise<void>}
+ */
+async function allActivitiesSeq() {
+    const container = document.getElementById('mhwp-ipso-list-container');
+
+    // Get all activities from our wp. Sorted
+    // TODO get a better name for this. the data structure also contains:
+    // - nonce for the form; - type of the reservation form (ipso, lq, form, mail); - url to b used for the reservation.
+    const activities = await getActivities(container);
+    activities.data.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+
+    // Add a node to the dom for each activity, return a activityId (not itemId), node pair.
+    // TODO: We probably want a pair of activity (i.e. wp datastructure) and nod.
+    const pairs = activities.data.map( (activity) => {
+        const node = addActivity(activity, container);
+        return [activity.activityID, node]
+    })
+
+    // pairs.map( ([activityId, node]) => fillDetail(activityId, node));
+
+    // Create a chain of promises to fetch the activity details.
+    // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
+    pairs.reduce((ps, [activityId, node]) => {
+       return ps.then(() => {
+           return fillDetail(activityId, node);
+       })
+    }, Promise.resolve());
+
+    // Prepare the form for each node.
+    // TODO use the node and the activity here.
+    prepareReservations();
 }
 
 /**
@@ -60,6 +98,43 @@ async function getActivities(container) {
     const fetchInit = {'HTTP_X_WP_NONCE': nonce };
     return await fetchWpRest(url, fetchInit, nonce, container);
 }
+
+function addActivity(activity, container) {
+    // Formatters for time/date
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+
+    const date = new Date(activity.timeStart);
+    activity.date = dateFormat(date);
+    activity.time = timeFormat(date);
+
+    // fill the template make it jQuery and add it to the dom.
+    const node = $jq(templateSeq(activity));
+    $jq(container).append(node);
+
+    return node;
+}
+
+function fillDetail(id, container) {
+    return getActivityDetailSeq(id, container).then((detail) => {
+        const imageUrl = new URL(detail.data.mainImage, ipsoURL);
+        return {
+            img: `<img src="${imageUrl}" alt="${detail.data.title}" />`,
+            intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.data.intro}</div>`,
+            descr: `<div class="mhwp-ipso-activity-detail-description">${detail.data.description}</div>`
+        }
+    }).catch((e) => {
+        // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
+        return {
+            intro: "Er was een probleem met het ophalen van de data",
+            description: "Er was een probleem met het ophalen van de data",
+            image: ""
+        }
+    }).then(({img, intro, descr}) => {
+        $jq(".mhwp-ipso-activity-detail", container).prepend(img, intro, descr)
+    });
+}
+
 
 /**
  * For all activities create and add html (data, form, details) to the DOM.
@@ -117,6 +192,25 @@ async function addActivities(activities, container) {
  * @returns {Promise<any>}
  */
 async function getActivityDetail(activityId, container) {
+    const url = new URL( marikenhuisURL );
+    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
+
+
+    clearErrors(container);
+    clearMessages(container);
+    return fetchWpRest(url, {}, 0, container, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(800).then(() => {
+                return fetchWpRest(url, {}, 0, container, true);
+            });
+        }
+        return json;
+    });
+}
+
+async function getActivityDetailSeq(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
 
@@ -200,4 +294,4 @@ function prepareReservations() {
     });
 }
 
-$jq(document).ready(allActivities);
+$jq(document).ready(allActivitiesSeq);
