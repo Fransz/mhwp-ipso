@@ -235,12 +235,12 @@ class MHWP_IPSO_Admin_Settings {
 
 		// phpcs:ignore
 		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso-options' ) ) {
-			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Security issues!' );
+			add_settings_error( 'mhwp_ipso_apikey', 'mhwp-ipso-error', 'Security issues!' );
 			return false;
 		}
 
 		if ( ! preg_match( '/^[a-f0-9-]{36}$/', $key ) ) {
-			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Invalid key' );
+			add_settings_error( 'mhwp_ipso_apikey', 'mhwp-ipso-error', 'Invalid key' );
 			return false;
 		}
 
@@ -279,12 +279,12 @@ class MHWP_IPSO_Admin_Settings {
 
 		// phpcs:ignore
 		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso-options' ) ) {
-			add_settings_error( 'mhwp_ipso_is_test', 'mhwp_ipso_error', 'Security issues!' );
+			add_settings_error( 'mhwp_ipso_is_test', 'mhwp-ipso-error', 'Security issues!' );
 			return $oldvalue;
 		}
 
 		if ( '0' !== $value && '1' !== $value ) {
-			add_settings_error( 'mhwp_ipso_is_test', 'mhwp_ipso_error', 'Value for "is_test" is invalid.' );
+			add_settings_error( 'mhwp_ipso_is_test', 'mhwp-ipso-error', 'Value for "is_test" is invalid.' );
 			return $oldvalue;
 		}
 

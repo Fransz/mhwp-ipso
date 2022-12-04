@@ -8,6 +8,9 @@ window.addEventListener("DOMContentLoaded", function () {
 	function switchTab(event) {
 		event.preventDefault();
 
+		// close earlier notices.
+		document.querySelector("#setting-error-mhwp-ipso-error")?.remove();
+
 		document.querySelector("ul.nav-tabs > li.active").classList.remove("active");
 		document.querySelector("div.tab-content > div.tab-pane.active").classList.remove("active");
 
