@@ -33,40 +33,6 @@ class MHWP_IPSO_Admin_Settings {
 	protected $admin_fields;
 
 	/**
-	 * Setter for attribute $admin_settings;
-	 *
-	 * @param array $settings The settings to set.
-	 * @return self An instance of SettingsApi.
-	 */
-	public function setSettings( array $settings ): self { // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		$this->admin_settings = $settings;
-		return $this;
-	}
-
-	/**
-	 * Setter for attribute $admin_sections;
-	 *
-	 * @param array $sections The sections to set.
-	 *
-	 * @return self An instance of SettingsApi.
-	 */
-	public function setSections( array $sections ): self { // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		$this->admin_sections = $sections;
-		return $this;
-	}
-
-	/**
-	 * Setter for attribute $admin_fields;
-	 *
-	 * @param array $fields The fields to set.
-	 * @return self An instance of SettingsApi.
-	 */
-	public function setFields( array $fields ): self {// phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-		$this->admin_fields = $fields;
-		return $this;
-	}
-
-	/**
 	 * Initialize the class and set its properties.
 	 */
 	public function __construct() {
@@ -74,7 +40,6 @@ class MHWP_IPSO_Admin_Settings {
 		$this->init_sections();
 		$this->init_fields();
 	}
-
 
 	/**
 	 * Initialize the property settings.
