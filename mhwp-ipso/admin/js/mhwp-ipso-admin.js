@@ -1,32 +1,26 @@
-(function( $ ) {
-	'use strict';
+window.addEventListener("DOMContentLoaded", function () {
+
+	let tabs = document.querySelectorAll("ul.nav-tabs > li");
 
 	/**
-	 * All of the code for your admin-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
+	 * Make the tabs in the admin dashboard work.
 	 */
+	function switchTab(event) {
+		event.preventDefault();
 
-})( jQuery );
+		document.querySelector("ul.nav-tabs > li.active").classList.remove("active");
+		document.querySelector("div.tab-content > div.tab-pane.active").classList.remove("active");
+
+		let clickedTab = event.currentTarget;
+		let anchor = event.target;
+		let activePaneId = anchor.getAttribute("href");
+
+		clickedTab.classList.add("active");
+		document.querySelector(activePaneId).classList.add("active");
+	}
+
+	// add the the switchTab to all tabs.
+	for(let i = 0; i < tabs.length; i++) {
+		tabs[i].addEventListener("click", switchTab);
+	}
+});

@@ -1,3 +1,7 @@
+/* Admin page. */
+.wrap > h1 {
+  padding:9px 0 20px 0;
+}
 /* Navigation tabs. */
 .nav-tabs {
   float: left;
@@ -112,5 +116,3 @@ ul.ui-list li form {
   border: 1px solid blue;
   width: 20em;
 }
-
-/*# sourceMappingURL=mhwp-ipso-admin.css.map */

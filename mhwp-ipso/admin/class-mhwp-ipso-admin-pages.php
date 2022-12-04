@@ -126,6 +126,6 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
-		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-settings.php';
+		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-index.php';
 	}
 }
