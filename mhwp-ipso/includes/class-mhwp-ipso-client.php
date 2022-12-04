@@ -89,7 +89,6 @@ class MHWP_IPSO_Client {
 		);
 
 		$is_test = get_option( 'mhwp_ipso_is_test', '1' );
-
 		if ( '0' === $is_test ) {
 			$this->url['host'] = 'api.ipso.community';
 		} else {
@@ -204,8 +203,15 @@ class MHWP_IPSO_Client {
 	private function request() {
 		$url = $this->get_url();
 
+		// get the correct api key.
+		$is_test = get_option( 'mhwp_ipso_is_test', '1' );
+		if ( '0' === $is_test ) {
+			$apikey = get_option( 'mhwp_ipso_live_apikey', '' );
+		} else {
+			$apikey = get_option( 'mhwp_ipso_test_apikey', '' );
+		}
+
 		// Set common headers, merge with specific ones.
-		$apikey  = get_option( 'mhwp_ipso_apikey', '' );
 		$headers = array_merge(
 			array(
 				'Accept'  => 'application/json',

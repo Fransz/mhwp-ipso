@@ -83,8 +83,13 @@ class MHWP_IPSO_Admin_Settings {
 		$this->admin_settings = array(
 			array(
 				'option_group' => 'mhwp_ipso',
-				'option_name'  => 'mhwp_ipso_apikey',
-				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_apikey' ) ),
+				'option_name'  => 'mhwp_ipso_test_apikey',
+				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_test_apikey' ) ),
+			),
+			array(
+				'option_group' => 'mhwp_ipso',
+				'option_name'  => 'mhwp_ipso_live_apikey',
+				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_live_apikey' ) ),
 			),
 			array(
 				'option_group' => 'mhwp_ipso',
@@ -122,19 +127,31 @@ class MHWP_IPSO_Admin_Settings {
 				'args'     => array(
 					'setting'   => 'mhwp_ipso_is_test',
 					'label_for' => 'mhwp-ipso-is_test',
-					'classes'   => 'ui-toggle',
+					'classes'   => 'mhwp-ipso-ui-toggle',
 				),
 			),
 			array(
-				'id'       => 'mhwp_ipso_apikey',
-				'title'    => 'API KEY',
+				'id'       => 'mhwp_ipso_live_apikey',
+				'title'    => 'LIVE API KEY',
 				'callback' => array( $this, 'ipso_text_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_settings_section',
 				'args'     => array(
-					'setting'   => 'mhwp_ipso_apikey',
+					'setting'   => 'mhwp_ipso_live_apikey',
 					'label_for' => 'mhwp-ipso-apikey',
-					'classes'   => '',
+					'classes'   => 'mhwp-ipso-ui-key',
+				),
+			),
+			array(
+				'id'       => 'mhwp_ipso_test_apikey',
+				'title'    => 'TEST API KEY',
+				'callback' => array( $this, 'ipso_text_field' ),
+				'page'     => 'mhwp_ipso_dashboard',
+				'section'  => 'mhwp_ipso_settings_section',
+				'args'     => array(
+					'setting'   => 'mhwp_ipso_test_apikey',
+					'label_for' => 'mhwp-ipso-test-apikey',
+					'classes'   => 'mhwp-ipso-ui-key',
 				),
 			),
 		);
@@ -178,29 +195,56 @@ class MHWP_IPSO_Admin_Settings {
 	}
 
 	/**
-	 * Removes illegal characters from apikeys.
-	 *
+	 * Sanitize the live apikey, or return the current one if not valid..
 	 * TODO: We want the api key stored encrypted.
 	 *
 	 * @param string $key The key to sanitize.
 	 * @return string
 	 */
-	public function sanitize_apikey( string $key ) : string {
-		$key    = sanitize_text_field( $key );
-		$oldkey = get_option( 'mhwp_ipso_apikey' );
+	public function sanitize_live_apikey( string $key ) : string {
+		if ( empty( $key ) || $this->sanitize_apikey( $key ) ) {
+			return $key;
+		} else {
+			return get_option( 'mhwp_ipso_live_apikey' );
+		}
+	}
+
+	/**
+	 * Sanitize the test apikey, or return the current one if not valid..
+	 * TODO: We want the api key stored encrypted.
+	 *
+	 * @param string $key The key to sanitize.
+	 * @return string
+	 */
+	public function sanitize_test_apikey( string $key ) : string {
+		if ( empty( $key ) || $this->sanitize_apikey( $key ) ) {
+			return $key;
+		} else {
+			return get_option( 'mhwp_ipso_test_apikey' );
+		}
+	}
+
+	/**
+	 * Removes illegal characters from api keys. display errors if the key is not valid.
+	 *
+	 * @param string $key The key to sanitize.
+	 * @return bool
+	 */
+	public function sanitize_apikey( string $key ) : bool {
+		$key = sanitize_text_field( $key );
 
 		// phpcs:ignore
 		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso-options' ) ) {
 			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Security issues!' );
-			return $oldkey;
+			return false;
 		}
 
 		if ( ! preg_match( '/^[a-f0-9-]{36}$/', $key ) ) {
 			add_settings_error( 'mhwp_ipso_apikey', 'mhwp_ipso_error', 'Invalid key' );
-			return $oldkey;
+			return false;
 		}
 
-		return $key;
+		return true;
 	}
 
 	/**
@@ -217,7 +261,6 @@ class MHWP_IPSO_Admin_Settings {
 		echo '<div class="' . esc_attr( $classes ) . '">' .
 			'<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $html_name ) . '"' .
 			' value="' . esc_attr( $value ) . '" />' .
-			'<label for="' . esc_attr( $id ) . '">' .
 			'</div>';
 	}
 
