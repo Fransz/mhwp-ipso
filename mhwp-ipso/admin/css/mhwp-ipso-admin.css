@@ -1,3 +1,4 @@
+/* Navigation tabs. */
 .nav-tabs {
   float: left;
   width: 100%;
@@ -40,23 +41,24 @@
   box-shadow: 0 5px 4px -2px rgba(0, 0, 128, 0.15);
 }
 
-div.ui-toggle {
+/** Toggles. */
+div.mhwp-ipso-ui-toggle {
   margin: 0;
   padding: 0;
   flex: 0 1 200px;
 }
-div.ui-toggle input[type=checkbox] {
+div.mhwp-ipso-ui-toggle input[type=checkbox] {
   display: none;
 }
-div.ui-toggle input[type=checkbox]:checked + label {
+div.mhwp-ipso-ui-toggle input[type=checkbox]:checked + label {
   border-color: #009EEA;
   background: #009EEA;
   box-shadow: 0 0 0 0 #009EEA;
 }
-div.ui-toggle input[type=checkbox]:checked + label > div {
+div.mhwp-ipso-ui-toggle input[type=checkbox]:checked + label > div {
   margin-left: 20px;
 }
-div.ui-toggle label {
+div.mhwp-ipso-ui-toggle label {
   transition: all 200ms ease;
   display: inline-block;
   position: relative;
@@ -69,21 +71,21 @@ div.ui-toggle label {
   width: 40px;
   height: 20px;
 }
-div.ui-toggle label div {
+div.mhwp-ipso-ui-toggle label div {
   transition: all 200ms ease;
   background: #ffffff;
   width: 20px;
   height: 20px;
   border-radius: 10px;
 }
-div.ui-toggle label:hover, div.ui-toggle label div:hover {
+div.mhwp-ipso-ui-toggle label:hover, div.mhwp-ipso-ui-toggle label div:hover {
   cursor: pointer;
 }
-div.ui-toggle label + span {
+div.mhwp-ipso-ui-toggle label + span {
   margin-left: 1em;
   font-weight: bold;
 }
-div.ui-toggle.post_type {
+div.mhwp-ipso-ui-toggle.post_type {
   margin-top: 1em;
 }
 
@@ -92,6 +94,7 @@ div#tp_tax_post_types {
   flex-flow: row wrap;
 }
 
+/* ui list. */
 ul.ui-list {
   display: flex;
   box-shadow: 0 5px 4px -2px rgba(0, 0, 128, 0.15);
@@ -105,12 +108,7 @@ ul.ui-list li form {
   margin: 1.33em 1em 1.33em 0;
 }
 
-#mhwp-ipso-url {
-  border: 1px solid blue;
-  width: 20em;
-}
-
-#mhwp-ipso-apikey {
+.mhwp-ipso-ui-key input {
   border: 1px solid blue;
   width: 20em;
 }
