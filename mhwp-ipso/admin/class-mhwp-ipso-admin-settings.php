@@ -61,6 +61,11 @@ class MHWP_IPSO_Admin_Settings {
 				'option_name'  => 'mhwp_ipso_is_test',
 				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_is_test' ) ),
 			),
+			array(
+				'option_group' => 'mhwp_ipso_mappings',
+				'option_name'  => 'mhwp_ipso_mappings',
+				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_mappings' ) ),
+			),
 		);
 	}
 
@@ -72,6 +77,12 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_settings_section',
 				'title'    => 'IPSO Settings',
+				'callback' => function () { return null; }, //phpcs:ignore Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace
+				'page'     => 'mhwp_ipso_dashboard',
+			),
+			array(
+				'id'       => 'mhwp_ipso_mappings_section',
+				'title'    => 'IPSO Mappings',
 				'callback' => function () { return null; }, //phpcs:ignore Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace
 				'page'     => 'mhwp_ipso_dashboard',
 			),
@@ -117,6 +128,30 @@ class MHWP_IPSO_Admin_Settings {
 					'setting'   => 'mhwp_ipso_test_apikey',
 					'label_for' => 'mhwp-ipso-test-apikey',
 					'classes'   => 'mhwp-ipso-ui-key',
+				),
+			),
+			array(
+				'id'       => 'mhwp_ipso_mappings_activity_id',
+				'title'    => 'Activity Id',
+				'callback' => array( $this, 'ipso_mappings_field' ),
+				'page'     => 'mhwp_ipso_dashboard',
+				'section'  => 'mhwp_ipso_mappings_section',
+				'args'     => array(
+					'setting'   => 'mhwp_ipso_mappings',
+					'label_for' => 'mhwp_ipso_mappings_activity_id',
+					'classes'   => 'mhwp-ipso-ui-mapping-activity-id',
+				),
+			),
+			array(
+				'id'       => 'mhwp_ipso_mappings_url',
+				'title'    => 'Activity Url',
+				'callback' => array( $this, 'ipso_mappings_field' ),
+				'page'     => 'mhwp_ipso_dashboard',
+				'section'  => 'mhwp_ipso_mappings_section',
+				'args'     => array(
+					'setting'   => 'mhwp_ipso_mappings',
+					'label_for' => 'mhwp_ipso_mappings_url',
+					'classes'   => 'mhwp-ipso-ui-mapping-url',
 				),
 			),
 		);
@@ -213,23 +248,6 @@ class MHWP_IPSO_Admin_Settings {
 	}
 
 	/**
-	 * Renderer calback for a text field.
-	 *
-	 * @param array $args Arguments.
-	 */
-	public function ipso_text_field( $args ) {
-		$id        = $args['label_for'];
-		$value     = get_option( $args['setting'] );
-		$classes   = $args['classes'];
-		$html_name = $args['setting'];
-
-		echo '<div class="' . esc_attr( $classes ) . '">' .
-			'<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $html_name ) . '"' .
-			' value="' . esc_attr( $value ) . '" />' .
-			'</div>';
-	}
-
-	/**
 	 * Sanatize the checkbox on the settings page.
 	 *
 	 * @param mixed $value the value of the checkbox.
@@ -255,6 +273,67 @@ class MHWP_IPSO_Admin_Settings {
 
 		return $value;
 	}
+
+	public function sanitize_mappings( $input ): array {
+		$output = get_option( 'mhwp_ipso_mappings', array() );
+
+		// phpcs:ignore
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso_mappings-options' ) ) {
+			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+			return $output;
+		}
+
+		if ( ! isset( $_POST['delete'] ) && ! isset( $input ) ) {
+			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Empty Form!' );
+			return $output;
+		}
+
+		if ( ! isset( $_POST['delete'] ) ) {
+			// We want to add a posttype. Sanatize inputs.
+			$activity_id = sanitize_text_field( wp_unslash( $input['mhwp_ipso_mappings_activity_id'] ) );
+			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
+			if ( empty( $activity_id ) ) {
+				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				return $output;
+			}
+			$input['mhwp_ipso_mappings_activity_id'] = $activity_id;
+
+			$url                             = sanitize_url( $input['mhwp_ipso_mappings_url'], array( 'http', 'https' ) );
+			$input['mhwp_ipso_mappings_url'] = $url;
+
+			$output[ $input['mhwp_ipso_mappings_activity_id'] ] = $input;
+		} else {
+
+			// We want to delete a posttype; Sanitize and check if there are still posts of this type.
+			$post_type = sanitize_text_field( wp_unslash( $_POST['delete'] ) );
+			$post_type = preg_replace( '/[^-_0-9a-zA-Z]/', '', $post_type );
+			if ( empty( $post_type ) ) {
+				add_settings_error( 'tp_cpt_manager', 'tp_cpt_error', 'Security issues!' );
+				return $output;
+			}
+
+			unset( $output[ $_POST['delete'] ] );
+		}
+		return $output;
+	}
+
+	/**
+	 * Renderer callback for a text field.
+	 *
+	 * @param array $args Arguments.
+	 */
+	public function ipso_text_field( $args ) {
+		$id        = $args['label_for'];
+		$value     = get_option( $args['setting'] );
+		$classes   = $args['classes'];
+		$html_name = $args['setting'];
+
+		echo '<div class="' . esc_attr( $classes ) . '">' .
+			 '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $html_name ) . '"' .
+			 ' value="' . esc_attr( $value ) . '" />' .
+			 '</div>';
+	}
+
 	/**
 	 * Display a checkbox.
 	 *
@@ -276,5 +355,17 @@ class MHWP_IPSO_Admin_Settings {
 			esc_attr( $checked ),
 			esc_attr( $id )
 		);
+	}
+
+	public function ipso_mappings_field( array $args ) {
+		$id      = $args['label_for'];
+		$value   = get_option( $args['setting'][$id] );
+		$classes = $args['classes'];
+		$name    = $args['setting'] . '[' . $id . ']';
+
+		echo '<div class="' . esc_attr( $classes ) . '">' .
+			 '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' .
+			 ' value="' . esc_attr( $value ) . '" required />' .
+			 '</div>';
 	}
 }

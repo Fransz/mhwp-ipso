@@ -112,7 +112,9 @@ ul.ui-list li form {
   margin: 1.33em 1em 1.33em 0;
 }
 
-.mhwp-ipso-ui-key input {
+.mhwp-ipso-ui-key input,
+.mhwp-ipso-ui-mapping-activity-id input,
+.mhwp-ipso-ui-mapping-url input {
   border: 1px solid blue;
   width: 20em;
 }
