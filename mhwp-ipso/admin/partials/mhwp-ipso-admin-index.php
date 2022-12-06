@@ -14,7 +14,7 @@
 	<?php settings_errors(); ?>
 
 	<ul class="nav nav-tabs">
-		<li class="active"><a href="#tab-1">Afwijkende reserverinjgen</a></li>
+		<li class="active"><a href="#tab-1">Afwijkende reserveringen</a></li>
 		<li><a href="#tab-2">Activiteiten</a></li>
 		<li><a href="#tab-3">Instellingen</a></li>
 		<li><a href="#tab-4">Logs</a></li>
@@ -26,11 +26,11 @@
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-mappings.php';
 		?>
 		</div>
-        <div id="tab-2" class="tab-pane">
+		<div id="tab-2" class="tab-pane">
 			<?php
 				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-activities.php';
 			?>
-        </div>
+		</div>
 		<div id="tab-3" class="tab-pane">
 			<?php
 				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-settings.php';

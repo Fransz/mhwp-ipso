@@ -130,7 +130,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Register all of the hooks related to the admin area functionality
+	 * Register all the hooks related to the admin area functionality
 	 * of the plugin.
 	 */
 	private function define_admin_hooks() {
@@ -145,7 +145,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Register all of the hooks related to the public-facing functionality
+	 * Register all the hooks related to the public-facing functionality
 	 * of the plugin.
 	 */
 	private function define_public_hooks() {
@@ -158,7 +158,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Register all of the hooks related to the block functionality
+	 * Register all the hooks related to the block functionality
 	 * of the plugin.
 	 */
 	private function define_block_hooks() {
@@ -172,7 +172,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Run the loader to execute all of the hooks with WordPress.
+	 * Run the loader to execute of the hooks with WordPress.
 	 */
 	public function run() {
 		$this->loader->run();
