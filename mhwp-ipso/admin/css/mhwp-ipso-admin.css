@@ -101,15 +101,21 @@ div#tp_tax_post_types {
 /* ui list. */
 ul.ui-list {
   display: flex;
-  box-shadow: 0 5px 4px -2px rgba(0, 0, 128, 0.15);
+  box-shadow: 0 -2px 4px -2px rgba(0, 0, 128, 0.15);
 }
 ul.ui-list li {
-  flex: 2 1 auto;
-  margin-bottom: 1.33em;
+  flex: 2 1 4em;
+  margin-bottom: 1em;
+  margin-top: 1em;
+  height: 1em;
+}
+ul.ui-list li h4 {
+  margin-top:1em;
+  margin-bottom:em;
 }
 ul.ui-list li form {
   display: inline-block;
-  margin: 1.33em 1em 1.33em 0;
+  margin: -1em 1em 0em 0;
 }
 
 .mhwp-ipso-ui-key input,

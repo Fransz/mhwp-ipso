@@ -16,22 +16,17 @@
 <h2>All Mappings</h2>
 
 <?php
+	// Get the current mappings, write a header.
 	$mappings = get_option( 'mhwp_ipso_mappings', array() );
-if ( empty( $mappings ) ) :
-	echo '<h4>Er zijn nog geen mappings tussen activiteiten en urls</h4>';
-	else :
-		?>
-	<ul class="ui-list">
-		<li>
-			<h4>Activiteit Id</h4>
-		</li>
-		<li>
-			<h4>URL</H4>
-		</li>
-		<li></li>
-		<li></li>
-	</ul>
-<?php endif; ?>
+
+	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
+    if ( empty( $mappings ) ) {
+        echo '<h4>Er zijn nog geen mappings tussen activiteiten en urls</h4>';
+    } else {
+        echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>URL</H4></li><li></li></ul>';
+    }
+	// phpcs:enable
+?>
 
 <?php foreach ( $mappings as $activity_id => $url ) : ?>
 		<ul class="ui-list">

@@ -126,6 +126,17 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
+		// The edit parameter is processed while rendering the page, not by the settings sanitizer.
+		if ( isset( $_POST['edit'] ) ) {
+			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
+				die( 'Security issues!' );
+			}
+			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
+			$edit = preg_replace( '/[^0-9]/', '', $edit );
+			if ( empty( $edit ) ) {
+				die( 'Onvolledig Formulier!' );
+			}
+		}
 		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-index.php';
 	}
 }

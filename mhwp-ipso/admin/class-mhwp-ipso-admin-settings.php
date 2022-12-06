@@ -278,9 +278,11 @@ class MHWP_IPSO_Admin_Settings {
 	 * Sanitize mappings before they are stored.
 	 * Deleting and adding mappings are handled here, after being processed by
 	 * optons.php and option.php.
-	 * Editing mappings are handled by filling the add form while displaying rthe page.
+	 * Editing mappings are handled by the index method filling the add form
+	 * while displaying rthe page.
 	 *
-	 * @param mixed $input An array of activfity_id and url for the mapping or null if we want to delete.
+	 * @param mixed $input An array of activity_id and url for the mapping or null if we want to delete.
+	 *
 	 * @return array An array of all mappings. The array key is the activity id. The values are the URLs
 	 */
 	public function sanitize_mappings( $input ): array {
@@ -301,9 +303,15 @@ class MHWP_IPSO_Admin_Settings {
 		if ( isset( $_POST['delete'] ) ) {
 			// We want to delete a posttype; Sanitize and check the activity_id.
 			$activity_id = sanitize_text_field( wp_unslash( $_POST['delete'] ) );
-			$activity_id = preg_replace( '/[^-_0-9a-zA-Z]/', '', $activity_id );
+			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
+
 			if ( empty( $activity_id ) ) {
 				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				return $output;
+			}
+
+			if ( ! array_key_exists( $activity_id, $output ) ) {
+				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Onbekend activiteits id.' );
 				return $output;
 			}
 
@@ -317,7 +325,6 @@ class MHWP_IPSO_Admin_Settings {
 				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
-			$input['mhwp_ipso_mappings_activity_id'] = $activity_id;
 
 			// We want to add a mapping. Sanitize url.
 			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_mappings_url'] ), array( 'http', 'https' ) );
@@ -325,10 +332,9 @@ class MHWP_IPSO_Admin_Settings {
 				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
-			$input['mhwp_ipso_mappings_url'] = $url;
 
 			// Store the mapping in the setting under its activity-id.
-			$output[ $input['mhwp_ipso_mappings_activity_id'] ] = $input['mhwp_ipso_mappings_url'];
+			$output[ $activity_id ] = $url;
 		}
 		return $output;
 	}
@@ -344,10 +350,13 @@ class MHWP_IPSO_Admin_Settings {
 		$classes   = $args['classes'];
 		$html_name = $args['setting'];
 
-		echo '<div class="' . esc_attr( $classes ) . '">' .
-			 '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $html_name ) . '"' .
-			 ' value="' . esc_attr( $value ) . '" />' .
-			 '</div>';
+		echo sprintf(
+			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" /></div>',
+			esc_attr( $classes ),
+			esc_attr( $id ),
+			esc_attr( $html_name ),
+			esc_attr( $value )
+		);
 	}
 
 	/**
@@ -356,7 +365,6 @@ class MHWP_IPSO_Admin_Settings {
 	 * @param array $args An array of arguments.
 	 *
 	 * @return void
-	 * @noinspection DuplicatedCode
 	 */
 	public function ipso_checkbox( array $args ) {
 		$id      = $args['label_for'];
@@ -373,15 +381,44 @@ class MHWP_IPSO_Admin_Settings {
 		);
 	}
 
+	/**
+	 * Display a mapping field. If we are editting a mapping these fields are filled
+	 *
+	 * @param array $args  The array of arguments.
+	 * @return void
+	 */
 	public function ipso_mappings_field( array $args ) {
-		$id      = $args['label_for'];
-		$value   = get_option( $args['setting'][ $id ] );
-		$classes = $args['classes'];
-		$name    = $args['setting'] . '[' . $id . ']';
+		$id       = $args['label_for'];
+		$value    = '';
+		$readonly = '';
+		$classes  = $args['classes'];
+		$name     = $args['setting'] . '[' . $id . ']';
 
-		echo '<div class="' . esc_attr( $classes ) . '">' .
-			 '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '"' .
-			 ' value="' . esc_attr( $value ) . '" required />' .
-			 '</div>';
+		// If we are editting retrieve values for the id that is in $edit.
+		// We already checked the nonce and validity.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['edit'] ) ) {
+			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
+			$edit = preg_replace( '/[^0-9]/', '', $edit );
+
+			$option = get_option( $args['setting'] );
+
+			if ( 'mhwp_ipso_mappings_activity_id' === $id ) {
+				$value    = $edit;
+				$readonly = 'readonly';
+			} else {
+				$value = $option[ $edit ];
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		echo sprintf(
+			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+			esc_attr( $classes ),
+			esc_attr( $id ),
+			esc_attr( $name ),
+			esc_attr( $value ),
+			esc_attr( $readonly )
+		);
 	}
 }
