@@ -108,7 +108,7 @@ class MHWP_IPSO_Admin_Settings {
 			),
 			array(
 				'id'       => 'mhwp_ipso_live_apikey',
-				'title'    => 'LIVE API KEY',
+				'title'    => 'Live api key',
 				'callback' => array( $this, 'ipso_text_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_settings_section',
@@ -120,7 +120,7 @@ class MHWP_IPSO_Admin_Settings {
 			),
 			array(
 				'id'       => 'mhwp_ipso_test_apikey',
-				'title'    => 'TEST API KEY',
+				'title'    => 'Test api key',
 				'callback' => array( $this, 'ipso_text_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_settings_section',
@@ -132,7 +132,7 @@ class MHWP_IPSO_Admin_Settings {
 			),
 			array(
 				'id'       => 'mhwp_ipso_mappings_activity_id',
-				'title'    => 'Activity Id',
+				'title'    => 'Activiteit Id',
 				'callback' => array( $this, 'ipso_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mappings_section',
@@ -144,7 +144,7 @@ class MHWP_IPSO_Admin_Settings {
 			),
 			array(
 				'id'       => 'mhwp_ipso_mappings_url',
-				'title'    => 'Activity Url',
+				'title'    => 'URL',
 				'callback' => array( $this, 'ipso_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mappings_section',

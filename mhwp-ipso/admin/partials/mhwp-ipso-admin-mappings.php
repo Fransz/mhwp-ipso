@@ -13,7 +13,7 @@
 
 ?>
 
-<h2>All Mappings</h2>
+<h2>Reserveringen die buiten IPSO om verwerkt worden.</h2>
 
 <?php
 	// Get the current mappings, write a header.
@@ -21,9 +21,9 @@
 
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
-        echo '<h4>Er zijn nog geen mappings tussen activiteiten en urls</h4>';
+	echo '<h4>Er zijn nog geen uitzonderingen gedefineerd</h4>';
     } else {
-        echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>URL</H4></li><li></li></ul>';
+	echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>URL</H4></li><li></li></ul>';
     }
 	// phpcs:enable
 ?>
@@ -55,6 +55,9 @@
 		</ul>
 <?php endforeach; ?>
 
+<hr />
+
+<h2><?php echo isset( $edit ) ? 'Verander de URL waarop gereserveerd wordt' : 'Voeg een nieuwe afwijkende reservering toe'; ?></h2>
 <form id="mhwp-ipso-mapping-add" method="post" action="options.php">
 	<?php
 		settings_fields( 'mhwp_ipso_mappings' );
