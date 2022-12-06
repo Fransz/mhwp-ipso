@@ -274,22 +274,43 @@ class MHWP_IPSO_Admin_Settings {
 		return $value;
 	}
 
+	/**
+	 * Sanitize mappings before they are stored.
+	 * Deleting and adding mappings are handled here, after being processed by
+	 * optons.php and option.php.
+	 * Editing mappings are handled by filling the add form while displaying rthe page.
+	 *
+	 * @param mixed $input An array of activfity_id and url for the mapping or null if we want to delete.
+	 * @return array An array of all mappings. The array key is the activity id. The values are the URLs
+	 */
 	public function sanitize_mappings( $input ): array {
 		$output = get_option( 'mhwp_ipso_mappings', array() );
 
-		// phpcs:ignore
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'mhwp_ipso_mappings-options' ) ) {
+		// Incorrect nonce.
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), 'mhwp_ipso_mappings-options' ) ) {
 			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
 			return $output;
 		}
 
+		// Incorrect action.
 		if ( ! isset( $_POST['delete'] ) && ! isset( $input ) ) {
 			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Empty Form!' );
 			return $output;
 		}
 
-		if ( ! isset( $_POST['delete'] ) ) {
-			// We want to add a posttype. Sanatize inputs.
+		if ( isset( $_POST['delete'] ) ) {
+			// We want to delete a posttype; Sanitize and check the activity_id.
+			$activity_id = sanitize_text_field( wp_unslash( $_POST['delete'] ) );
+			$activity_id = preg_replace( '/[^-_0-9a-zA-Z]/', '', $activity_id );
+			if ( empty( $activity_id ) ) {
+				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				return $output;
+			}
+
+			unset( $output[ $activity_id ] );
+		} else {
+
+			// We want to add a mapping. Sanitize activity id.
 			$activity_id = sanitize_text_field( wp_unslash( $input['mhwp_ipso_mappings_activity_id'] ) );
 			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
 			if ( empty( $activity_id ) ) {
@@ -298,21 +319,16 @@ class MHWP_IPSO_Admin_Settings {
 			}
 			$input['mhwp_ipso_mappings_activity_id'] = $activity_id;
 
-			$url                             = sanitize_url( $input['mhwp_ipso_mappings_url'], array( 'http', 'https' ) );
-			$input['mhwp_ipso_mappings_url'] = $url;
-
-			$output[ $input['mhwp_ipso_mappings_activity_id'] ] = $input;
-		} else {
-
-			// We want to delete a posttype; Sanitize and check if there are still posts of this type.
-			$post_type = sanitize_text_field( wp_unslash( $_POST['delete'] ) );
-			$post_type = preg_replace( '/[^-_0-9a-zA-Z]/', '', $post_type );
-			if ( empty( $post_type ) ) {
-				add_settings_error( 'tp_cpt_manager', 'tp_cpt_error', 'Security issues!' );
+			// We want to add a mapping. Sanitize url.
+			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_mappings_url'] ), array( 'http', 'https' ) );
+			if ( empty( $url ) ) {
+				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
+			$input['mhwp_ipso_mappings_url'] = $url;
 
-			unset( $output[ $_POST['delete'] ] );
+			// Store the mapping in the setting under its activity-id.
+			$output[ $input['mhwp_ipso_mappings_activity_id'] ] = $input['mhwp_ipso_mappings_url'];
 		}
 		return $output;
 	}
@@ -359,7 +375,7 @@ class MHWP_IPSO_Admin_Settings {
 
 	public function ipso_mappings_field( array $args ) {
 		$id      = $args['label_for'];
-		$value   = get_option( $args['setting'][$id] );
+		$value   = get_option( $args['setting'][ $id ] );
 		$classes = $args['classes'];
 		$name    = $args['setting'] . '[' . $id . ']';
 

@@ -21,16 +21,16 @@
 	</ul>
 
 	<div class="tab-content">
-        <div id="tab-1" class="tab-pane active">
-        <?php
-            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-settings.php';
-        ?>
-        </div>
-        <div id="tab-2" class="tab-pane">
-        <?php
-            require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-mappings.php';
-        ?>
-        </div>
+		<div id="tab-1" class="tab-pane active">
+		<?php
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-settings.php';
+		?>
+		</div>
+		<div id="tab-2" class="tab-pane">
+		<?php
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-mappings.php';
+		?>
+		</div>
 		<div id="tab-3" class="tab-pane">
 			<?php
 				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-activities.php';
