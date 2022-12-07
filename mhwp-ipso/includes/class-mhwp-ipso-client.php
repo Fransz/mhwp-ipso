@@ -189,17 +189,17 @@ class MHWP_IPSO_Client {
 		$response = $this->response( $this->request() );
 
 		if ( isset( $response->data ) ) {
-				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( isset( $response->data->activityID ) && array_key_exists( $response->data->activityID, $mappings ) ) {
+			if ( isset( $response->data->id ) && array_key_exists( $response->data->id, $mappings ) ) {
 				// A mapping exisits for this activity. Add the url.
-				$response->data->reservationUrl = $mappings[ $response->data->activityID ];
+				$response->data->reservationUrl = $mappings[ $response->data->id ];
 			}
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( isset( $response->data->mainImage ) ) {
 				// An image exisits for this activity. Prepend scheme and host.
 				$response->data->mainImage = $this->url['scheme'] .
 					rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
 			}
-				// phpcs:enable
+			// phpcs:enable
 		}
 		return $response;
 	}
