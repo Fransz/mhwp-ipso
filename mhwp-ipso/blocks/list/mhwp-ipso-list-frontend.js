@@ -1,7 +1,4 @@
-// TODO: We fetch the activities sequentially now.
-// TODO: Drop the altrnative functions/template; Clean up
-// import template from './mhwp-ipso-list-template';
-import templateSeq from './mhwp-ipso-list-template-seq';
+import template from './mhwp-ipso-list-template';
 
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
@@ -29,34 +26,20 @@ const ipsoURL = "https://api.test.ipso.community/";
 async function allActivities() {
     const container = document.getElementById('mhwp-ipso-list-container');
 
-    const activities = await getActivities(container);
-    await addActivities(activities.data, container);
-    prepareReservations();
-}
 
-/**
- * Top level function. Tobe called on DomContentLoaded.
- *
- * @returns {Promise<void>}
- */
-async function allActivitiesSeq() {
-    const container = document.getElementById('mhwp-ipso-list-container');
+    // Get all activities from our wp, property data. Sort them.
+    let activities = await getActivities(container);
+    activities = activities.data;
 
-    // Get all activities from our wp. Sorted
-    // TODO get a better name for this. the data structure also contains:
-    // - nonce for the form; - type of the reservation form (ipso, lq, form, mail); - url to b used for the reservation.
-    const activities = await getActivities(container);
-    activities.data.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
 
-    // Add a node to the dom for each activity, return a activityId (not itemId), node pair.
-    // TODO: We probably want a pair of activity (i.e. wp datastructure) and nod.
-    const pairs = activities.data.map( (activity) => {
+    // Add a node to the dom for each activity, return an activityId (not itemId), node (jquery object) pair.
+    const pairs = activities.map( (activity) => {
         const node = addActivity(activity, container);
-        return [activity.activityID, node]
+        return [activity.activityID, node];
     })
 
-    // pairs.map( ([activityId, node]) => fillDetail(activityId, node));
 
     // Create a chain of promises to fetch the activity details.
     // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
@@ -67,14 +50,10 @@ async function allActivitiesSeq() {
            prepareForm(detail, node);
        })
     }, Promise.resolve());
-
-    // Prepare the form for each node.
-    // TODO use the node and the activity here.
-    // prepareReservations();
 }
 
 /**
- * Fetch all wanted activities.
+ * Fetch all activities.
  *
  * @param container Container for error messages.
  * @returns {Promise<void>}
@@ -106,6 +85,13 @@ async function getActivities(container) {
     return await fetchWpRest(url, fetchInit, nonce, container);
 }
 
+/**
+ * Add an activity to the dom using our template.
+ *
+ * @param activity json data that describes the activity,
+ * @param container The container where to add.
+ * @returns The jQuery object for the added node.
+ */
 function addActivity(activity, container) {
     // Formatters for time/date
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
@@ -116,14 +102,21 @@ function addActivity(activity, container) {
     activity.time = timeFormat(date);
 
     // fill the template make it jQuery and add it to the dom.
-    const node = $jq(templateSeq(activity));
+    const node = $jq(template(activity));
     $jq(container).append(node);
 
     return node;
 }
 
+/**
+ * Get the details for an activity, process them. Return a default upon failure.
+ *
+ * @param id The detail id.
+ * @param container A container for error messages,
+ * @returns {Promise<{descr: string, img: string, intro: string, reservationUrl: null} | {image: string, intro: string, description: string, reservationUrl: null}>}
+ */
 function getDetail(id, container) {
-    return getActivityDetailSeq(id, container).then((json) => {
+    return fetchDetail(id, container).then((json) => {
         const detail = json.data;
         const imageUrl = new URL(detail.mainImage, ipsoURL);
         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
@@ -145,112 +138,59 @@ function getDetail(id, container) {
     });
 }
 
+/**
+ * Actually make the request for the details, and again if necessary.
+ *
+ * @param activityId The activity for which to fetch the detail
+ * @param container The parent for messages.
+ * @returns {Promise<any>}
+ */
+async function fetchDetail(activityId, container) {
+    const url = new URL( marikenhuisURL );
+    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
+
+
+    clearErrors(container);
+    clearMessages(container);
+    return fetchWpRest(url, {}, 0, container, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(800).then(() => {
+                return fetchWpRest(url, {}, 0, container, true);
+            });
+        }
+        return json;
+    });
+}
+
+/**
+ * Fill in the details in the container
+ *
+ * @param detail JSON The detail information.
+ * @param container The jquery node where to add.
+ */
 function fillDetail(detail, container) {
     const {img, intro, descr} = detail;
     $jq(".mhwp-ipso-activity-detail", container).prepend(img, intro, descr);
 }
 
 /**
- * For all activities create and add html (data, form, details) to the DOM.
- * @param activities All activities.
- * @param container The parent container for all html.
- * @returns {Promise<void>}
- */
-async function addActivities(activities, container) {
-    let cnt = 0;
-
-    // Formatters for time/date
-    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
-
-    // Sort the array with activities.
-    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-    for (let key in Object.keys(activities)) {
-        let activity = activities[key];
-        let activityDetail = await getActivityDetail(activity.activityID, container).catch((e) => {
-            console.log(e);
-
-            // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
-            activity.intro = "Er was een probleem met het ophalen van de data";
-            activity.description = "Er was een probleem met het ophalen van de data";
-            activity.image = "";
-
-            return null;
-        });
-
-        const date = new Date(activity.timeStart);
-        activity.date = dateFormat(date);
-        activity.time = timeFormat(date);
-
-       if(activityDetail) {
-           const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
-           activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
-
-           activity.intro = activityDetail.data.intro;
-           activity.description = activityDetail.data.description;
-       }
-       cnt++;
-
-       const html = template(activity, cnt);
-       const node = $jq(html);
-       $jq(container).append(node);
-    }
-}
-
-/**
- * For an activity fetch its details.
+ * Remove the form if we dont not need it, otherwise add a validation-, and submit handler.
  *
- * @param activityId The activity for which to fetch the detail
- * @param container The parent for messages.
- * @returns {Promise<any>}
+ * @param detail
+ * @param container
  */
-async function getActivityDetail(activityId, container) {
-    const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
-
-
-    clearErrors(container);
-    clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, false).then((json) => {
-        // Upon a 429 error (Too many requests), We try again.
-        if ( json.mhwp_ipso_code === 429) {
-            console.log('Error 429, retrying');
-            return wait(800).then(() => {
-                return fetchWpRest(url, {}, 0, container, true);
-            });
-        }
-        return json;
-    });
-}
-
-async function getActivityDetailSeq(activityId, container) {
-    const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
-
-
-    clearErrors(container);
-    clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, false).then((json) => {
-        // Upon a 429 error (Too many requests), We try again.
-        if ( json.mhwp_ipso_code === 429) {
-            console.log('Error 429, retrying');
-            return wait(800).then(() => {
-                return fetchWpRest(url, {}, 0, container, true);
-            });
-        }
-        return json;
-    });
-}
-
 function prepareForm(detail, container) {
    if(detail.reservationUrl) {
+       // We dont need the form. Prepare the button to redirect. remove the form.
        const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
        ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
        button.on('click', (e) => window.location = detail.reservationUrl );
 
        $jq('.mhwp-ipso-activity-reservation', container).remove();
    } else {
+       // Add validation- and submit handlers to the form.
        const form = $jq('form', container);
        form.validate({
            rules: {
@@ -270,6 +210,13 @@ function prepareForm(detail, container) {
    }
 }
 
+/**
+ * Make a reservation by accessing our API.
+ *
+ * @param form The form  that is submitted.
+ * @param event The submit event.
+ * @returns {Promise<void>}
+ */
 async function makeReservation(form, event) {
     event.preventDefault();
 
@@ -304,7 +251,7 @@ async function makeReservation(form, event) {
         setTimeout(() => {
             clearMessages(container);
             $jq('button', form).prop('disabled', false);
-        }, 2500);
+        }, 5000);
     }).catch((_) => {
         // TODO: addError
         // No op. We had an error making a reservation. We still want to continue, maybe an other one
@@ -312,15 +259,4 @@ async function makeReservation(form, event) {
     });
 }
 
-/**
- * Find all forms added by the calendar, attach a validator and a submit handler to each.
- */
-function prepareReservations() {
-
-    forms.each( (_, f) => {
-        $jq( f ).validate({
-        });
-    });
-}
-
-$jq(document).ready(allActivitiesSeq);
+$jq(document).ready(allActivities);
