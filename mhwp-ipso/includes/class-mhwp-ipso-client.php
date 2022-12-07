@@ -14,7 +14,7 @@
 class MHWP_IPSO_Client {
 
 	/**
-	 * The json response for failng to make the request.
+	 * The json response for failing to make the request.
 	 *
 	 * @var object
 	 */
@@ -80,7 +80,7 @@ class MHWP_IPSO_Client {
 	 * Constructor, initialize standard responses, initialize the url array.
 	 */
 	public function __construct() {
-		$this->init_std_repsonses();
+		$this->init_std_responses();
 
 		$this->url = array(
 			'scheme' => 'https://',
@@ -100,7 +100,7 @@ class MHWP_IPSO_Client {
 	 * Initialize our standard response.
 	 * The type casting cannot be done on the attributes directly.
 	 */
-	private function init_std_repsonses() {
+	private function init_std_responses() {
 		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
 		$this->error_failure = (object) [
 			'mhwp_ipso_status' => 'error',
@@ -134,7 +134,7 @@ class MHWP_IPSO_Client {
 
 	/**
 	 * Request IPSO for Activities/addParticipants
-	 * We need to json encode the data so we have a string.
+	 * We need to json encode the data, so we have a string.
 	 *
 	 * @param array $data The data to send.
 	 * @return object
@@ -143,7 +143,7 @@ class MHWP_IPSO_Client {
 		$this->method      = 'POST';
 		$this->url['path'] = '/api/Activities/addParticipant';
 
-		// We are gonna post json, set the correct header.
+		// We are going to post json, set the correct header.
 		$this->headers['Content-type'] = 'application/json';
 
 		// Encode the data as a json string.
@@ -173,16 +173,35 @@ class MHWP_IPSO_Client {
 
 	/**
 	 * Request IPSO for Activities/getActivityInfo
+	 * The returned data is extended with nonce's and data from our settings.
+	 * reservation mappings; images url;
 	 *
 	 * @param array $data The data to send.
 	 * @return object
 	 */
 	public function get_activity( array $data ): object {
+		$mappings = get_option( 'mhwp_ipso_mappings', array() );
+
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetActivityInfo';
 		$this->data        = $data;
 
-		return $this->response( $this->request() );
+		$response = $this->response( $this->request() );
+
+		if ( isset( $response->data ) ) {
+				// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( isset( $response->data->activityID ) && array_key_exists( $response->data->activityID, $mappings ) ) {
+				// A mapping exisits for this activity. Add the url.
+				$response->data->reservationUrl = $mappings[ $response->data->activityID ];
+			}
+			if ( isset( $response->data->mainImage ) ) {
+				// An image exisits for this activity. Prepend scheme and host.
+				$response->data->mainImage = $this->url['scheme'] .
+					rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
+			}
+				// phpcs:enable
+		}
+		return $response;
 	}
 
 	/**
@@ -198,7 +217,7 @@ class MHWP_IPSO_Client {
 	 * Connects to the ipso system.
 	 * We set the used headers here (apikey!), and get the url from our attribute.
 	 *
-	 * @return mixed
+	 * @return array|WP_Error
 	 */
 	private function request() {
 		$url = $this->get_url();
@@ -232,12 +251,13 @@ class MHWP_IPSO_Client {
 	}
 
 	/**
-	 * Checks the request for errors and returns an array of the received json data.
+	 * Checks the request for errors and returns an object with the ipso data
+	 * in attribute data
 	 *
 	 * @param array | WP_Error $resp The response we received from the server.
 	 *
 	 * @return object An array with at least a status code.
-	 * @noinspection PhpUndefinedFieldInspection*/
+	 */
 	private function response( $resp ) : object {
 		if ( is_wp_error( $resp ) ) {
 			$this->error_failure->mhwp_ipso_code = $resp->get_error_code();
