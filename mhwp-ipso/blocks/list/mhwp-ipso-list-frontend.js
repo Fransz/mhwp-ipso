@@ -14,10 +14,6 @@ $jq.validator.addMethod( "phoneNL", function( value, element ) {
     return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
 }, "Vul een geldig telefoonnummer in." );
 
-// TODO: This has to be test or live. We probably want the wp to fix the image urls.
-// We need this for images.
-const ipsoURL = "https://api.test.ipso.community/";
-
 /**
  * Top level function. Tobe called on DomContentLoaded.
  *
@@ -41,13 +37,11 @@ async function allActivities() {
     })
 
 
-    // Create a chain of promises to fetch the activity details.
+    // Create a chain of promises to fetch the activity details. The promise returns void.
     // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
     pairs.reduce((ps, [activityId, node]) => {
        return ps.then( async () => {
-           const detail = await getDetail(activityId);
-           fillDetail(detail, node);
-           prepareForm(detail, node);
+           await fillActivity(activityId, node);
        })
     }, Promise.resolve());
 }
@@ -109,6 +103,21 @@ function addActivity(activity, container) {
 }
 
 /**
+ * Fill an activity with its details and prepare the form
+ *
+ * @param activityId The id for the activity.
+ * @param node The jquery dom node for the activity.
+ */
+async function fillActivity(activityId, node) {
+    const detail = await getDetail(activityId, node);
+
+    const {img, intro, descr} = detail;
+    $jq(".mhwp-ipso-activity-detail", node).prepend(img, intro, descr);
+
+    prepareForm(detail, node);
+}
+
+/**
  * Get the details for an activity, process them. Return a default upon failure.
  *
  * @param id The detail id.
@@ -118,7 +127,7 @@ function addActivity(activity, container) {
 function getDetail(id, container) {
     return fetchDetail(id, container).then((json) => {
         const detail = json.data;
-        const imageUrl = new URL(detail.mainImage, ipsoURL);
+        const imageUrl = new URL(detail.mainImage);
         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
 
         return {
@@ -156,23 +165,12 @@ async function fetchDetail(activityId, container) {
         // Upon a 429 error (Too many requests), We try again.
         if ( json.mhwp_ipso_code === 429) {
             console.log('Error 429, retrying');
-            return wait(800).then(() => {
+            return wait(1000).then(() => {
                 return fetchWpRest(url, {}, 0, container, true);
             });
         }
         return json;
     });
-}
-
-/**
- * Fill in the details in the container
- *
- * @param detail JSON The detail information.
- * @param container The jquery node where to add.
- */
-function fillDetail(detail, container) {
-    const {img, intro, descr} = detail;
-    $jq(".mhwp-ipso-activity-detail", container).prepend(img, intro, descr);
 }
 
 /**
