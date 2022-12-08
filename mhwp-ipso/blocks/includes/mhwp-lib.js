@@ -1,6 +1,59 @@
 const $jq = jQuery.noConflict();
 
 /**
+ * Make a reservation by accessing our API.
+ * Submit callback for the validator api
+ *
+ * @param form The form  that is submitted.
+ * @param event The submit event.
+ * @returns {Promise<void>}
+ */
+async function makeReservation(form, event) {
+    event.preventDefault();
+
+    // The URL for making the reservation
+    const marikenhuisURL = document.location.origin;
+    const url = new URL( marikenhuisURL );
+    url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+
+    $jq('button', form).prop('disabled', true);
+    const container = $jq(form).parent();
+
+    const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
+    const firstName = $jq('input[name="firstName"]', form).val();
+    const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
+    const lastName = $jq('input[name="lastName"]', form).val();
+    const email = $jq('input[name="email"]', form).val();
+    let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
+    phoneNumber = phoneNumber === "" ? null : phoneNumber;
+    const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
+
+    clearErrors(container);
+    clearMessages(container);
+
+    const fetchInit = {
+        method: 'POST',
+        body: JSON.stringify( data )
+    }
+    await fetchWpRest(
+        url, fetchInit, 0, container
+    ).then(() => {
+        // TODO: if ! 200 addError
+        addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+        setTimeout(() => {
+            clearMessages(container);
+            $jq('button', form).prop('disabled', false);
+        }, 5000);
+    }).catch((_) => {
+        console.log('catched');
+        // TODO: addError
+        // No op. We had an error making a reservation. We still want to continue, maybe an other one
+        // succeeds.
+    });
+}
+
+
+/**
  * Helper method for accessing the rest api in our wordPress installation.
  *  TODO we can drop nonce here.
  *
@@ -22,8 +75,7 @@ function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
     }
     return fetch( url, Object.assign({}, defaults, init)).then((res)=> {
         if ( ! res.ok ) {
-            const message = res['message'] ? res['message'] : '';
-            throw new TypeError( message );
+            throw new TypeError( 'Er is een probleem op de server.' );
         }
         return res.json();
     }).then((json) => {
@@ -100,4 +152,4 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
-export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages}
+export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages, makeReservation};
