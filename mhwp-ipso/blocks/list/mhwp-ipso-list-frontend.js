@@ -40,8 +40,8 @@ async function allActivities() {
     // Create a chain of promises to fetch the activity details. The promise returns void.
     // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
     pairs.reduce((ps, [activityId, node]) => {
-       return ps.then( async () => {
-           await fillActivity(activityId, node);
+       return ps.then( () => {
+           return fillActivity(activityId, node);
        })
     }, Promise.resolve());
 }
