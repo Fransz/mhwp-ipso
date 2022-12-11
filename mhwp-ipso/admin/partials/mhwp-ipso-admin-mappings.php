@@ -39,13 +39,15 @@
 			<li>
 				<form id="mhwp-ipso-mapping-edit" method="post" action="">
 					<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />
+					<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
 				<?php
 					settings_fields( 'mhwp_ipso_mappings' );
-					submit_button( 'edit', 'secondary', 'submit', false, null );
+					submit_button( 'edit', 'primary', 'submit', false, null );
 				?>
 				</form>
 				<form id="mhwp-ipso-mapping-del" method="post" action="options.php">
 					<input type="hidden" name="delete" value="<?php echo esc_attr( $activity_id ); ?>" />
+					<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
 					<?php
 					settings_fields( 'mhwp_ipso_mappings' );
 					submit_button( 'delete', 'delete', 'submit', false, null );
@@ -59,6 +61,7 @@
 
 <h2><?php echo isset( $edit ) ? 'Verander de URL waarop gereserveerd wordt' : 'Voeg een nieuwe afwijkende reservering toe'; ?></h2>
 <form id="mhwp-ipso-mapping-add" method="post" action="options.php">
+	<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
 	<?php
 		settings_fields( 'mhwp_ipso_mappings' );
 		echo '<table class="form-table" role="presentation">';

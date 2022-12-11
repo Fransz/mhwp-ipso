@@ -65,7 +65,7 @@ class MHWP_IPSO_Admin_Pages {
 	 *
 	 * @return self An instance of this class, for chaining.
 	 */
-	public function withSubPages( $menu_title = null ) {    // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+	public function withSubPages( $menu_title = null ) : MHWP_IPSO_Admin_Pages {    // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 		if ( empty( $this->admin_pages ) ) {
 			return $this;
 		}
@@ -126,7 +126,7 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
-		// The edit parameter, used for editting a mapping, is processed while
+		// The edit parameter, used for editing a mapping, is processed while
 		// rendering the page, not by the settings sanitizer.
 		if ( isset( $_POST['edit'] ) ) {
 			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
@@ -151,6 +151,13 @@ class MHWP_IPSO_Admin_Pages {
 				die( 'Onvolledig Formulier!' );
 			}
 		}
+
+		// The tab parameter, used for displaying the right tab.
+		// Don't check the admin_referer here, we might have done that for the edit or save variable.
+		if ( isset( $_REQUEST['mhwp_ipso_tab'] ) ) {
+			$tab = rawurldecode( sanitize_text_field( wp_unslash( $_REQUEST['mhwp_ipso_tab'] ) ) );
+		}
+
 		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-index.php';
 	}
 }
