@@ -279,7 +279,7 @@ class MHWP_IPSO_Admin_Settings {
 	 * Deleting and adding mappings are handled here, after being processed by
 	 * optons.php and option.php.
 	 * Editing mappings are handled by the index method filling the add form
-	 * while displaying rthe page.
+	 * while displaying the page.
 	 *
 	 * @param mixed $input An array of activity_id and url for the mapping or null if we want to delete.
 	 *

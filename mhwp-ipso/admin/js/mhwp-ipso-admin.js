@@ -22,7 +22,7 @@ window.addEventListener("DOMContentLoaded", function () {
 		document.querySelector(activePaneId).classList.add("active");
 	}
 
-	// add the the switchTab to all tabs.
+	// add the switchTab handler to all tabs.
 	for(let i = 0; i < tabs.length; i++) {
 		tabs[i].addEventListener("click", switchTab);
 	}

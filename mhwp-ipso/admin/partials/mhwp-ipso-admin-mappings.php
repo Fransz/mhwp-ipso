@@ -1,6 +1,6 @@
 <?php
 	/**
-	 * Template for ipso mappings, displays form to create, update and delete mappings.
+	 * Template for ipso mappings, displays a form to create, update and delete mappings.
 	 *
 	 * The forms for delete and add/create are handled by options.php, and
 	 * passed through to the sanitization function for setting mhwp_ipso_mappings.

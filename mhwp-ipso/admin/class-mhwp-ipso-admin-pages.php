@@ -126,7 +126,8 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
-		// The edit parameter is processed while rendering the page, not by the settings sanitizer.
+		// The edit parameter, used for editting a mapping, is processed while
+		// rendering the page, not by the settings sanitizer.
 		if ( isset( $_POST['edit'] ) ) {
 			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
 				die( 'Security issues!' );
@@ -134,6 +135,19 @@ class MHWP_IPSO_Admin_Pages {
 			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
 			$edit = preg_replace( '/[^0-9]/', '', $edit );
 			if ( empty( $edit ) ) {
+				die( 'Onvolledig Formulier!' );
+			}
+		}
+
+		// The date parameter, used for displaying activities, is processed while
+		// rendering the page.
+		if ( isset( $_POST['date'] ) ) {
+			if ( ! check_admin_referer( 'mhwp_ipso_activities-options' ) ) {
+				die( 'Security issues!' );
+			}
+			$date  = sanitize_text_field( wp_unslash( $_POST['date'] ) );
+			$match = preg_match( '/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $date );
+			if ( 1 !== $match ) {
 				die( 'Onvolledig Formulier!' );
 			}
 		}
