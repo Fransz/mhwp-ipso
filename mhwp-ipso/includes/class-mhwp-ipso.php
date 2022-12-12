@@ -130,7 +130,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Register all of the hooks related to the admin area functionality
+	 * Register all the hooks related to the admin area functionality
 	 * of the plugin.
 	 */
 	private function define_admin_hooks() {
@@ -142,10 +142,11 @@ class MHWP_IPSO {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_admin_menu' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_admin_settings' );
 
+		$this->loader->add_filter( 'wp_redirect', $plugin_admin, 'filter_redirect', 10, 2 );
 	}
 
 	/**
-	 * Register all of the hooks related to the public-facing functionality
+	 * Register all the hooks related to the public-facing functionality
 	 * of the plugin.
 	 */
 	private function define_public_hooks() {
@@ -158,7 +159,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Register all of the hooks related to the block functionality
+	 * Register all the hooks related to the block functionality
 	 * of the plugin.
 	 */
 	private function define_block_hooks() {
@@ -172,7 +173,7 @@ class MHWP_IPSO {
 	}
 
 	/**
-	 * Run the loader to execute all of the hooks with WordPress.
+	 * Run the loader to execute of the hooks with WordPress.
 	 */
 	public function run() {
 		$this->loader->run();
@@ -184,7 +185,7 @@ class MHWP_IPSO {
 	 *
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_mhwp_ipso() {
+	public function get_mhwp_ipso() : string {
 		return $this->mhwp_ipso;
 	}
 
@@ -193,7 +194,7 @@ class MHWP_IPSO {
 	 *
 	 * @return    MHWP_IPSO_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader() : MHWP_IPSO_Loader {
 		return $this->loader;
 	}
 
@@ -202,7 +203,7 @@ class MHWP_IPSO {
 	 *
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version() : string {
 		return $this->version;
 	}
 
