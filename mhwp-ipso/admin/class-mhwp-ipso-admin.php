@@ -92,4 +92,25 @@ class MHWP_IPSO_Admin {
 		wp_enqueue_script( $this->mhwp_ipso . '_admin', plugin_dir_url( __FILE__ ) . 'js/mhwp-ipso-admin.js', array( 'jquery' ), $this->version, false );
 	}
 
+	/**
+	 * Add a query parameter to a location if appropriate.
+	 *
+	 * We use this to land on the correct tab of tabbed admin pages.
+	 * The posted variable is set by a form on one of those tabs, added here as a
+	 * query parameter, and read on the same admin pages.
+	 * This function is called as a filter for redirects after options.
+	 *
+	 * @param string $location Location for the redirection.
+	 * @param int    $status The http status.
+	 *
+	 * @return string
+	 */
+	public function filter_redirect( string $location, int $status ) : string {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['mhwp_ipso_tab'] ) ) {
+			$tab = sanitize_text_field( wp_unslash( $_POST['mhwp_ipso_tab'] ) );
+			return esc_url_raw( add_query_arg( 'mhwp_ipso_tab', rawurlencode( $tab ), $location ) );
+		}
+		return $location;
+	}
 }

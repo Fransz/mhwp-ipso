@@ -65,7 +65,7 @@ class MHWP_IPSO_Admin_Pages {
 	 *
 	 * @return self An instance of this class, for chaining.
 	 */
-	public function withSubPages( $menu_title = null ) {    // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+	public function withSubPages( $menu_title = null ) : MHWP_IPSO_Admin_Pages {    // phpcs:ignore  WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 		if ( empty( $this->admin_pages ) ) {
 			return $this;
 		}
@@ -126,6 +126,38 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
-		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-settings.php';
+		// The edit parameter, used for editing a mapping, is processed while
+		// rendering the page, not by the settings sanitizer.
+		if ( isset( $_POST['edit'] ) ) {
+			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
+				die( 'Security issues!' );
+			}
+			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
+			$edit = preg_replace( '/[^0-9]/', '', $edit );
+			if ( empty( $edit ) ) {
+				die( 'Onvolledig Formulier!' );
+			}
+		}
+
+		// The date parameter, used for displaying activities, is processed while
+		// rendering the page.
+		if ( isset( $_POST['date'] ) ) {
+			if ( ! check_admin_referer( 'mhwp_ipso_activities-options' ) ) {
+				die( 'Security issues!' );
+			}
+			$date  = sanitize_text_field( wp_unslash( $_POST['date'] ) );
+			$match = preg_match( '/[0-9]{4}-[0-9]{2}-[0-9]{2}/', $date );
+			if ( 1 !== $match ) {
+				die( 'Onvolledig Formulier!' );
+			}
+		}
+
+		// The tab parameter, used for displaying the right tab.
+		// Don't check the admin_referer here, we might have done that for the edit or save variable.
+		if ( isset( $_REQUEST['mhwp_ipso_tab'] ) ) {
+			$tab = rawurldecode( sanitize_text_field( wp_unslash( $_REQUEST['mhwp_ipso_tab'] ) ) );
+		}
+
+		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-index.php';
 	}
 }

@@ -111,8 +111,6 @@ registerBlockType( metadata, {
             }
         }
 
-        // TODO check classNames and id. English and hyphens. mhwp-button prefix.
-        // TODO toggle reservation.
         return (
             <div { ...blockProps } >
                 <div id="mhwp-ipso-button-container" className="mhwp-ipso-button-reservation">

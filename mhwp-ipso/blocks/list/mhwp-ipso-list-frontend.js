@@ -1,16 +1,18 @@
 import template from './mhwp-ipso-list-template';
+
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
-import { fetchWpRest, wait, addMessage, clearErrors, clearMessages } from "../includes/mhwp-lib";
+import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
 
 const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
 
-// TODO: This has to be test or live. We probably want the wp to fix the image urls.
-// We need this for images.
-const ipsoURL = "https://api.test.ipso.community/";
+// Dutch phone numbers have 10 digits (or 11 and start with +31).
+$jq.validator.addMethod( "phoneNL", function( value, element ) {
+    return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
+}, "Vul een geldig telefoonnummer in." );
 
 /**
  * Top level function. Tobe called on DomContentLoaded.
@@ -20,16 +22,32 @@ const ipsoURL = "https://api.test.ipso.community/";
 async function allActivities() {
     const container = document.getElementById('mhwp-ipso-list-container');
 
-    const activities = await getActivities(container);
-    await addActivities(activities.data, container);
-    prepareReservations();
 
-    // TODO better flow:
-    // getActivities; addActivities; getDetails; addDetails; addForms
+    // Get all activities from our wp, property data. Sort them.
+    let activities = await getActivities(container);
+    activities = activities.data;
+
+    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+
+    // Add a node to the dom for each activity, return an activityId (not itemId), node (jquery object) pair.
+    const pairs = activities.map( (activity) => {
+        const node = addActivity(activity, container);
+        return [activity.activityID, node];
+    })
+
+
+    // Create a chain of promises to fetch the activity details. The promise returns void.
+    // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
+    pairs.reduce((ps, [activityId, node]) => {
+       return ps.then( () => {
+           return fillActivity(activityId, node);
+       })
+    }, Promise.resolve());
 }
 
 /**
- * Fetch all wanted activities.
+ * Fetch all activities.
  *
  * @param container Container for error messages.
  * @returns {Promise<void>}
@@ -62,64 +80,83 @@ async function getActivities(container) {
 }
 
 /**
- * For all activities create and add html (data, form, details) to the DOM.
- * @param activities All activities.
- * @param container The parent container for all html.
- * @returns {Promise<void>}
+ * Add an activity to the dom using our template.
+ *
+ * @param activity json data that describes the activity,
+ * @param container The container where to add.
+ * @returns The jQuery object for the added node.
  */
-async function addActivities(activities, container) {
-    let cnt = 0;
-
+function addActivity(activity, container) {
     // Formatters for time/date
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
     const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
-    // Sort the array with activities.
-    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+    const date = new Date(activity.timeStart);
+    activity.date = dateFormat(date);
+    activity.time = timeFormat(date);
 
-    for (let key in Object.keys(activities)) {
-        let activity = activities[key];
-        let activityDetail = await getActivityDetail(activity.activityID, container).catch((e) => {
-            console.log(e);
+    // fill the template make it jQuery and add it to the dom.
+    const node = $jq(template(activity));
+    $jq(container).append(node);
 
-            // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
-            activity.intro = "Er was een probleem met het ophalen van de data";
-            activity.description = "Er was een probleem met het ophalen van de data";
-            activity.image = "";
-
-            return null;
-        });
-
-        const date = new Date(activity.timeStart);
-        activity.date = dateFormat(date);
-        activity.time = timeFormat(date);
-
-       if(activityDetail) {
-           const imageUrl = new URL(activityDetail.data.mainImage, ipsoURL);
-           activity.img = `<img src="${imageUrl}" alt="${activity.title}" />`
-
-           activity.intro = activityDetail.data.intro;
-           activity.description = activityDetail.data.description;
-       }
-       cnt++;
-
-       const html = template(activity, cnt);
-       const node = $jq(html);
-       $jq(container).append(node);
-    }
+    return node;
 }
 
 /**
- * For an activity fetch its details.
+ * Fill an activity with its details and prepare the form
+ *
+ * @param activityId The id for the activity.
+ * @param node The jquery dom node for the activity.
+ */
+async function fillActivity(activityId, node) {
+    const detail = await getDetail(activityId, node);
+
+    const {img, intro, descr} = detail;
+    $jq(".mhwp-ipso-activity-detail", node).prepend(img, intro, descr);
+
+    prepareForm(detail, node);
+}
+
+/**
+ * Get the details for an activity, process them. Return a default upon failure.
+ *
+ * @param id The detail id.
+ * @param container A container for error messages,
+ * @returns {Promise<{descr: string, img: string, intro: string, reservationUrl: null} | {image: string, intro: string, description: string, reservationUrl: null}>}
+ */
+function getDetail(id, container) {
+    return fetchDetail(id, container).then((json) => {
+        const detail = json.data;
+        const imageUrl = new URL(detail.mainImage);
+        const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
+
+        return {
+            img: `<img src="${imageUrl}" alt="${detail.title}" />`,
+            intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
+            descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
+            reservationUrl
+        }
+    }).catch((e) => {
+        // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
+        return {
+            intro: "Er was een probleem met het ophalen van de data",
+            description: "Er was een probleem met het ophalen van de data",
+            image: "",
+            reservationUrl: null
+        }
+    });
+}
+
+/**
+ * Actually make the request for the details, and again if necessary.
  *
  * @param activityId The activity for which to fetch the detail
  * @param container The parent for messages.
  * @returns {Promise<any>}
  */
-async function getActivityDetail(activityId, container) {
+async function fetchDetail(activityId, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
-
 
     clearErrors(container);
     clearMessages(container);
@@ -127,7 +164,7 @@ async function getActivityDetail(activityId, container) {
         // Upon a 429 error (Too many requests), We try again.
         if ( json.mhwp_ipso_code === 429) {
             console.log('Error 429, retrying');
-            return wait(800).then(() => {
+            return wait(1000).then(() => {
                 return fetchWpRest(url, {}, 0, container, true);
             });
         }
@@ -136,68 +173,37 @@ async function getActivityDetail(activityId, container) {
 }
 
 /**
- * Find all forms added by the calendar, attach a validator and a submit handler to each.
+ * Remove the form if we dont not need it, otherwise add a validation-, and submit handler.
+ *
+ * @param detail
+ * @param container
  */
-function prepareReservations() {
-    // The URL for making the reservation
-    const url = new URL( marikenhuisURL );
-    url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+function prepareForm(detail, container) {
+   if(detail.reservationUrl) {
+       // We dont need the form. Prepare the button to redirect. remove the form.
+       const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
+       ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
+       button.on('click', (e) => window.location = detail.reservationUrl );
 
-    // Dutch phone numbers have 10 digits (or 11 and start with +31).
-    $jq.validator.addMethod( "phoneNL", function( value, element ) {
-        return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
-    }, "Vul een geldig telefoonnummer in." );
+       $jq('.mhwp-ipso-activity-reservation', container).remove();
+   } else {
+       // Add validation- and submit handlers to the form.
+       const form = $jq('form', container);
+       form.validate({
+           rules: {
+               phoneNumber: {
+                   phoneNL: true,
+                   "normalizer": v => $jq.trim(v)
+               }
+           },
+           "submitHandler": makeReservation,
+           "invalidHandler": function () {
+               // TODO: We want an error message here.
+               console.log( 'invalid' );
+           }
 
-    const forms = $jq('form', '#mhwp-ipso-list-container');
-    forms.each( (_, f) => {
-        $jq( f ).validate({
-            rules: {
-                // We only use one explicit validation rule. others are extracted from the HTML attributes
-                phoneNumber: {
-                    phoneNL: true,
-                    "normalizer": v => $jq.trim(v)
-                }
-            },
-            "submitHandler": async function ( form, event ) {
-                event.preventDefault();
-                $jq('button', form).prop('disabled', true);
-                const container = $jq(form).parent();
-
-                const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
-                const firstName = $jq('input[name="firstName"]', form).val();
-                const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
-                const lastName = $jq('input[name="lastName"]', form).val();
-                const email = $jq('input[name="email"]', form).val();
-                let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
-                phoneNumber = phoneNumber === "" ? null : phoneNumber;
-                const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
-
-                clearErrors(container);
-                clearMessages(container);
-
-                const fetchInit = {
-                    method: 'POST',
-                    body: JSON.stringify( data )
-                }
-                await fetchWpRest(
-                    url, fetchInit, 0, container
-                ).then(() => {
-                    // if ! 200 addError
-                    addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
-                    setTimeout(() => {
-                        clearMessages(container);
-                        $jq('button', form).prop('disabled', false);
-                    }, 2500);
-                }).catch((_) => {
-                    // No op. We had an error making a reservation. We still want to continue, maybe an other one
-                    // succeeds.
-                });
-            },
-            "invalidHandler": function () {
-                console.log( 'invalid' );
-            }
-        });
-    });
+       })
+   }
 }
 
 $jq(document).ready(allActivities);
