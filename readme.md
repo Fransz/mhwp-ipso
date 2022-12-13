@@ -1,6 +1,12 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.4.0 - Backend;
+- Rest API Live <-> test uitlezen, Juiste API aanspreken , Image URL's aanpassen.
+- Uitzonderingen voor reserveringen. URL's gekoppeld aan ActivityId's
+- IPSO informatie in backend (agendaId's activityId's)
+- Betere afhandeling in frontend.
+
 Release 0.3.1 - Front-end.
 - IPSO now returns HTML. Process that.
 - Changed classname/ids
@@ -35,15 +41,11 @@ Release 0.1.0  - Initial release.
 
 ## Roadmap
 
-Release 0.4.0 - Backend;
+Release 0.4.1 - Backend;
 - Nonces bij formulieren, en nieuwe na een reservering;
-- Settings: API key; live <-> test knop; 
-- Rest API Live <-> test uitlezen, Juiste API aanspreken , Image URL's aanpassen.
-- LimeQuery URL's gekoppeld aan ActivityId's
+- Logging; 
 
 Release 0.5.0 - Backend;
-- Log
-- IPSO informatie in backend (agendaId's activityId's)
 
 Release 0.6.0 - Frontend Filter.
 - Better user experience while loading the ipso-list.

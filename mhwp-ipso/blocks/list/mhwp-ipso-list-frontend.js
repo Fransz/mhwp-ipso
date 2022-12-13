@@ -111,8 +111,8 @@ function addActivity(activity, container) {
 async function fillActivity(activityId, node) {
     const detail = await getDetail(activityId, node);
 
-    const {img, intro, descr} = detail;
-    $jq(".mhwp-ipso-activity-detail", node).prepend(img, intro, descr);
+    const {img, title, intro, descr} = detail;
+    $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
 
     prepareForm(detail, node);
 }
@@ -132,6 +132,7 @@ function getDetail(id, container) {
 
         return {
             img: `<img src="${imageUrl}" alt="${detail.title}" />`,
+            title: `<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`,
             intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
             descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
             reservationUrl
