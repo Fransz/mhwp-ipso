@@ -153,9 +153,10 @@ class MHWP_IPSO_Admin_Pages {
 		}
 
 		// The tab parameter, used for displaying the right tab.
-		// Don't check the admin_referer here, we might have done that for the edit or save variable.
+		// Don't check the admin_referer here, we do not have a nonce.
 		if ( isset( $_REQUEST['mhwp_ipso_tab'] ) ) {
 			$tab = rawurldecode( sanitize_text_field( wp_unslash( $_REQUEST['mhwp_ipso_tab'] ) ) );
+			remove_query_arg( '$keymhwp_ipso_tab' );
 		}
 
 		include_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/partials/mhwp-ipso-admin-index.php';
