@@ -11,14 +11,20 @@
 
 ?>
 
-<h2>Activities</h2>
+<?php
+	// get a default date for the form.
+    //phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+	$default_date = $date ?? date( 'Y-m-d' );
+?>
+
+<h2>Activiteiten</h2>
 
 <form method="POST" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 	<input type="hidden" name="mhwp_ipso_tab" value="Activiteiten" />
 	<?php wp_nonce_field( 'mhwp_ipso_activities-options' ); ?>
 
 	<label for="datepicker" >Kies een datum</label>
-	<input type="date" id="datepicker" name="date" size="30" />
+	<input type="date" id="datepicker" name="date" value=<?php echo esc_attr( $default_date ); ?> size="30" />
 	<?php submit_button( 'Toon', 'submit', 'submit', false ); ?>
 </form>
 
@@ -56,19 +62,16 @@ if ( isset( $date ) ) {
 		?>
 
 		<?php
-		$display_date = ( new DateTime( $date ) )->format( 'd-M-Y' );
-		echo '<h2>Activiteiten op: ' . esc_html( $display_date ) . '</h2>';
+		$display_date = ( new DateTime( $date ) )->format( 'd F Y' );
+		echo '<h2>Activiteiten op ' . esc_html( $display_date ) . '</h2>';
 		if ( empty( $activities ) ) {
 			echo '<h4>Geen activiteiten gevonden</h4>';
 		} else {
-			echo '<ul class="ui-list"><li><h4>Datum</h4></li><li><h4>Agenda Id</h4></li><li><h4>Actviteit Id</h4></li><li><h4>Titel</h4></li></ul>';
+			echo '<ul class="ui-list"><li><h4>Agenda Id</h4></li><li><h4>Actviteit Id</h4></li><li><h4>Titel</h4></li></ul>';
 		}
 		?>
 		<?php foreach ( $activities as $activity ) : ?>
 		<ul class="ui-list">
-			<li>
-				<span><?php echo esc_html( $date ); ?></span>
-			</li>
 			<li>
 				<span><?php echo esc_html( $activity->id ); ?></span>
 			</li>
