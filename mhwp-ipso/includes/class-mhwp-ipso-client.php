@@ -173,8 +173,7 @@ class MHWP_IPSO_Client {
 
 	/**
 	 * Request IPSO for Activities/getActivityInfo
-	 * The returned data is extended with nonce's and data from our settings.
-	 * reservation mappings; images url;
+	 * The returned data is extended with reservation mappings; images url;
 	 *
 	 * @param array $data The data to send.
 	 * @return object

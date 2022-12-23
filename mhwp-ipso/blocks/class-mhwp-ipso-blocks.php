@@ -50,7 +50,6 @@ class MHWP_IPSO_Blocks {
 
 	/**
 	 * Register the stylesheets for blocks.
-	 *
 	 */
 	public function enqueue_styles() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
@@ -61,7 +60,6 @@ class MHWP_IPSO_Blocks {
 
 	/**
 	 * Register the JavaScript for the blocks.
-	 *
 	 */
 	public function enqueue_scripts() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
@@ -90,22 +88,26 @@ class MHWP_IPSO_Blocks {
 	 */
 	public function register_blocks() {
 		/**
-		 * Set additional attributes depending on the test option.
-		 *
-		 * TODO: The nonce invalidates the block in the backend. We want to drop it.
+		 * Generate a wp nonce and add it to the footer, to be used by the block.
+		 * The nonce is checked as part of the normal rest api processing (rest_cookie_check_errors)
+		 * The nonce protects against CSRF attacks, not against replay attacks.
 		 *
 		 * @param array $metadata the metadata.
 		 * @return array
 		 */
 		function filter_block_metadata( array $metadata ): array {
 			if ( 'mhwp-ipso/list' === $metadata['name'] ) {
-				// get the options we need.
-				$metadata['attributes']['rest_nonce'] = array(
-					'type'      => 'string',
-					'default'   => wp_create_nonce( 'wp_rest' ),
-					'source'    => 'attribute',
-					'selector'  => 'input#ipso-list-nonce',
-					'attribute' => 'value;',
+				add_action(
+					'wp_print_footer_scripts',
+					function () {
+						?>
+						<script>
+							let wpApiSettings = {
+								'nonce': '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>',
+							};
+						</script>
+						<?php
+					}
 				);
 			}
 			return $metadata;
