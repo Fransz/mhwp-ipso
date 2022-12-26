@@ -37,9 +37,7 @@ async function getActivities() {
     url.searchParams.append('from', d);
     url.searchParams.append('till', d);
 
-    // TODO: Drop the nonce on the GET request.
-    const fetchInit = {'HTTP_X_WP_NONCE': 0};
-    const activities = await fetchWpRest(url, fetchInit, 0, container);
+    const activities = await fetchWpRest(url, {}, container);
 
     // form and input for the activityCalendarid
     const form = $jq('form', container);

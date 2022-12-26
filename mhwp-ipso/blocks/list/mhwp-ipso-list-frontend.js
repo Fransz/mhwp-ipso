@@ -68,15 +68,9 @@ async function getActivities(container) {
     const till = d.toISOString().slice(0, -14);
     url.searchParams.append('till', till);
 
-    // Get the nonce.
-    // Todo: we want to drop the nonce. It invalidates the block in the backend.
-    const node = document.getElementById('mhwp-ipso-list-nonce');
-    const nonce = node ?. value;
-
     clearErrors(container);
     clearMessages(container);
-    const fetchInit = {'HTTP_X_WP_NONCE': nonce };
-    return await fetchWpRest(url, fetchInit, nonce, container);
+    return await fetchWpRest(url, {}, container);
 }
 
 /**
@@ -111,8 +105,8 @@ function addActivity(activity, container) {
 async function fillActivity(activityId, node) {
     const detail = await getDetail(activityId, node);
 
-    const {img, intro, descr} = detail;
-    $jq(".mhwp-ipso-activity-detail", node).prepend(img, intro, descr);
+    const {img, title, intro, descr} = detail;
+    $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
 
     prepareForm(detail, node);
 }
@@ -132,6 +126,7 @@ function getDetail(id, container) {
 
         return {
             img: `<img src="${imageUrl}" alt="${detail.title}" />`,
+            title: `<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`,
             intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
             descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
             reservationUrl
@@ -160,12 +155,13 @@ async function fetchDetail(activityId, container) {
 
     clearErrors(container);
     clearMessages(container);
-    return fetchWpRest(url, {}, 0, container, false).then((json) => {
+
+    return fetchWpRest(url, {}, container, false).then((json) => {
         // Upon a 429 error (Too many requests), We try again.
         if ( json.mhwp_ipso_code === 429) {
             console.log('Error 429, retrying');
             return wait(1000).then(() => {
-                return fetchWpRest(url, {}, 0, container, true);
+                return fetchWpRest(url, {}, container, true);
             });
         }
         return json;

@@ -7,6 +7,7 @@
  */
 
 ?>
+<h2>Instellingen</h2>
 
 <form id="admin_manager" method="post" action="options.php">
 	<input type="hidden" name="mhwp_ipso_tab" value="Instellingen" />
