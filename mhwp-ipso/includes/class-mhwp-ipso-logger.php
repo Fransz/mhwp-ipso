@@ -48,7 +48,7 @@ class MHWP_IPSO_Logger {
 	 *
 	 * @var string $logfile
 	 */
-	private $logfile;
+	public $logfile;
 
 	/**
 	 * Construct a logger.
@@ -119,12 +119,12 @@ class MHWP_IPSO_Logger {
 		foreach ( $data as $param => $value ) {
 			$params .= sprintf( '%s:%s,', $param, $value );
 		}
-		$params = rtrim( $params, ',' ) . ';';
+		$params = rtrim( $params, ',' );
 
 		// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 		$time = date( 'd-m-Y h:i:s', $timestamp );
 
-		$line = sprintf( '%s %s %s %s %s' . PHP_EOL, $time, $ip, $uri, $code, $params );
+		$line = sprintf( '%-19s  %-15s  %-70s  %-3s  %s' . PHP_EOL, $time, $ip, $uri, $code, $params );
 
 		$fp = fopen( $this->logfile, 'a' );
 		fwrite( $fp, $line );

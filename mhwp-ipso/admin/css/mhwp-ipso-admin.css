@@ -127,3 +127,8 @@ ul.ui-list li form {
   border: 1px solid blue;
   width: 20em;
 }
+
+#mhwp-ipso-admin-log textarea {
+  white-space: pre;
+  resize: both;
+}
