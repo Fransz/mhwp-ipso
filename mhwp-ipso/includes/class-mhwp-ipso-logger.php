@@ -121,8 +121,13 @@ class MHWP_IPSO_Logger {
 		}
 		$params = rtrim( $params, ',' );
 
-		// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-		$time = date( 'd-m-Y h:i:s', $timestamp );
+		try {
+			$time = ( new DateTime( 'now', new DateTimeZone( 'Europe/Amsterdam' ) ) );
+			$time = $time->format( 'd-m-Y H:i:s' );
+		} catch ( Exception $e ) {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			$time = date( 'Y-m-d H:i:s' );
+		}
 
 		$line = sprintf( '%-19s  %-15s  %-70s  %-3s  %s' . PHP_EOL, $time, $ip, $uri, $code, $params );
 
