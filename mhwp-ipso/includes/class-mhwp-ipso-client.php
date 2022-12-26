@@ -6,6 +6,8 @@
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 
+require_once plugin_dir_path( dirname( __FILE__ )) . 'includes/class-mhwp-ipso-logger.php';
+
 /**
  * Class for connecting to the ipso system.
  * We provide methods for each endpoint.These setup the request parameters,
@@ -77,7 +79,15 @@ class MHWP_IPSO_Client {
 	private $headers = array();
 
 	/**
+	 * A logger instance
+	 *
+	 * @var MHWP_IPSO_logger $logger
+	 */
+	private $logger;
+
+	/**
 	 * Constructor, initialize standard responses, initialize the url array.
+	 * Open the logger.
 	 */
 	public function __construct() {
 		$this->init_std_responses();
@@ -94,6 +104,8 @@ class MHWP_IPSO_Client {
 		} else {
 			$this->url['host'] = 'api.test.ipso.community';
 		}
+
+		$this->logger = new MHWP_IPSO_Logger();
 	}
 
 	/**
@@ -154,7 +166,9 @@ class MHWP_IPSO_Client {
 		}
 		$this->data = $json;
 
-		return $this->response( $this->request() );
+		$res = $this->request();
+		$this->logger->log( $res, $data );
+		return $this->response( $res );
 	}
 
 	/**
@@ -168,7 +182,9 @@ class MHWP_IPSO_Client {
 		$this->url['path'] = '/api/Activities/GetCalendarActivities';
 		$this->data        = $data;
 
-		return $this->response( $this->request() );
+		$res = $this->request();
+		$this->logger->log( $res );
+		return $this->response( $res );
 	}
 
 	/**
@@ -185,7 +201,9 @@ class MHWP_IPSO_Client {
 		$this->url['path'] = '/api/Activities/GetActivityInfo';
 		$this->data        = $data;
 
-		$response = $this->response( $this->request() );
+		$res = $this->request();
+		$this->logger->log( $res );
+		$response = $this->response( $res );
 
 		if ( isset( $response->data ) ) {
 			if ( isset( $response->data->id ) && array_key_exists( $response->data->id, $mappings ) ) {
