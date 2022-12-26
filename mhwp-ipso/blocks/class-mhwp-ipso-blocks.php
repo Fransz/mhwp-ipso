@@ -54,7 +54,6 @@ class MHWP_IPSO_Blocks {
 	public function enqueue_styles() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
 
-		// TODO: Styles from the block come from block.json. If we dont have other
 		// stylesheets this can be dropped.
 	}
 
@@ -64,7 +63,6 @@ class MHWP_IPSO_Blocks {
 	public function enqueue_scripts() {
 		$ver = MHWP_IPSO__DEV_MODE ? time() : $this->version;
 
-		// TODO is this the place to enqueue this?
 		if ( ! is_admin() ) {
 			wp_enqueue_script(
 				$this->mhwp_ipso . '_blocks_validate',

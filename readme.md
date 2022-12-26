@@ -41,15 +41,13 @@ Release 0.1.0  - Initial release.
 
 ## Roadmap
 
-Release 0.4.1 - Backend;
+Release 0.5.0 - Backend;
 - Nonces bij formulieren, en nieuwe na een reservering;
 - Logging; 
 
-Release 0.5.0 - Backend;
-
-Release 0.6.0 - Frontend Filter.
-- Better user experience while loading the ipso-list.
-- Fetch details after calendar, but what to do with the image
+Release 0.6.0 - Frontend.
+- Datepicker.
+- Filtering.
 - A spinner on the calendar when we are still loading.
 - Collapse activiteiten met meerdere tijdslots op dezelfde dag.
 
