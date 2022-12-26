@@ -360,7 +360,7 @@ class MHWP_IPSO_Admin_Settings {
 	}
 
 	/**
-	 * Display a checkbox.
+	 * Callback for rendering a checkbox.
 	 *
 	 * @param array $args An array of arguments.
 	 *
@@ -382,9 +382,11 @@ class MHWP_IPSO_Admin_Settings {
 	}
 
 	/**
-	 * Display a mapping field. If we are editting a mapping these fields are filled
+	 * Render callback for mapping fields;
+	 * If we are editing a mapping these fields are filled
 	 *
 	 * @param array $args  The array of arguments.
+	 *
 	 * @return void
 	 */
 	public function ipso_mappings_field( array $args ) {
@@ -394,7 +396,7 @@ class MHWP_IPSO_Admin_Settings {
 		$classes  = $args['classes'];
 		$name     = $args['setting'] . '[' . $id . ']';
 
-		// If we are editting retrieve values for the id that is in $edit.
+		// If we are editing, retrieve values for the id that is in $edit.
 		// We already checked the nonce and validity.
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST['edit'] ) ) {

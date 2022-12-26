@@ -19,6 +19,7 @@ async function makeReservation(form, event) {
     $jq('button', form).prop('disabled', true);
     const container = $jq(form).parent();
 
+
     const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
     const firstName = $jq('input[name="firstName"]', form).val();
     const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
@@ -36,7 +37,7 @@ async function makeReservation(form, event) {
         body: JSON.stringify( data )
     }
     await fetchWpRest(
-        url, fetchInit, 0, container
+        url, fetchInit, container
     ).then(() => {
         // TODO: if ! 200 addError
         addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
@@ -55,20 +56,19 @@ async function makeReservation(form, event) {
 
 /**
  * Helper method for accessing the rest api in our wordPress installation.
- *  TODO we can drop nonce here.
  *
  * @param url The URL of the worpress installation.
  * @param init Additional settings for the fetch init object.
- * @param nonce
  * @param errorContainer A container for error messages.
  * @param throw_429 whether we should throw upon 429 errors. If this is false the caller should retry.
  * @returns {Promise<any>}
  */
-function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
+function fetchWpRest (url, init, errorContainer, throw_429=true) {
     const defaults = {
         method: 'GET',
         cache: 'no-store',
         headers: {
+            'X-WP-Nonce': wpApiSettings.nonce,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
@@ -77,6 +77,11 @@ function fetchWpRest (url, init, nonce, errorContainer, throw_429=true) {
         if ( ! res.ok ) {
             throw new TypeError( 'Er is een probleem op de server.' );
         }
+
+        // Get a possibly new nonce from the response header, store it globally.
+        const nonce = res.headers.get( 'X-WP-Nonce' ) ;
+        if( nonce ) wpApiSettings.nonce = nonce;
+
         return res.json();
     }).then((json) => {
         if ( json.mhwp_ipso_status !== 'ok' ) {
