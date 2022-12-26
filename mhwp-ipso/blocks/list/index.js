@@ -55,6 +55,9 @@ registerBlockType( metadata, {
         const blockProps = useBlockProps.save();
         return (
             <div { ...blockProps } >
+                <div id="mhwp-ipso-list-datepicker">
+                    <input type="date" />
+                </div>
                 <div id="mhwp-ipso-list-container">
                     <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
                 </div>

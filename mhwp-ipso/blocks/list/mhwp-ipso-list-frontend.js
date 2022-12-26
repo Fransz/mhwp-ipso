@@ -5,6 +5,11 @@ import '../includes/bootstrap-transition';
 
 import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
 
+/**
+ * Globales.
+ *
+ * jQuery, An alias for our origin, a rule for the jQuery validator, attach an eventhandler to the datepicker.
+ */
 const $jq = jQuery.noConflict();
 
 const marikenhuisURL = document.location.origin;
@@ -14,40 +19,51 @@ $jq.validator.addMethod( "phoneNL", function( value, element ) {
     return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
 }, "Vul een geldig telefoonnummer in." );
 
-/**
- * Top level function. Tobe called on DomContentLoaded.
- *
- * @returns {Promise<void>}
- */
-async function allActivities() {
-    const container = document.getElementById('mhwp-ipso-list-container');
+const datePicker = document.querySelector('#mhwp-ipso-list-datepicker input');
+datePicker.addEventListener('change', handleDateChange)
 
+
+/**
+ * Top level function.
+ *
+ * @returns {void}
+ */
+async function main () {
+    const container = document.querySelector('#mhwp-ipso-list-container');
 
     // Get all activities from our wp, property data. Sort them.
     let activities = await getActivities(container);
     activities = activities.data;
-
     activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
+    await processActivities(activities);
+}
 
-    // Add a node to the dom for each activity, return an activityId (not itemId), node (jquery object) pair.
-    const pairs = activities.map( (activity) => {
-        const node = addActivity(activity, container);
-        return [activity.activityID, node];
-    })
+/**
+ * Handle changes in the datepicker.
+ *
+ * Todo: restrict dates to choose; invalid dates handling; get Activities for a week;
+ * @param event
+ * @returns {Promise<void>}
+ */
+async function handleDateChange(event) {
+    const container = document.querySelector('#mhwp-ipso-list-container');
 
+    const d = new Date(event.currentTarget.value);
+    if ( "Invalid String." === d.toString())
+        return;
 
-    // Create a chain of promises to fetch the activity details. The promise returns void.
-    // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
-    pairs.reduce((ps, [activityId, node]) => {
-       return ps.then( () => {
-           return fillActivity(activityId, node);
-       })
-    }, Promise.resolve());
+    // Get all activities from our wp, property data. Sort them.
+    let activities = await getActivitiesByDate(d, container);
+    activities = activities.data;
+    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+    await processActivities(activities);
 }
 
 /**
  * Fetch all activities.
+ * The from and till query parameter are set with the value from the wp block.
  *
  * @param container Container for error messages.
  * @returns {Promise<void>}
@@ -71,6 +87,54 @@ async function getActivities(container) {
     clearErrors(container);
     clearMessages(container);
     return await fetchWpRest(url, {}, container);
+}
+
+/**
+ * Fetch all activities for a given date
+ * The from and till query parameters are set with the functions parameter.
+ *
+ * @param date Date to retrieve rthe activities for.
+ * @param container Container for error messages.
+ * @returns {Promise<void>}
+ */
+async function getActivitiesByDate(date, container) {
+    const url = new URL( marikenhuisURL );
+    url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+    const listContainer = document.querySelector('#mhwp-ipso-list-container');
+    listContainer.innerHTML = '';
+
+    const d = date.toISOString().slice(0, -14);
+    url.searchParams.append('from', d);
+    url.searchParams.append('till', d);
+
+    clearErrors(container);
+    clearMessages(container);
+    return await fetchWpRest(url, {}, container);
+}
+
+/**
+ * Process the fetched activities.
+ *
+ * @param activities The activities to process
+ * @returns {Promise<void>}
+ */
+function processActivities(activities) {
+    const container = document.querySelector('#mhwp-ipso-list-container');
+
+    const pairs = activities.map( (activity) => {
+        const node = addActivity(activity, container);
+        return [activity.activityID, node];
+    })
+
+
+    // Create a chain of promises to fetch the activity details. Return that chain.
+    // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
+    return pairs.reduce((ps, [activityId, node]) => {
+       return ps.then( () => {
+           return fillActivity(activityId, node);
+       })
+    }, Promise.resolve());
 }
 
 /**
@@ -202,4 +266,4 @@ function prepareForm(detail, container) {
    }
 }
 
-$jq(document).ready(allActivities);
+$jq(document).ready(main);
