@@ -1,6 +1,10 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.5.0 - Backend;
+- Nonces bij formulieren, en nieuwe na een reservering;
+- Logging; 
+
 Release 0.4.0 - Backend;
 - Rest API Live <-> test uitlezen, Juiste API aanspreken , Image URL's aanpassen.
 - Uitzonderingen voor reserveringen. URL's gekoppeld aan ActivityId's
@@ -41,14 +45,12 @@ Release 0.1.0  - Initial release.
 
 ## Roadmap
 
-Release 0.5.0 - Backend;
-- Nonces bij formulieren, en nieuwe na een reservering;
-- Logging; 
-
 Release 0.6.0 - Frontend.
 - Datepicker.
 - Filtering.
 - A spinner on the calendar when we are still loading.
+
+Release 0.7.0 - Frontend.
 - Collapse activiteiten met meerdere tijdslots op dezelfde dag.
 
 ## Deployment
