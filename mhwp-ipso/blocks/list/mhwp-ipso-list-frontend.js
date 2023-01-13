@@ -122,11 +122,20 @@ async function getActivitiesByDate(date, container) {
 function processActivities(activities) {
     const container = document.querySelector('#mhwp-ipso-list-container');
 
+    // Keep track of the activities date. For date headers.
+    let curDate = null;
+
     const pairs = activities.map( (activity) => {
-        const node = addActivity(activity, container);
+        // Add all activities, with or without date separator.
+        const node = addActivity(activity, container, activity.onDate !== curDate);
+
+        // update the current date.
+        if (activity.onDate !== curDate) {
+            curDate = activity.onDate;
+        }
+
         return [activity.activityID, node];
     })
-
 
     // Create a chain of promises to fetch the activity details. Return that chain.
     // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
@@ -142,16 +151,24 @@ function processActivities(activities) {
  *
  * @param activity json data that describes the activity,
  * @param container The container where to add.
+ * @param newDate Do we want to add a seperator for new date?
  * @returns The jQuery object for the added node.
  */
-function addActivity(activity, container) {
+function addActivity(activity, container, newDate) {
     // Formatters for time/date
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
     const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
+    // Add the formatted date and time to the activity,
     const date = new Date(activity.timeStart);
     activity.date = dateFormat(date);
     activity.time = timeFormat(date);
+
+    // Add a date header if the date changed.
+    if (newDate) {
+        const dateHeader = `<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`;
+        $jq(container).append($jq(dateHeader));
+    }
 
     // fill the template make it jQuery and add it to the dom.
     const node = $jq(template(activity));

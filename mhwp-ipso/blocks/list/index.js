@@ -58,9 +58,9 @@ registerBlockType( metadata, {
                 <div id="mhwp-ipso-list-datepicker">
                     <input type="date" />
                 </div>
-                <div id="mhwp-ipso-list-container">
+                <ul id="mhwp-ipso-list-container">
                     <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
-                </div>
+                </ul>
 
             </div>
         )
