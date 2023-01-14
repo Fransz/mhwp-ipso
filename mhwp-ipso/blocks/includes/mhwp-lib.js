@@ -16,9 +16,8 @@ async function makeReservation(form, event) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-    $jq('button', form).prop('disabled', true);
-    const container = $jq(form).parent();
-
+    const formContainer = $jq(form).parent();
+    const container = $jq(formContainer).parent();
 
     const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
     const firstName = $jq('input[name="firstName"]', form).val();
@@ -40,10 +39,10 @@ async function makeReservation(form, event) {
         url, fetchInit, container
     ).then(() => {
         // TODO: if ! 200 addError
+        $jq(formContainer).removeClass('in');
         addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
         setTimeout(() => {
             clearMessages(container);
-            $jq('button', form).prop('disabled', false);
         }, 5000);
     }).catch((_) => {
         console.log('catched');
