@@ -27,7 +27,7 @@ class MHWP_IPSO_Client {
 	 *
 	 * @var array host
 	 */
-	private $url;
+	public $url;
 
 	/**
 	 * The data for the request.
@@ -130,30 +130,13 @@ class MHWP_IPSO_Client {
 	 * @return object
 	 */
 	public function get_activity( array $data ): object {
-		$mappings = get_option( 'mhwp_ipso_mappings', array() );
-
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetActivityInfo';
 		$this->data        = $data;
 
 		$res = $this->request();
 		$this->logger->log( $res );
-		$response = $this->response( $res );
-
-		// Todo this should be in the REST controller.
-		if ( isset( $response->data ) ) {
-			if ( isset( $response->data->id ) && array_key_exists( $response->data->id, $mappings ) ) {
-				// A mapping exisits for this activity. Add the url.
-				$response->data->reservationUrl = $mappings[ $response->data->id ];
-			}
-			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( isset( $response->data->mainImage ) ) {
-				// An image exists for this activity. Prepend scheme and host.
-				$response->data->mainImage = $this->url['scheme'] . rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
-			}
-			// phpcs:enable
-		}
-		return $response;
+		return $this->response( $res );
 	}
 
 	/**
