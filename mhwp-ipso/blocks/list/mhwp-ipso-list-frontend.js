@@ -284,7 +284,7 @@ function prepareForm(detail, container) {
                    "normalizer": v => $jq.trim(v)
                }
            },
-           "submitHandler": makeReservation,
+           "submitHandler": (form, event) => makeReservation(detail, form, event),
            "invalidHandler": function () {
                // TODO: We want an error message here.
                console.log( 'invalid' );
