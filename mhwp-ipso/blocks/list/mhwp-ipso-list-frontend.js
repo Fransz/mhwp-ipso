@@ -202,6 +202,7 @@ function getDetail(activity, container) {
         const detail = json.data;
         const imageUrl = new URL(detail.mainImage);
         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
+
         // Places left. If maxRegistrations === 0 there is no limit.
         const places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
@@ -233,7 +234,7 @@ function getDetail(activity, container) {
  */
 async function fetchDetail(activity, container) {
     const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activitydetail`;
+    url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
     url.searchParams.append('activityId', activity.activityID);
     url.searchParams.append('calendarId', activity.id);
 
@@ -265,7 +266,7 @@ function prepareForm(detail, container) {
         button.remove();
         $jq('.mhwp-ipso-activity-reservation', container).remove();
 
-        const notice = '<div class="mhwp-ipso-activity-detail-full">De activiteit is vol, u kunt niet registreren.</div>';
+        const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet registreren.</div>';
         $jq('.mhwp-ipso-activity-detail', container).append(notice);
     } else if(detail.reservationUrl) {
        // We dont need the form. Prepare the button to redirect. remove the form.

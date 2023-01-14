@@ -49,12 +49,12 @@ async function makeReservation(detail, form, event) {
         detail.places -= 1;
         if (detail.places <= 0) {
             // Reservations are no more possible.Remove the form and button, add a notice.
-            const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
+            const button = $jq(".mhwp-ipso-reservation-button", container);
             button.remove();
-            $jq('.mhwp-ipso-activity-reservation', container).remove();
+            $jq(form).remove();
 
-            const notice = '<div class="mhwp-ipso-activity-detail-full">De activiteit is vol, u kunt niet meer registreren.</div>';
-            $jq('.mhwp-ipso-activity-detail', container).append(notice);
+            const notice = '<div class="mhwp-ipso-ervation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
+            container.append(notice);
         }
 
         // Close the reservation form, add a message.
