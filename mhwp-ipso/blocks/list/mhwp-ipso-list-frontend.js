@@ -230,7 +230,8 @@ function getDetail(activity, container) {
  */
 async function fetchDetail(activity, container) {
     const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activity.activityID}`;
+    url.pathname = `wp-json/mhwp-ipso/v1/activitydetail`;
+    url.searchParams.append('activityId', activity.activityID);
     url.searchParams.append('calendarId', activity.id);
 
     clearErrors(container);

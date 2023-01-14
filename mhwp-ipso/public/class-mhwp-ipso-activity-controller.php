@@ -47,7 +47,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 		);
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->resource . '/(?P<id>[\d]+)',
+			'/' . $this->resource . 'detail',
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -111,7 +111,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * @return object Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ): WP_REST_Response {
-		$activity_id = basename( $request->get_route() );
+		$activity_id = $request->get_param( 'activityId' );
 		$calendar_id = $request->get_param( 'calendarId' );
 
 		$data = array(
@@ -170,7 +170,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 
 		$this->schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'activity',
+			'title'      => 'activities',
 			'type'       => 'object',
 			'properties' => array(
 				'from' => array(
@@ -199,11 +199,15 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 
 		$this->schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'activities',
+			'title'      => 'activity',
 			'type'       => 'object',
 			'properties' => array(
 				'calendarId' => array(
 					'description' => esc_html__( 'The id of the activity in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
+				),
+				'activityId' => array(
+					'description' => esc_html__( 'The id of the activity type', 'mhwp-ipso' ),
 					'type'        => 'string',
 				),
 			),
