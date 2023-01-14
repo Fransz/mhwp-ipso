@@ -42,7 +42,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
 				),
-				'schema' => array( $this, 'get_item_schema' ),
+				'schema' => array( $this, 'get_items_schema' ),
 			)
 		);
 		register_rest_route(
@@ -55,7 +55,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
 				),
-				'schema' => array( $this, 'get_items_schema' ),
+				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
 	}
@@ -163,7 +163,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 *
 	 * @return array The schema for an activity.
 	 */
-	public function get_item_schema() : array {
+	public function get_items_schema() : array {
 		if ( $this->schema ) {
 			return $this->schema;
 		}
@@ -180,7 +180,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 				'till' => array(
 					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
-					'default'     => 7,
 				),
 			),
 		);
@@ -189,11 +188,11 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get our schema for the activity list.
+	 * Get our schema for an activity detail.
 	 *
 	 * @return array The schema for an activity.
 	 */
-	public function get_items_schema() : array {
+	public function get_item_schema() : array {
 		if ( $this->schema ) {
 			return $this->schema;
 		}
