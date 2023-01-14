@@ -64,10 +64,10 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 	 * @return object Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ): object {
-		$client      = new MHWP_IPSO_Client();
-		$json        = $request->get_json_params();
-		$reservation = $client->add_participants( $json );
-		return new WP_REST_Response( $reservation, 200 );
+		$client           = new MHWP_IPSO_Client();
+		$json             = $request->get_json_params();
+		$reservation_resp = $client->add_participants( $json );
+		return new WP_REST_Response( $reservation_resp, 200 );
 	}
 
 	/**
