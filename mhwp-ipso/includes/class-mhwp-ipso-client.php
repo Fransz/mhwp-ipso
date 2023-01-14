@@ -16,34 +16,6 @@ require_once plugin_dir_path( dirname( __FILE__ )) . 'includes/class-mhwp-ipso-l
 class MHWP_IPSO_Client {
 
 	/**
-	 * The json response for failing to make the request.
-	 *
-	 * @var object
-	 */
-	private $error_failure;
-
-	/**
-	 * The json response for a 404 error.
-	 *
-	 * @var object
-	 */
-	private $error_404;
-
-	/**
-	 * The json response for all other http errors.
-	 *
-	 * @var object
-	 */
-	private $error;
-
-	/**
-	 * The json response for an ok response.
-	 *
-	 * @var object
-	 */
-	private $ok;
-
-	/**
 	 * The method to use for the request.
 	 *
 	 * @var string method
@@ -86,12 +58,10 @@ class MHWP_IPSO_Client {
 	private $logger;
 
 	/**
-	 * Constructor, initialize standard responses, initialize the url array.
+	 * Constructor, initialize the url array.
 	 * Open the logger.
 	 */
 	public function __construct() {
-		$this->init_std_responses();
-
 		$this->url = array(
 			'scheme' => 'https://',
 			'host'   => '',
@@ -109,42 +79,6 @@ class MHWP_IPSO_Client {
 	}
 
 	/**
-	 * Initialize our standard response.
-	 * The type casting cannot be done on the attributes directly.
-	 */
-	private function init_std_responses() {
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error_failure = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 0,
-			'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error_404 = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 404,
-			'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 0,
-			'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->ok = (object) [
-			'mhwp_ipso_status' => 'ok',
-			'mhwp_ipso_code'   => 200,
-			'mhwp_ipso_msg'    => '',
-			'data'             => array(),
-		];
-
-	}
-
-	/**
 	 * Request IPSO for Activities/addParticipants
 	 * We need to json encode the data, so we have a string.
 	 *
@@ -158,11 +92,14 @@ class MHWP_IPSO_Client {
 		// We are going to post json, set the correct header.
 		$this->headers['Content-type'] = 'application/json';
 
-		// Encode the data as a json string.
+		// Encode the clients data as a json string.
 		$json = wp_json_encode( $data );
 		if ( false === $json ) {
-			$this->error->mhwp_ipso_msg = 'Ongeldige data';
-			return $this->error;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => 400,
+				'mhwp_ipso_msg'    => 'Ongeldige data',
+			);
 		}
 		$this->data = $json;
 
@@ -277,23 +214,40 @@ class MHWP_IPSO_Client {
 	 */
 	private function response( $resp ) : object {
 		if ( is_wp_error( $resp ) ) {
-			$this->error_failure->mhwp_ipso_code = $resp->get_error_code();
-			return $this->error_failure;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => $resp->get_error_code(),
+				'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
+			);
 		}
 
 		if ( 404 === $resp['response']['code'] ) {
-			return $this->error_404;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => 404,
+				'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
+			);
 		}
 
 		if ( 200 !== $resp['response']['code'] ) {
-			$this->error->mhwp_ipso_code = $resp['response']['code'];
-			return $this->error;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => $resp['response']['code'],
+				'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
+			);
 		}
 
+		// No errors from IPSO; encode the responses data IPSO returned some.
 		if ( ! empty( $resp['body'] ) ) {
-			$arr            = json_decode( $resp['body'] );
-			$this->ok->data = $arr;
+			$data = json_decode( $resp['body'] );
+		} else {
+			$data = array();
 		}
-		return $this->ok;
+		return (object) array(
+			'mhwp_ipso_status' => 'ok',
+			'mhwp_ipso_code'   => 200,
+			'mhwp_ipso_msg'    => '',
+			'data'             => $data,
+		);
 	}
 }
