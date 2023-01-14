@@ -130,18 +130,16 @@ function processActivities(activities) {
         const node = addActivity(activity, container, activity.onDate !== curDate);
 
         // update the current date.
-        if (activity.onDate !== curDate) {
-            curDate = activity.onDate;
-        }
+        curDate = activity.onDate;
 
-        return [activity.activityID, node];
+        return [activity, node];
     })
 
     // Create a chain of promises to fetch the activity details. Return that chain.
     // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
-    return pairs.reduce((ps, [activityId, node]) => {
+    return pairs.reduce((ps, [activity, node]) => {
        return ps.then( () => {
-           return fillActivity(activityId, node);
+           return fillActivity(activity, node);
        })
     }, Promise.resolve());
 }
@@ -180,11 +178,11 @@ function addActivity(activity, container, newDate) {
 /**
  * Fill an activity with its details and prepare the form
  *
- * @param activityId The id for the activity.
+ * @param activity The activity.
  * @param node The jquery dom node for the activity.
  */
-async function fillActivity(activityId, node) {
-    const detail = await getDetail(activityId, node);
+async function fillActivity(activity, node) {
+    const detail = await getDetail(activity, node);
 
     const {img, title, intro, descr} = detail;
     $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
@@ -195,12 +193,12 @@ async function fillActivity(activityId, node) {
 /**
  * Get the details for an activity, process them. Return a default upon failure.
  *
- * @param id The detail id.
+ * @param activity The activity for which to get details.
  * @param container A container for error messages,
  * @returns {Promise<{descr: string, img: string, intro: string, reservationUrl: null} | {image: string, intro: string, description: string, reservationUrl: null}>}
  */
-function getDetail(id, container) {
-    return fetchDetail(id, container).then((json) => {
+function getDetail(activity, container) {
+    return fetchDetail(activity, container).then((json) => {
         const detail = json.data;
         const imageUrl = new URL(detail.mainImage);
         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
@@ -226,13 +224,14 @@ function getDetail(id, container) {
 /**
  * Actually make the request for the details, and again if necessary.
  *
- * @param activityId The activity for which to fetch the detail
+ * @param activity The activity for which to fetch the detail
  * @param container The parent for messages.
  * @returns {Promise<any>}
  */
-async function fetchDetail(activityId, container) {
+async function fetchDetail(activity, container) {
     const url = new URL( marikenhuisURL );
-    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activityId}`;
+    url.pathname = `wp-json/mhwp-ipso/v1/activity/${activity.activityID}`;
+    url.searchParams.append('calendarId', activity.id);
 
     clearErrors(container);
     clearMessages(container);
