@@ -55,7 +55,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
 				),
-				'schema' => array( $this, 'get_item_schema' ),
+				'schema' => array( $this, 'get_items_schema' ),
 			)
 		);
 	}
@@ -83,10 +83,10 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'till' => $request->get_param( 'till' ),
 		);
 
-		$client   = new MHWP_IPSO_Client();
-		$calendar = $client->get_activities( $data );
+		$client          = new MHWP_IPSO_Client();
+		$activities_resp = $client->get_activities( $data );
 
-		return new WP_REST_Response( $calendar, 200 );
+		return new WP_REST_Response( $activities_resp, 200 );
 	}
 
 	/**
@@ -100,7 +100,13 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get a single activity (really a type!) from the ipso system.
+	 * Get a single activity (really a activity type!) from the ipso system.
+	 *
+	 * Todo The returned data is extended with reservation mappings; images url;
+	 *
+	 * The data is extended with the nr of participants.
+	 * For that we have to make an extra request to IPSO.
+	 * We do that here and not in the client, that would expose names and email for participants.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
@@ -108,18 +114,28 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ): WP_REST_Response {
 		$activity_id = basename( $request->get_route() );
+		$calendar_id = $request->get_param( 'calendarId' );
 
 		$data = array(
 			'activityID' => $activity_id,
 		);
 
-		$client   = new MHWP_IPSO_Client();
-		$activity = $client->get_activity( $data );
-		return new WP_REST_Response( $activity, 200 );
+		$client        = new MHWP_IPSO_Client();
+		$activity_resp = $client->get_activity( $data );
+
+		$data = array(
+			'activityId' => $calendar_id,
+		);
+
+		$participants_resp = $client->get_participants( $data );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$activity_resp->nrParticipants = count( $participants_resp->data );
+
+		return new WP_REST_Response( $activity_resp, 200 );
 	}
 
 	/**
-	 * Get our schema for an activity.
+	 * Get our schema for the activity list.
 	 *
 	 * @return array The schema for an activity.
 	 */
@@ -141,6 +157,31 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'default'     => 7,
+				),
+			),
+		);
+
+		return $this->schema;
+	}
+
+	/**
+	 * Get our schema for the activity list.
+	 *
+	 * @return array The schema for an activity.
+	 */
+	public function get_items_schema() : array {
+		if ( $this->schema ) {
+			return $this->schema;
+		}
+
+		$this->schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'activities',
+			'type'       => 'object',
+			'properties' => array(
+				'calendarId' => array(
+					'description' => esc_html__( 'The id of the activity in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
 				),
 			),
 		);

@@ -6,7 +6,7 @@
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 
-require_once plugin_dir_path( dirname( __FILE__ )) . 'includes/class-mhwp-ipso-logger.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-logger.php';
 
 /**
  * Class for connecting to the ipso system.
@@ -64,7 +64,6 @@ class MHWP_IPSO_Client {
 	public function __construct() {
 		$this->url = array(
 			'scheme' => 'https://',
-			'host'   => '',
 			'path'   => '',
 		);
 
@@ -126,7 +125,6 @@ class MHWP_IPSO_Client {
 
 	/**
 	 * Request IPSO for Activities/getActivityInfo
-	 * The returned data is extended with reservation mappings; images url;
 	 *
 	 * @param array $data The data to send.
 	 * @return object
@@ -142,6 +140,7 @@ class MHWP_IPSO_Client {
 		$this->logger->log( $res );
 		$response = $this->response( $res );
 
+		// Todo this should be in the REST controller.
 		if ( isset( $response->data ) ) {
 			if ( isset( $response->data->id ) && array_key_exists( $response->data->id, $mappings ) ) {
 				// A mapping exisits for this activity. Add the url.
@@ -149,13 +148,28 @@ class MHWP_IPSO_Client {
 			}
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( isset( $response->data->mainImage ) ) {
-				// An image exisits for this activity. Prepend scheme and host.
-				$response->data->mainImage = $this->url['scheme'] .
-					rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
+				// An image exists for this activity. Prepend scheme and host.
+				$response->data->mainImage = $this->url['scheme'] . rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
 			}
 			// phpcs:enable
 		}
 		return $response;
+	}
+
+	/**
+	 * Request IPSO for Activities/getParticipants
+	 *
+	 * @param array $data The data to send.
+	 * @return object
+	 */
+	public function get_participants( array $data ): object {
+		$this->method      = 'GET';
+		$this->url['path'] = '/api/Activities/GetParticipants';
+		$this->data        = $data;
+
+		$res = $this->request();
+		$this->logger->log( $res );
+		return $this->response( $res );
 	}
 
 	/**
