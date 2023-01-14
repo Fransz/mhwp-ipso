@@ -51,15 +51,15 @@ function template(activity) {
                                 <input type="email" id="mhwp-ipso-email-${id}" name="email" required placeholder="" />
                                 <span class="validity"></span>
                             </fieldset>
-                        <div>
-                        <!-- @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing  -->
-                        <button class="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
-                    </div>
+                            <div>
+                                <!-- @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing  -->
+                                <button class="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-
-    </li>`;
+            </div>
+        </li>`;
 }
 
 export default template;

@@ -202,12 +202,15 @@ function getDetail(activity, container) {
         const detail = json.data;
         const imageUrl = new URL(detail.mainImage);
         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
+        // Places left. If maxRegistrations === 0 there is no limit.
+        const places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
         return {
             img: `<img src="${imageUrl}" alt="${detail.title}" />`,
             title: `<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`,
             intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
             descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
+            places,
             reservationUrl
         }
     }).catch((e) => {
@@ -256,7 +259,15 @@ async function fetchDetail(activity, container) {
  * @param container
  */
 function prepareForm(detail, container) {
-   if(detail.reservationUrl) {
+    if(detail.places <= 0) {
+        // Reservations are not possible.Remove the form and button. add a notice.
+        const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
+        button.remove();
+        $jq('.mhwp-ipso-activity-reservation', container).remove();
+
+        const notice = '<div class="mhwp-ipso-activity-detail-full">De activiteit is vol, u kunt niet registreren.</div>';
+        $jq('.mhwp-ipso-activity-detail', container).append(notice);
+    } else if(detail.reservationUrl) {
        // We dont need the form. Prepare the button to redirect. remove the form.
        const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
        ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
@@ -278,7 +289,6 @@ function prepareForm(detail, container) {
                // TODO: We want an error message here.
                console.log( 'invalid' );
            }
-
        })
    }
 }
