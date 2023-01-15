@@ -1,9 +1,9 @@
     import template from './mhwp-ipso-list-template';
 
-               import '../includes/bootstrap-collapse';
-               import '../includes/bootstrap-transition';
+    import '../includes/bootstrap-collapse';
+    import '../includes/bootstrap-transition';
 
-               import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
+    import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
 
 
     (function () {
@@ -25,21 +25,6 @@
 
         // Container for all activities.
         let listContainer;
-
-        /**
-         * Calculate first and last day of the week in which d falls.
-         * Monday is the first day of our week;
-         *
-         * @param d The day for which we have to calculate the week.
-         * @return Array<Date> The first and last dates of the week.
-         */
-        function week (d) {
-            const first = new Date(d);
-            first.setDate(first.getDate() + ((7 - d.getDay()) % 7) - 6);
-            const last = new Date(first);
-            last.setDate(first.getDate() + 6);
-            return [first, last];
-        }
 
         /**
          * init globals, attach event handlers.
@@ -80,11 +65,8 @@
          * @returns {void}
          */
         async function main () {
-            // initialize
-            init();
-
-            // Get all activities from our wp, property data. Sort them.
-            let activities = await getActivities(currentDay, listContainer);
+            // Get all activities from our wp; property data; Sort them;
+            let activities = await getActivities();
             activities = activities.data;
             activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
@@ -104,7 +86,7 @@
                 return;
 
             // Get all activities from our wp, property data. Sort them.
-            let activities = await getActivitiesByDate(d, listContainer);
+            let activities = await getActivitiesByDate(d);
             activities = activities.data;
             activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
@@ -128,26 +110,35 @@
             // Clear the listContainer.
             Array.from(listContainer.childNodes).map((n) => n.remove());
 
-            // Get all activities from our wp, property data. Sort them.
-            let activities = await getActivities(currentDay, listContainer);
-            activities = activities.data;
-            activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+            main();
+        }
 
-            await processActivities(activities);
+        /**
+         * Calculate first and last day of the week in which d falls.
+         * Monday is the first day of our week;
+         *
+         * @param d The day for which we have to calculate the week.
+         * @return Array<Date> The first and last dates of the week.
+         */
+        function week (d) {
+            const first = new Date(d);
+            first.setDate(first.getDate() + ((7 - d.getDay()) % 7) - 6);
+            const last = new Date(first);
+            last.setDate(first.getDate() + 6);
+            return [first, last];
         }
 
         /**
          * Fetch all activities.
          * The from and till query parameter are set with the value from the wp block.
          *
-         * @param date first dadte of the period to fetch.
          * @returns {Promise<void>}
          */
-        async function getActivities(date) {
+        async function getActivities() {
             const url = new URL( marikenhuisURL );
             url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-            const d = new Date(date);
+            const d = new Date(currentDay);
             const from = d.toISOString().slice(0, -14);
             url.searchParams.append('from', from);
 
@@ -360,6 +351,6 @@
             }
         }
 
-        // $jq(document).ready(main);
-        document.addEventListener('DOMContentLoaded', main);
+        // Run init and main on DOMConctentLoaded
+        document.addEventListener('DOMContentLoaded', () => { init(); main(); });
 })();
