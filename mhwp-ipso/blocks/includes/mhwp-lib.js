@@ -53,7 +53,7 @@ async function makeReservation(detail, form, event) {
             button.remove();
             $jq(form).remove();
 
-            const notice = '<div class="mhwp-ipso-ervation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
+            const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
             container.append(notice);
         }
 
