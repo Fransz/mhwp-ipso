@@ -19,9 +19,29 @@ $jq.validator.addMethod( "phoneNL", function( value, element ) {
     return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
 }, "Vul een geldig telefoonnummer in." );
 
+let currentDay = null;
+let nrDays = 7;
+
+const container = document.querySelector('#mhwp-ipso-list-container');
+
 const datePicker = document.querySelector('#mhwp-ipso-list-datepicker input');
 datePicker.addEventListener('change', handleDateChange)
 
+
+/**
+ * Calculate first and last day of the week in which d falls.
+ * Monday is the first day of our week;
+ *
+ * @param d The day for which we have to calculate the week.
+ * @return Array<Date> The first and last dates of the week.
+ */
+function week (d) {
+    const first = new Date(d);
+    first.setDate(first.getDate() + ((7 - d.getDay()) % 7) - 6);
+    const last = new Date(first);
+    last.setDate(first.getDate() + 6);
+    return [first, last];
+}
 
 /**
  * Top level function.
@@ -31,8 +51,27 @@ datePicker.addEventListener('change', handleDateChange)
 async function main () {
     const container = document.querySelector('#mhwp-ipso-list-container');
 
+    // Get the parameter for in the query, We always have value in nr-days.
+    const el = document.getElementById('mhwp-ipso-list-nr-days');
+    nrDays = parseInt(el.value) || 0;
+
+    // Initialize the week picker.
+    const prevWeek = document.querySelector('#mhwp-ipso-prev-week');
+    console.log(prevWeek);
+    prevWeek.addEventListener('click', () =>  changeWeek(-7, container) )
+    const nextWeek = document.querySelector('#mhwp-ipso-next-week');
+    nextWeek.addEventListener('click', () => changeWeek(7, container))
+
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric'}).format;
+    let d = new Date();
+    const [mon, sun] = week(d);
+    const interval = `${dateFormat(mon)} - ${dateFormat(sun)}`;
+    document.querySelector('#mhwp-ipso-current-week').innerHTML = interval;
+
+    currentDay = mon;
+
     // Get all activities from our wp, property data. Sort them.
-    let activities = await getActivities(container);
+    let activities = await getActivities(currentDay, container);
     activities = activities.data;
     activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
@@ -62,21 +101,43 @@ async function handleDateChange(event) {
 }
 
 /**
+ * Handle clicks on the next/previous week button
+ */
+async function changeWeek(nrDays, container) {
+    // Date format for the interval.
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric'}).format;
+
+    // Copy day; add; calculate week; display; save.
+    const newDay = new Date(currentDay);
+    newDay.setDate(newDay.getDate() + nrDays);
+    const [mon, sun] = week(newDay);
+    document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
+    currentDay = mon;
+
+    // Clear the container.
+    Array.from(container.childNodes).map((n) => n.remove());
+
+    // Get all activities from our wp, property data. Sort them.
+    let activities = await getActivities(currentDay, container);
+    activities = activities.data;
+    activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+    await processActivities(activities);
+}
+
+/**
  * Fetch all activities.
  * The from and till query parameter are set with the value from the wp block.
  *
+ * @param date first dadte of the period to fetch.
  * @param container Container for error messages.
  * @returns {Promise<void>}
  */
-async function getActivities(container) {
+async function getActivities(date, container) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-    // Get the parameter for in the query, We always have value in nr-days.
-    let nrDays = document.getElementById('mhwp-ipso-list-nr-days');
-    nrDays = parseInt(nrDays.value);
-
-    let d = new Date();
+    const d = new Date(date);
     const from = d.toISOString().slice(0, -14);
     url.searchParams.append('from', from);
 
@@ -294,4 +355,5 @@ function prepareForm(detail, container) {
    }
 }
 
-$jq(document).ready(main);
+// $jq(document).ready(main);
+document.addEventListener('DOMContentLoaded', main);

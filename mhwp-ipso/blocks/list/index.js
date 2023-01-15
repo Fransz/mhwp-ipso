@@ -55,6 +55,11 @@ registerBlockType( metadata, {
         const blockProps = useBlockProps.save();
         return (
             <div { ...blockProps } >
+                <div id="mhwp-ipso-list-weekpicker">
+                    <div id="mhwp-ipso-current-week">21 januari- 28 januari</div>
+                    <button id="mhwp-ipso-prev-week">vorige week</button>
+                    <button id="mhwp-ipso-next-week">volgende week</button>
+                </div>
                 <div id="mhwp-ipso-list-datepicker">
                     <input type="date" />
                 </div>
