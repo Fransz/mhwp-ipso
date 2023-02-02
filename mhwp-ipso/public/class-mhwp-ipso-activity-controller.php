@@ -104,6 +104,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 *
 	 * The data is extended with reservation mappings; images url;
 	 * The data is extended with the nr of participants.
+	 *
 	 * For the participants we make an extra request to IPSO.
 	 * Doing that in the client would expose names and email for participants.
 	 *
