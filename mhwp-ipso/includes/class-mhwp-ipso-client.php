@@ -103,7 +103,9 @@ class MHWP_IPSO_Client {
 		$this->data = $json;
 
 		$res = $this->request();
-		$this->logger->log( $res, $data );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
@@ -119,7 +121,9 @@ class MHWP_IPSO_Client {
 		$this->data        = $data;
 
 		$res = $this->request();
-		$this->logger->log( $res );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
@@ -135,7 +139,9 @@ class MHWP_IPSO_Client {
 		$this->data        = $data;
 
 		$res = $this->request();
-		$this->logger->log( $res );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
@@ -151,7 +157,9 @@ class MHWP_IPSO_Client {
 		$this->data        = $data;
 
 		$res = $this->request();
-		$this->logger->log( $res );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
