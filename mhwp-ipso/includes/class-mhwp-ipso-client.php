@@ -222,7 +222,7 @@ class MHWP_IPSO_Client {
 			return (object) array(
 				'mhwp_ipso_status' => 'error',
 				'mhwp_ipso_code'   => $resp->get_error_code(),
-				'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
+				'mhwp_ipso_msg'    => 'Het agendasysteem reageert niet',
 			);
 		}
 
@@ -230,7 +230,7 @@ class MHWP_IPSO_Client {
 			return (object) array(
 				'mhwp_ipso_status' => 'error',
 				'mhwp_ipso_code'   => 404,
-				'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
+				'mhwp_ipso_msg'    => 'Het agendasysteem is onbekend',
 			);
 		}
 
@@ -238,7 +238,7 @@ class MHWP_IPSO_Client {
 			return (object) array(
 				'mhwp_ipso_status' => 'error',
 				'mhwp_ipso_code'   => $resp['response']['code'],
-				'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
+				'mhwp_ipso_msg'    => 'Er gaat iets niet goed bij het agendasysteem',
 			);
 		}
 
