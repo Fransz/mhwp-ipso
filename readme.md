@@ -64,28 +64,3 @@ We willen de plugin soms op deze site installeren om te demonstreren.
 #### Endpoints.
 De vrijwilligers site draait in een subdirectory. Je moet de paden van de endpoints aanpassen.
 Let op doe dit voor de button, en de list.
-
-#### Divi
-Maar deze vrijwilligers site is gemaakt met divi, en kent niet zomaar bootstrap.
-
-Oplossing (min of meer);
-
-Voeg wat extra css toe om in iedergeval 'reserveer' en 'lees meer' in en uit te kunnen klappen.
-
-    #mhwp-ipso-list-container .collapse.in  {
-        display:block;
-        overflow:hidden;
-    }
-
-    #mhwp-ipso-list-container .collapse  {
-        display:none;
-        overflow:hidden;
-    }
-
-Of laat het block bootstrap laden. in class-mhwp-ipso-blocks.php; function enqueue\_styles
-		wp_enqueue_style(
-			$this->mhwp_ipso . '_bootstrap',
-			'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
-			array(),
-			$ver
-        );
