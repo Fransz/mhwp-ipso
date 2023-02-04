@@ -211,7 +211,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
         const pairs = activities.map( (activity) => {
             // Add all activities, with or without date separator.
-            const node = addActivity(activity, listContainer, activity.onDate !== curDate);
+            const node = addActivity(activity, activity.onDate !== curDate);
 
             // update the current date.
             curDate = activity.onDate;
