@@ -1,6 +1,9 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.6.1 - hotfix.
+- Days were not correctly seperated.
+
 Release 0.6.0
 - Weekpicker.
 - Seperators between days.
