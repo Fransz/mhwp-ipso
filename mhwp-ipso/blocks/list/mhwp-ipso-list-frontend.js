@@ -75,7 +75,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      */
     async function main () {
         // Clear the listContainer.
-        Array.from(listContainer.querySelectorAll('li')).map((n) => n.remove());
+        const items = Array.from(listContainer.querySelectorAll('li'));
+        items.map((n) => n.remove());
 
         // Get all activities from our wp; property data; Sort them;
         let activities = await getActivities();
@@ -108,7 +109,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Handle clicks on the next/previous week button
      */
-    async function handleWeekChange(nrDays) {
+    function handleWeekChange(nrDays) {
         // Date format for the interval.
         const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric'}).format;
 
@@ -118,6 +119,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const [mon, sun] = week(newDay);
         document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
         currentDay = mon;
+
+        // Disable the next/prev week buttons
+        const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
+        buttons.map((b) => b.disabled = true);
+        addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
+
+        // Enable them in 5 seconds.
+        // TODO do we want another solution for this?
+        //  - only load calendar, details only after opening an item;
+        //  - disable buttons after selecting a week; enable them after fetching the calendar and details (not 5 sec.)
+        setTimeout(function () {
+            const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
+            buttons.map((b) => b.disabled = false);
+            clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
+        }, 5000);
 
         main();
     }
@@ -361,6 +377,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         }
     }
 
-    // Run init and main on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => { init(); main(); });
+    // Run init and handleWeekChange on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(7);});
 })();
