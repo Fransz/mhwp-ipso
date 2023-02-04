@@ -1,6 +1,14 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.6.0
+- Weekpicker.
+- Seperators between days.
+- Test if there are places available for an activity.
+- A message on the calendar when we are still loading.
+- Improvements in the front end code
+- Reservation forms collapse after a reservation is made.
+
 Release 0.5.0 - Backend;
 - Nonces bij formulieren, en nieuwe na een reservering;
 - Logging; 
@@ -45,12 +53,10 @@ Release 0.1.0  - Initial release.
 
 ## Roadmap
 
-Release 0.6.0 - Frontend.
-- Datepicker.
-- Filtering.
-- A spinner on the calendar when we are still loading.
 
-Release 0.7.0 - Frontend.
+Release 0.7.0 
+- Fix javascript todos; Drop jquery etc..
+- Add functionaity to mail upon a reservation.
 - Collapse activiteiten met meerdere tijdslots op dezelfde dag.
 
 ## Deployment
@@ -64,28 +70,3 @@ We willen de plugin soms op deze site installeren om te demonstreren.
 #### Endpoints.
 De vrijwilligers site draait in een subdirectory. Je moet de paden van de endpoints aanpassen.
 Let op doe dit voor de button, en de list.
-
-#### Divi
-Maar deze vrijwilligers site is gemaakt met divi, en kent niet zomaar bootstrap.
-
-Oplossing (min of meer);
-
-Voeg wat extra css toe om in iedergeval 'reserveer' en 'lees meer' in en uit te kunnen klappen.
-
-    #mhwp-ipso-list-container .collapse.in  {
-        display:block;
-        overflow:hidden;
-    }
-
-    #mhwp-ipso-list-container .collapse  {
-        display:none;
-        overflow:hidden;
-    }
-
-Of laat het block bootstrap laden. in class-mhwp-ipso-blocks.php; function enqueue\_styles
-		wp_enqueue_style(
-			$this->mhwp_ipso . '_bootstrap',
-			'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
-			array(),
-			$ver
-        );

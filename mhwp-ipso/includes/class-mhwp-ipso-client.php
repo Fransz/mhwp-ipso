@@ -6,7 +6,7 @@
  * @author     Frans Jsspers <frans.jaspers@marikenhuis.nl>
  */
 
-require_once plugin_dir_path( dirname( __FILE__ )) . 'includes/class-mhwp-ipso-logger.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-logger.php';
 
 /**
  * Class for connecting to the ipso system.
@@ -14,34 +14,6 @@ require_once plugin_dir_path( dirname( __FILE__ )) . 'includes/class-mhwp-ipso-l
  * encode data to a json string if necessary, check the response for errors.
  */
 class MHWP_IPSO_Client {
-
-	/**
-	 * The json response for failing to make the request.
-	 *
-	 * @var object
-	 */
-	private $error_failure;
-
-	/**
-	 * The json response for a 404 error.
-	 *
-	 * @var object
-	 */
-	private $error_404;
-
-	/**
-	 * The json response for all other http errors.
-	 *
-	 * @var object
-	 */
-	private $error;
-
-	/**
-	 * The json response for an ok response.
-	 *
-	 * @var object
-	 */
-	private $ok;
 
 	/**
 	 * The method to use for the request.
@@ -55,7 +27,7 @@ class MHWP_IPSO_Client {
 	 *
 	 * @var array host
 	 */
-	private $url;
+	public $url;
 
 	/**
 	 * The data for the request.
@@ -86,15 +58,12 @@ class MHWP_IPSO_Client {
 	private $logger;
 
 	/**
-	 * Constructor, initialize standard responses, initialize the url array.
+	 * Constructor, initialize the url array.
 	 * Open the logger.
 	 */
 	public function __construct() {
-		$this->init_std_responses();
-
 		$this->url = array(
 			'scheme' => 'https://',
-			'host'   => '',
 			'path'   => '',
 		);
 
@@ -106,42 +75,6 @@ class MHWP_IPSO_Client {
 		}
 
 		$this->logger = new MHWP_IPSO_Logger();
-	}
-
-	/**
-	 * Initialize our standard response.
-	 * The type casting cannot be done on the attributes directly.
-	 */
-	private function init_std_responses() {
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error_failure = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 0,
-			'mhwp_ipso_msg'    => 'Er gaat iets niet goed op de server',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error_404 = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 404,
-			'mhwp_ipso_msg'    => 'Het registratiesysteem is onbekend',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->error = (object) [
-			'mhwp_ipso_status' => 'error',
-			'mhwp_ipso_code'   => 0,
-			'mhwp_ipso_msg'    => 'Het registratiesysteem reageert niet',
-		];
-
-		// phpcs:ignore  Generic.Arrays.DisallowShortArraySyntax
-		$this->ok = (object) [
-			'mhwp_ipso_status' => 'ok',
-			'mhwp_ipso_code'   => 200,
-			'mhwp_ipso_msg'    => '',
-			'data'             => array(),
-		];
-
 	}
 
 	/**
@@ -158,16 +91,21 @@ class MHWP_IPSO_Client {
 		// We are going to post json, set the correct header.
 		$this->headers['Content-type'] = 'application/json';
 
-		// Encode the data as a json string.
+		// Encode the clients data as a json string.
 		$json = wp_json_encode( $data );
 		if ( false === $json ) {
-			$this->error->mhwp_ipso_msg = 'Ongeldige data';
-			return $this->error;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => 400,
+				'mhwp_ipso_msg'    => 'Ongeldige data',
+			);
 		}
 		$this->data = $json;
 
 		$res = $this->request();
-		$this->logger->log( $res, $data );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
@@ -183,42 +121,46 @@ class MHWP_IPSO_Client {
 		$this->data        = $data;
 
 		$res = $this->request();
-		$this->logger->log( $res );
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
 		return $this->response( $res );
 	}
 
 	/**
 	 * Request IPSO for Activities/getActivityInfo
-	 * The returned data is extended with reservation mappings; images url;
 	 *
 	 * @param array $data The data to send.
 	 * @return object
 	 */
 	public function get_activity( array $data ): object {
-		$mappings = get_option( 'mhwp_ipso_mappings', array() );
-
 		$this->method      = 'GET';
 		$this->url['path'] = '/api/Activities/GetActivityInfo';
 		$this->data        = $data;
 
 		$res = $this->request();
-		$this->logger->log( $res );
-		$response = $this->response( $res );
-
-		if ( isset( $response->data ) ) {
-			if ( isset( $response->data->id ) && array_key_exists( $response->data->id, $mappings ) ) {
-				// A mapping exisits for this activity. Add the url.
-				$response->data->reservationUrl = $mappings[ $response->data->id ];
-			}
-			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( isset( $response->data->mainImage ) ) {
-				// An image exisits for this activity. Prepend scheme and host.
-				$response->data->mainImage = $this->url['scheme'] .
-					rtrim( $this->url['host'], '/' ) . $response->data->mainImage;
-			}
-			// phpcs:enable
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
 		}
-		return $response;
+		return $this->response( $res );
+	}
+
+	/**
+	 * Request IPSO for Activities/getParticipants
+	 *
+	 * @param array $data The data to send.
+	 * @return object
+	 */
+	public function get_participants( array $data ): object {
+		$this->method      = 'GET';
+		$this->url['path'] = '/api/Activities/GetParticipants';
+		$this->data        = $data;
+
+		$res = $this->request();
+		if ( ! is_wp_error( $res ) ) {
+			$this->logger->log( $res, $data );
+		}
+		return $this->response( $res );
 	}
 
 	/**
@@ -277,23 +219,40 @@ class MHWP_IPSO_Client {
 	 */
 	private function response( $resp ) : object {
 		if ( is_wp_error( $resp ) ) {
-			$this->error_failure->mhwp_ipso_code = $resp->get_error_code();
-			return $this->error_failure;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => $resp->get_error_code(),
+				'mhwp_ipso_msg'    => 'Het agendasysteem reageert niet',
+			);
 		}
 
 		if ( 404 === $resp['response']['code'] ) {
-			return $this->error_404;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => 404,
+				'mhwp_ipso_msg'    => 'Het agendasysteem is onbekend',
+			);
 		}
 
 		if ( 200 !== $resp['response']['code'] ) {
-			$this->error->mhwp_ipso_code = $resp['response']['code'];
-			return $this->error;
+			return (object) array(
+				'mhwp_ipso_status' => 'error',
+				'mhwp_ipso_code'   => $resp['response']['code'],
+				'mhwp_ipso_msg'    => 'Er gaat iets niet goed bij het agendasysteem',
+			);
 		}
 
+		// No errors from IPSO; encode the responses data IPSO returned some.
 		if ( ! empty( $resp['body'] ) ) {
-			$arr            = json_decode( $resp['body'] );
-			$this->ok->data = $arr;
+			$data = json_decode( $resp['body'] );
+		} else {
+			$data = array();
 		}
-		return $this->ok;
+		return (object) array(
+			'mhwp_ipso_status' => 'ok',
+			'mhwp_ipso_code'   => 200,
+			'mhwp_ipso_msg'    => '',
+			'data'             => $data,
+		);
 	}
 }

@@ -37,22 +37,24 @@
 				<span><?php echo esc_html( $url ); ?></span>
 			</li>
 			<li>
-				<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
-					<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />
-					<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
-				<?php
-					settings_fields( 'mhwp_ipso_mappings' );
-					submit_button( 'edit', 'primary', 'submit', false, null );
-				?>
-				</form>
-				<form id="mhwp-ipso-mapping-del" method="post" action="options.php">
-					<input type="hidden" name="delete" value="<?php echo esc_attr( $activity_id ); ?>" />
-					<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
+				<div>
+					<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
+						<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />
+						<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
 					<?php
-					settings_fields( 'mhwp_ipso_mappings' );
-					submit_button( 'delete', 'delete', 'submit', false, null );
+						settings_fields( 'mhwp_ipso_mappings' );
+						submit_button( 'edit', 'primary', 'submit', false, null );
 					?>
-				</form>
+					</form>
+					<form id="mhwp-ipso-mapping-del" method="post" action="options.php">
+						<input type="hidden" name="delete" value="<?php echo esc_attr( $activity_id ); ?>" />
+						<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
+						<?php
+						settings_fields( 'mhwp_ipso_mappings' );
+						submit_button( 'delete', 'delete', 'submit', false, null );
+						?>
+					</form>
+				</div>
 			</li>
 		</ul>
 <?php endforeach; ?>

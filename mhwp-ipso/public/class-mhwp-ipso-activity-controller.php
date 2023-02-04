@@ -42,12 +42,12 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::READABLE ),
 				),
-				'schema' => array( $this, 'get_item_schema' ),
+				'schema' => array( $this, 'get_items_schema' ),
 			)
 		);
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->resource . '/(?P<id>[\d]+)',
+			'/' . $this->resource . 'detail',
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -83,10 +83,10 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'till' => $request->get_param( 'till' ),
 		);
 
-		$client   = new MHWP_IPSO_Client();
-		$calendar = $client->get_activities( $data );
+		$client          = new MHWP_IPSO_Client();
+		$activities_resp = $client->get_activities( $data );
 
-		return new WP_REST_Response( $calendar, 200 );
+		return new WP_REST_Response( $activities_resp, 200 );
 	}
 
 	/**
@@ -100,26 +100,96 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get a single activity (really a type!) from the ipso system.
+	 * Get a single activity (really a activity type!) from the ipso system.
+	 *
+	 * The data is extended with reservation mappings; images url;
+	 * The data is extended with the nr of participants.
+	 *
+	 * For the participants we make an extra request to IPSO.
+	 * Doing that in the client would expose names and email for participants.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 *
-	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
+	 * @return object Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ): WP_REST_Response {
-		$activity_id = basename( $request->get_route() );
+		$activity_id = $request->get_param( 'activityId' );
+		$calendar_id = $request->get_param( 'calendarId' );
 
 		$data = array(
 			'activityID' => $activity_id,
 		);
 
-		$client   = new MHWP_IPSO_Client();
-		$activity = $client->get_activity( $data );
-		return new WP_REST_Response( $activity, 200 );
+		$client        = new MHWP_IPSO_Client();
+		$activity_resp = $client->get_activity( $data );
+
+		// If we could not correctly fetch the activity, bail out.
+		if ( is_wp_error( $activity_resp ) || 200 !== $activity_resp->mhwp_ipso_code ) {
+			return new WP_REST_Response( $activity_resp, 200 );
+		}
+
+		if ( isset( $activity_resp->data ) ) {
+			// Get the configured mappings.
+			$mappings = get_option( 'mhwp_ipso_mappings', array() );
+
+			if ( isset( $activity_resp->data->id ) && array_key_exists( $activity_resp->data->id, $mappings ) ) {
+
+				// A mapping exists for this activity. Add the url.
+				$activity_resp->data->reservationUrl = $mappings[ $activity_resp->data->id ];
+			}
+
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( isset( $activity_resp->data->mainImage ) ) {
+
+				// An image exists for this activity. Prepend scheme and host, the client knows about these.
+				$url                            = $client->url['scheme'] . rtrim( $client->url['host'], '/' );
+				$activity_resp->data->mainImage = $url . $activity_resp->data->mainImage;
+			}
+			// phpcs:enable
+		}
+
+		// Make another request for the participants data.
+		$data = array(
+			'activityId' => $calendar_id,
+		);
+
+		$participants_resp = $client->get_participants( $data );
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$activity_resp->data->nrParticipants = count( $participants_resp->data );
+
+		return new WP_REST_Response( $activity_resp, 200 );
 	}
 
 	/**
-	 * Get our schema for an activity.
+	 * Get our schema for the activity list.
+	 *
+	 * @return array The schema for an activity.
+	 */
+	public function get_items_schema() : array {
+		if ( $this->schema ) {
+			return $this->schema;
+		}
+
+		$this->schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'activities',
+			'type'       => 'object',
+			'properties' => array(
+				'from' => array(
+					'description' => esc_html__( 'Start date in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
+				),
+				'till' => array(
+					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
+					'type'        => 'string',
+				),
+			),
+		);
+
+		return $this->schema;
+	}
+
+	/**
+	 * Get our schema for an activity detail.
 	 *
 	 * @return array The schema for an activity.
 	 */
@@ -133,14 +203,13 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'title'      => 'activity',
 			'type'       => 'object',
 			'properties' => array(
-				'from' => array(
-					'description' => esc_html__( 'Start date in the calendar', 'mhwp-ipso' ),
+				'calendarId' => array(
+					'description' => esc_html__( 'The id of the activity in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
 				),
-				'till' => array(
-					'description' => esc_html__( 'End date in the calendar', 'mhwp-ipso' ),
+				'activityId' => array(
+					'description' => esc_html__( 'The id of the activity type', 'mhwp-ipso' ),
 					'type'        => 'string',
-					'default'     => 7,
 				),
 			),
 		);

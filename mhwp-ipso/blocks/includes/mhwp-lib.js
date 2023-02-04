@@ -8,7 +8,7 @@ const $jq = jQuery.noConflict();
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeReservation(form, event) {
+async function makeReservation(detail, form, event) {
     event.preventDefault();
 
     // The URL for making the reservation
@@ -16,10 +16,16 @@ async function makeReservation(form, event) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-    $jq('button', form).prop('disabled', true);
-    const container = $jq(form).parent();
+    const formContainer = $jq(form).parent();
+    const container = $jq(formContainer).parent();
 
+    // Clear messages.
+    clearErrors(formContainer);
+    clearMessages(formContainer);
+    clearErrors(container);
+    clearMessages(container);
 
+    // Collect all dat in an object.
     const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
     const firstName = $jq('input[name="firstName"]', form).val();
     const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
@@ -27,10 +33,8 @@ async function makeReservation(form, event) {
     const email = $jq('input[name="email"]', form).val();
     let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
     phoneNumber = phoneNumber === "" ? null : phoneNumber;
-    const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
 
-    clearErrors(container);
-    clearMessages(container);
+    const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
 
     const fetchInit = {
         method: 'POST',
@@ -40,10 +44,26 @@ async function makeReservation(form, event) {
         url, fetchInit, container
     ).then(() => {
         // TODO: if ! 200 addError
+
+        // We made a successful reservation; Check to see if we can make another.
+        detail.places -= 1;
+        if (detail.places <= 0) {
+            // Reservations are no more possible.Remove the form and button, add a notice.
+            const button = $jq(".mhwp-ipso-reservation-button", container);
+            button.remove();
+            $jq(form).remove();
+
+            const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
+            container.append(notice);
+        }
+
+        // Close the reservation form, add a message.
+        $jq(formContainer).removeClass('in');
         addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+
+        // Close the message after 5 sec.
         setTimeout(() => {
             clearMessages(container);
-            $jq('button', form).prop('disabled', false);
         }, 5000);
     }).catch((_) => {
         console.log('catched');
