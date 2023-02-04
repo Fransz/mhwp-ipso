@@ -116,9 +116,13 @@ ul.ui-list li h4 {
   margin-top:1em;
   margin-bottom:em;
 }
+ul.ui-list li div {
+  display:flex;
+  justify-content: space-evenly;
+}
+
 ul.ui-list li form {
   display: inline-block;
-  margin: -1em 1em 0em 0;
 }
 
 .mhwp-ipso-ui-key input,

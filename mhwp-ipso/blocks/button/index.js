@@ -116,50 +116,52 @@ registerBlockType( metadata, {
                     {idInput(attributes.activity_id)}
                     {titleInput(attributes.activity_title)}
 
-                    <button className="mhwp-ipso-reservation-show-reservation" type="button"
+                    <button className="mhwp-ipso-reservation-show-reservation mhwp-ipso-reservation-button " type="button"
                             data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation"
                             aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation">
                         Reserveer
                     </button>
 
-                    <form className="collapse" id="mhwp-ipso-collapse-reservation">
-                        <input type="hidden" name="activityCalendarId" value="" />
-                        <div>
-                            <fieldset className="mhwp-ipso-reservation-firstname">
-                                <label htmlFor="mhwp-ipso-voornaam">Voornaam</label>
-                                <span className="required">*</span>
-                                <input type="text" id="mhwp-ipso-voornaam" name="firstName" required placeholder="" />
-                            </fieldset>
-                            <fieldset className="mhwp-ipso-reservation-prefix">
-                                <label htmlFor="mhwp-ipso-tussenvoegsel">Tussenvoegsel</label>
-                                <input type="text" id="mhwp-ipso-tussenvoegsel" name="lastNamePrefix" placeholder="" />
-                            </fieldset>
-                            <fieldset className="mhwp-ipso-reservation-lastname">
-                                <label htmlFor="mhwp-ipso-achternaam">Achternaam</label>
-                                <span className="required">*</span>
-                                <input type="text" id="mhwp-ipso-achternaam" name="lastName" required placeholder="" />
-                            </fieldset>
-                        </div>
-
-                        <div>
-                            <fieldset className="mhwp-ipso-reservation-telephone">
-                                <label htmlFor="mhwp-ipso-telefoon">Telefoonnummer</label>
-                                <input type="tel" id="mhwp-ipso-telefoon" name="phoneNumber" placeholder="" />
-                                <span className="validity"></span>
-                            </fieldset>
-                            <fieldset className="mhwp-ipso-reservation-email">
-                                <label htmlFor="mhwp-ipso-email">Emailadres</label>
-                                <span className="required">*</span>
-                                <input type="email" id="mhwp-ipso-email" name="email" required placeholder="" />
-                                <span className="validity"></span>
-                            </fieldset>
+                    <div className="mhwp-ipso-reservation-form collapse" id="mhwp-ipso-collapse-reservation">
+                        <form>
+                            <input type="hidden" name="activityCalendarId" value="" />
+                            <input type="hidden" name="activityCalendarId" value="" />
                             <div>
-                                <button type="submit">Reserveer</button>
+                                <fieldset className="mhwp-ipso-reservation-firstname">
+                                    <label htmlFor="mhwp-ipso-voornaam">Voornaam</label>
+                                    <span className="required">*</span>
+                                    <input type="text" id="mhwp-ipso-voornaam" name="firstName" required placeholder="" />
+                                </fieldset>
+                                <fieldset className="mhwp-ipso-reservation-prefix">
+                                    <label htmlFor="mhwp-ipso-tussenvoegsel">Tussenvoegsel</label>
+                                    <input type="text" id="mhwp-ipso-tussenvoegsel" name="lastNamePrefix" placeholder="" />
+                                </fieldset>
+                                <fieldset className="mhwp-ipso-reservation-lastname">
+                                    <label htmlFor="mhwp-ipso-achternaam">Achternaam</label>
+                                    <span className="required">*</span>
+                                    <input type="text" id="mhwp-ipso-achternaam" name="lastName" required placeholder="" />
+                                </fieldset>
                             </div>
-                        </div>
-                    </form>
-                </div>
 
+                            <div>
+                                <fieldset className="mhwp-ipso-reservation-telephone">
+                                    <label htmlFor="mhwp-ipso-telefoon">Telefoonnummer</label>
+                                    <input type="tel" id="mhwp-ipso-telefoon" name="phoneNumber" placeholder="" />
+                                    <span className="validity"></span>
+                                </fieldset>
+                                <fieldset className="mhwp-ipso-reservation-email">
+                                    <label htmlFor="mhwp-ipso-email">Emailadres</label>
+                                    <span className="required">*</span>
+                                    <input type="email" id="mhwp-ipso-email" name="email" required placeholder="" />
+                                    <span className="validity"></span>
+                                </fieldset>
+                                <div>
+                                    <button type="submit">Reserveer</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         )
     }

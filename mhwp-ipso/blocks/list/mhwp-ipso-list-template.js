@@ -2,8 +2,7 @@ function template(activity) {
     const id = activity.id;
     // We just return an evaluated template string.
     return `
-        <li class="mhwp-ipso-activity panel">
-            <div>
+        <li class="mhwp-ipso-activity panel"><div>
                 <div class="mhwp-ipso-activity-header">
                     <span class="mhwp-ipso-activity-header-title">${activity.title}</span>
                     <span class="mhwp-ipso-activity-header-date">${activity.date}</span>
@@ -15,7 +14,7 @@ function template(activity) {
                    Lees meer
                 </button>
                 <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${id}">
-                    <button class="mhwp-ipso-activity-show-reservation" type="button"
+                    <button class="mhwp-ipso-activity-show-reservation mhwp-ipso-reservation-button" type="button"
                        data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation-${id}"
                        aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation-${id}">
                         Reserveer
@@ -51,15 +50,15 @@ function template(activity) {
                                 <input type="email" id="mhwp-ipso-email-${id}" name="email" required placeholder="" />
                                 <span class="validity"></span>
                             </fieldset>
-                        <div>
-                        <!-- @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing  -->
-                        <button class="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
-                    </div>
+                            <div>
+                                <!-- @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing  -->
+                                <button class="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-
-    </li>`;
+            </div>
+        </li>`;
 }
 
 export default template;

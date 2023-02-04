@@ -78,6 +78,21 @@ class MHWP_IPSO_Blocks {
 				$ver,
 				true
 			);
+			wp_enqueue_script(
+				$this->mhwp_ipso . '_blocks',
+				plugin_dir_url( __FILE__ ) . 'mhwp-ipso-blocks.js',
+				array(),
+				$ver,
+				true
+			);
+
+			// Generate an initial wp nonce and pass it to the frontend.
+			// The rest API receives the nonce via a header (wpFetchRest);
+			// The rest API checks and refreshes the nonce (wp-includes/rest-api.php:rest_cookie_check_errors).
+			// The nonce protects against CSRF attacks, not against replay attacks.
+			$nonce  = esc_js( wp_create_nonce( 'wp_rest' ) );
+			$script = "const wpApiSettings = { 'nonce': '$nonce' };";
+			wp_add_inline_script( $this->mhwp_ipso . '_blocks', $script );
 		}
 	}
 
@@ -85,33 +100,6 @@ class MHWP_IPSO_Blocks {
 	 * Register the block.
 	 */
 	public function register_blocks() {
-		/**
-		 * Generate a wp nonce and add it to the footer, to be used by the block.
-		 * The nonce is checked as part of the normal rest api processing (rest_cookie_check_errors)
-		 * The nonce protects against CSRF attacks, not against replay attacks.
-		 *
-		 * @param array $metadata the metadata.
-		 * @return array
-		 */
-		function filter_block_metadata( array $metadata ): array {
-			if ( 'mhwp-ipso/list' === $metadata['name'] ) {
-				add_action(
-					'wp_print_footer_scripts',
-					function () {
-						?>
-						<script>
-							let wpApiSettings = {
-								'nonce': '<?php echo esc_js( wp_create_nonce( 'wp_rest' ) ); ?>',
-							};
-						</script>
-						<?php
-					}
-				);
-			}
-			return $metadata;
-		}
-		add_filter( 'block_type_metadata', 'filter_block_metadata' );
-
 		register_block_type(
 			plugin_dir_path( __FILE__ ) . 'list'
 		);
