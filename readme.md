@@ -1,6 +1,14 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.6.0
+- Weekpicker.
+- Seperators between days.
+- Test if there are places available for an activity.
+- A message on the calendar when we are still loading.
+- Improvements in the front end code
+- Reservation forms collapse after a reservation is made.
+
 Release 0.5.0 - Backend;
 - Nonces bij formulieren, en nieuwe na een reservering;
 - Logging; 
@@ -45,15 +53,10 @@ Release 0.1.0  - Initial release.
 
 ## Roadmap
 
-Release 0.6.0
-- Weekpicker.
-- Seperators between days.
-- For each activity we test if there are places available.
-- A message on the calendar when we are still loading.
-- Drop jquery in them main js files.
-- Improvements in the front end. 
 
-Release 0.7.0 - Frontend.
+Release 0.7.0 
+- Fix javascript todos; Drop jquery etc..
+- Add functionaity to mail upon a reservation.
 - Collapse activiteiten met meerdere tijdslots op dezelfde dag.
 
 ## Deployment
