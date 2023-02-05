@@ -43,6 +43,9 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Initialize the property settings.
+	 *
+	 * Todo mail: add a setting mhwp_ipso_mail_mappings and a sanitizer;
+	 * Todo mail: rename setting mhwp_ipso_mappings to mhwp_ipso_url_mappings and the sanitizer;
 	 */
 	public function init_settings() {
 		$this->admin_settings = array(
@@ -71,6 +74,8 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Initialize the property sections.
+	 *
+	 * Todo mail: add a section mail_mappings; rename mappings to url_mappings;
 	 */
 	public function init_sections() {
 		$this->admin_sections = array(
@@ -91,6 +96,11 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Initialize the property fields.
+	 *
+	 * Todo: mail add fileds for the mail mappings: in the correct section, with correct setting
+	 * Todo: one field with id mhwp_ipso_mail_mappings_activity_id one field with id mhwp_ipso_mail_mappings_mail
+	 * Todo: rename mhwp_ipso_mappings_{activity_id,url} to mhwp_ipso_url_mappings_{activity_id,url}
+	 * Todo mail: We  can reuse the callback if we test for mhwp_ipso_mail_mappings_activity_id also;
 	 */
 	public function init_fields() {
 		$this->admin_fields = array(
@@ -276,16 +286,15 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Sanitize mappings before they are stored.
-	 * Deleting and adding mappings are handled here, after being processed by
-	 * optons.php and option.php.
-	 * Editing mappings are handled by the index method filling the add form
-	 * while displaying the page.
+	 * Deleting and adding mappings are handled here, after being processed by optons.php and option.php.
+	 * Editing mappings are handled by the index method filling the add form while displaying the page.
 	 *
 	 * @param mixed $input An array of activity_id and url for the mapping or null if we want to delete.
 	 *
 	 * @return array An array of all mappings. The array key is the activity id. The values are the URLs
 	 */
 	public function sanitize_mappings( $input ): array {
+		// Todo mail: we need to change this.
 		$output = get_option( 'mhwp_ipso_mappings', array() );
 
 		// Incorrect nonce.
@@ -327,6 +336,7 @@ class MHWP_IPSO_Admin_Settings {
 			}
 
 			// We want to add a mapping. Sanitize url.
+			// Todo mail: we need to change this.
 			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_mappings_url'] ), array( 'http', 'https' ) );
 			if ( empty( $url ) ) {
 				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
@@ -384,6 +394,7 @@ class MHWP_IPSO_Admin_Settings {
 	/**
 	 * Render callback for mapping fields;
 	 * If we are editing a mapping these fields are filled
+	 * Todo mail: We  can reuse this callback if we test for mhwp_ipso_mail_mappings_activity_id also;
 	 *
 	 * @param array $args  The array of arguments.
 	 *

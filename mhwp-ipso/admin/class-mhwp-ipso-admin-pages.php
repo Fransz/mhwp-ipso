@@ -128,6 +128,7 @@ class MHWP_IPSO_Admin_Pages {
 	public function index() {
 		// The edit parameter, used for editing a mapping, is processed while
 		// rendering the page, not by the settings sanitizer.
+		// Todo mail: rename to edit_mapping
 		if ( isset( $_POST['edit'] ) ) {
 			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
 				die( 'Security issues!' );

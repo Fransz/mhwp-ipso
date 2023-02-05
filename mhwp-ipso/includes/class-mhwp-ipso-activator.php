@@ -17,6 +17,7 @@ class MHWP_IPSO_Activator {
 
 	/**
 	 * Activate the plugin, set defalt option values.
+	 * todo mail: init setting. rename setting
 	 */
 	public static function activate() {
 		add_option( 'mhwp_ipso_live_apikey', '', '', false );

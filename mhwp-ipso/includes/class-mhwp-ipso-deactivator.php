@@ -17,6 +17,7 @@ class MHWP_IPSO_Deactivator {
 
 	/**
 	 * Deactivate the plugin
+	 * todo mail: init setting. rename setting
 	 */
 	public static function deactivate() {
 		delete_option( 'mhwp_ipso_live_apikey' );
