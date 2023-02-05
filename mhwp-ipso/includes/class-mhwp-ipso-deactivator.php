@@ -23,7 +23,7 @@ class MHWP_IPSO_Deactivator {
 		delete_option( 'mhwp_ipso_live_apikey' );
 		delete_option( 'mhwp_ipso_test_apikey' );
 		delete_option( 'mhwp_ipso_is_test' );
-		delete_option( 'mhwp_ipso_mappings' );
+		delete_option( 'mhwp_ipso_url_mappings' );
 	}
 
 }

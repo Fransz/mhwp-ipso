@@ -45,7 +45,7 @@ class MHWP_IPSO_Admin_Settings {
 	 * Initialize the property settings.
 	 *
 	 * Todo mail: add a setting mhwp_ipso_mail_mappings and a sanitizer;
-	 * Todo mail: rename setting mhwp_ipso_mappings to mhwp_ipso_url_mappings and the sanitizer;
+	 * Todo mail: sanitizer;
 	 */
 	public function init_settings() {
 		$this->admin_settings = array(
@@ -65,8 +65,8 @@ class MHWP_IPSO_Admin_Settings {
 				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_is_test' ) ),
 			),
 			array(
-				'option_group' => 'mhwp_ipso_mappings',
-				'option_name'  => 'mhwp_ipso_mappings',
+				'option_group' => 'mhwp_ipso_url_mappings',
+				'option_name'  => 'mhwp_ipso_url_mappings',
 				'args'         => array( 'sanitize_callback' => array( $this, 'sanitize_mappings' ) ),
 			),
 		);
@@ -86,7 +86,7 @@ class MHWP_IPSO_Admin_Settings {
 				'page'     => 'mhwp_ipso_dashboard',
 			),
 			array(
-				'id'       => 'mhwp_ipso_mappings_section',
+				'id'       => 'mhwp_ipso_url_mappings_section',
 				'title'    => 'IPSO Mappings',
 				'callback' => function () { return null; }, //phpcs:ignore Generic.Functions.OpeningFunctionBraceKernighanRitchie.ContentAfterBrace
 				'page'     => 'mhwp_ipso_dashboard',
@@ -99,7 +99,6 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * Todo: mail add fileds for the mail mappings: in the correct section, with correct setting
 	 * Todo: one field with id mhwp_ipso_mail_mappings_activity_id one field with id mhwp_ipso_mail_mappings_mail
-	 * Todo: rename mhwp_ipso_mappings_{activity_id,url} to mhwp_ipso_url_mappings_{activity_id,url}
 	 * Todo mail: We  can reuse the callback if we test for mhwp_ipso_mail_mappings_activity_id also;
 	 */
 	public function init_fields() {
@@ -141,26 +140,26 @@ class MHWP_IPSO_Admin_Settings {
 				),
 			),
 			array(
-				'id'       => 'mhwp_ipso_mappings_activity_id',
+				'id'       => 'mhwp_ipso_url_mappings_id',
 				'title'    => 'Activiteit Id',
 				'callback' => array( $this, 'ipso_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
-				'section'  => 'mhwp_ipso_mappings_section',
+				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
-					'setting'   => 'mhwp_ipso_mappings',
-					'label_for' => 'mhwp_ipso_mappings_activity_id',
+					'setting'   => 'mhwp_ipso_url_mappings',
+					'label_for' => 'mhwp_ipso_url_mappings_id',
 					'classes'   => 'mhwp-ipso-ui-mapping-activity-id',
 				),
 			),
 			array(
-				'id'       => 'mhwp_ipso_mappings_url',
+				'id'       => 'mhwp_ipso_url_mappings_url',
 				'title'    => 'URL',
 				'callback' => array( $this, 'ipso_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
-				'section'  => 'mhwp_ipso_mappings_section',
+				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
-					'setting'   => 'mhwp_ipso_mappings',
-					'label_for' => 'mhwp_ipso_mappings_url',
+					'setting'   => 'mhwp_ipso_url_mappings',
+					'label_for' => 'mhwp_ipso_url_mappings_url',
 					'classes'   => 'mhwp-ipso-ui-mapping-url',
 				),
 			),
@@ -295,17 +294,18 @@ class MHWP_IPSO_Admin_Settings {
 	 */
 	public function sanitize_mappings( $input ): array {
 		// Todo mail: we need to change this.
-		$output = get_option( 'mhwp_ipso_mappings', array() );
+		$output = get_option( 'mhwp_ipso_url_mappings', array() );
 
 		// Incorrect nonce.
-		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), 'mhwp_ipso_mappings-options' ) ) {
-			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+		// todo mail: Do we have a seperat enonce for mail_mappings?
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['_wpnonce'] ), 'mhwp_ipso_url_mappings-options' ) ) {
+			add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
 			return $output;
 		}
 
 		// Incorrect action.
 		if ( ! isset( $_POST['delete'] ) && ! isset( $input ) ) {
-			add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Empty Form!' );
+			add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Empty Form!' );
 			return $output;
 		}
 
@@ -315,12 +315,12 @@ class MHWP_IPSO_Admin_Settings {
 			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
 
 			if ( empty( $activity_id ) ) {
-				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
 
 			if ( ! array_key_exists( $activity_id, $output ) ) {
-				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Onbekend activiteits id.' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Onbekend activiteits id.' );
 				return $output;
 			}
 
@@ -328,18 +328,18 @@ class MHWP_IPSO_Admin_Settings {
 		} else {
 
 			// We want to add a mapping. Sanitize activity id.
-			$activity_id = sanitize_text_field( wp_unslash( $input['mhwp_ipso_mappings_activity_id'] ) );
+			$activity_id = sanitize_text_field( wp_unslash( $input['mhwp_ipso_url_mappings_id'] ) );
 			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
 			if ( empty( $activity_id ) ) {
-				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
 
 			// We want to add a mapping. Sanitize url.
 			// Todo mail: we need to change this.
-			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_mappings_url'] ), array( 'http', 'https' ) );
+			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_url_mappings_url'] ), array( 'http', 'https' ) );
 			if ( empty( $url ) ) {
-				add_settings_error( 'mhwp_ipso_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
 				return $output;
 			}
 
@@ -416,7 +416,7 @@ class MHWP_IPSO_Admin_Settings {
 
 			$option = get_option( $args['setting'] );
 
-			if ( 'mhwp_ipso_mappings_activity_id' === $id ) {
+			if ( 'mhwp_ipso_url_mappings_id' === $id ) {
 				$value    = $edit;
 				$readonly = 'readonly';
 			} else {
