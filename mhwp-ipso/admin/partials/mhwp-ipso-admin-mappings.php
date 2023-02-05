@@ -36,7 +36,7 @@
 				<span><?php echo esc_html( $activity_id ); ?></span>
 			</li>
 			<li>
-				<span><?php echo esc_html( $url ); ?></span>
+				<span><?php echo esc_url( $url ); ?></span>
 			</li>
 			<li>
 				<div>
