@@ -8,7 +8,7 @@ const $jq = jQuery.noConflict();
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeReservation(detail, form, event) {
+async function makeReservation(detail, mailData, form, event) {
     event.preventDefault();
 
     // The URL for making the reservation
@@ -25,7 +25,7 @@ async function makeReservation(detail, form, event) {
     clearErrors(container);
     clearMessages(container);
 
-    // Collect all dat in an object.
+    // Collect all data in an object.
     const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
     const firstName = $jq('input[name="firstName"]', form).val();
     const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
@@ -33,8 +33,15 @@ async function makeReservation(detail, form, event) {
     const email = $jq('input[name="email"]', form).val();
     let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
     phoneNumber = phoneNumber === "" ? null : phoneNumber;
+    const activityId = mailData.activityId;
+    const activityTitle = mailData.activityTitle;
+    const activityDate = mailData.activityDate;
+    const activityTime = mailData.activityTime;
 
-    const data = { activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber };
+    const data = {
+        activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
+        activityId, activityTitle, activityDate, activityTime
+    };
 
     const fetchInit = {
         method: 'POST',
