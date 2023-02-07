@@ -1,4 +1,6 @@
 /**
+ * Todo add mailData in the ipso button so we can mail with the button also.
+ *
  * Todo addMessage ipv <div id='notice'>
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;

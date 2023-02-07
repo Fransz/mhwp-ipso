@@ -1,6 +1,9 @@
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
+/*
+ * Todo add mailData in the ipso button so we can mail with the button also.
+ */
 import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait} from "../includes/mhwp-lib";
 
 (function() {
