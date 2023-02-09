@@ -129,7 +129,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 
 		if ( isset( $activity_resp->data ) ) {
 			// Get the configured mappings.
-			$mappings = get_option( 'mhwp_ipso_mappings', array() );
+			$mappings = get_option( 'mhwp_ipso_url_mappings', array() );
 
 			if ( isset( $activity_resp->data->id ) && array_key_exists( $activity_resp->data->id, $mappings ) ) {
 

@@ -64,9 +64,57 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 	 * @return object Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ): object {
-		$client           = new MHWP_IPSO_Client();
-		$json             = $request->get_json_params();
+		$client = new MHWP_IPSO_Client();
+		$json   = $request->get_json_params();
+
+		// get request parameters for mailing, drop them from the json.
+		// Todo do we have to escape this; We want to prevent 2 empty lines? two dots? donno.
+		$activity_id    = $json['activityId'];
+		$activity_title = $json['activityTitle'] ?? '';
+		$activity_date  = $json['activityDate'] ?? '';
+		$activity_time  = $json['activityTime'] ?? '';
+		$firstname      = $json['firstName'] ?? '';
+		$prefix         = $json['lastNamePrefix'] ?? '';
+		$lastname       = $json['lastName'] ?? '';
+		$guest_email    = $json['email'] ?? '';
+		$phonenumber    = $json['phoneNumber'] ?? '';
+
+		// Drop parameters not needed for making the reservation from the json.
+		unset( $json['activityId'] );
+		unset( $json['activityTitle'] );
+		unset( $json['activityDate'] );
+		unset( $json['activityTime'] );
+
+		// make the reservataion with IPSO.Community.
 		$reservation_resp = $client->add_participants( $json );
+
+		// If we could not correctly make the resevation, bail out.
+		if ( is_wp_error( $reservation_resp ) || 200 !== $reservation_resp->mhwp_ipso_code ) {
+			return new WP_REST_Response( $reservation_resp, 200 );
+		}
+
+		// get the mail mappings.
+		$mappings = get_option( 'mhwp_ipso_mail_mappings', array() );
+
+		// If there is a mapping for the activity_id, mail.
+		if ( isset( $activity_id ) && array_key_exists( $activity_id, $mappings ) ) {
+			$mail_list = $mappings[ $activity_id ];
+			$emails    = explode( ',', $mail_list );
+
+			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+			$subject  = sprintf( 'Marikenhuis - Inschrijving activiteit %s', $activity_title );
+			$message  = sprintf( 'Er is een inschrijving voor activiteit %s, op %s om %s.', $activity_title, $activity_date, $activity_time );
+			$message .= PHP_EOL . sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s.', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
+			// phpcs:enable
+
+			foreach ( $emails as $email ) {
+				$mailed = wp_mail( $email, $subject, $message );
+				if ( ! $mailed ) {
+					error_log( "We tried to mail: $email. Subject: $subject, message: $message" );
+				}
+			}
+		}
+
 		return new WP_REST_Response( $reservation_resp, 200 );
 	}
 
