@@ -54,10 +54,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const el = document.getElementById('mhwp-ipso-list-nr-days');
         nrDays = parseInt(el.value) || 0;
 
-        // Attach an eventhandler to the datepicker.
-        const datePicker = document.querySelector('#mhwp-ipso-list-datepicker input');
-        datePicker.addEventListener('change', handleDateChange)
-
         // Initialize the week picker.
         const prevWeek = document.querySelector('#mhwp-ipso-prev-week');
         prevWeek.addEventListener('click', () =>  handleWeekChange(-7, listContainer) )
@@ -92,26 +88,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
         buttons.map((b) => b.disabled = false);
         clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
-    }
-
-    /**
-     * Handle changes in the datepicker.
-     *
-     * Todo: restrict dates to choose; invalid dates handling;
-     * @param event
-     * @returns {Promise<void>}
-     */
-    async function handleDateChange(event) {
-        const d = new Date(event.currentTarget.value);
-        if ( "Invalid String." === d.toString())
-            return;
-
-        // Get all activities from our wp, property data. Sort them.
-        let activities = await getActivitiesByDate(d);
-        activities = activities.data;
-        activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-        await processActivities(activities);
     }
 
     /**
