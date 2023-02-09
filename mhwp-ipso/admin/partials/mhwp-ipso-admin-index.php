@@ -4,6 +4,7 @@
  *
  * @package  MHWP_IPSO
  * @author   Frans Jaspers
+ * Todo mail: add the tab.
  */
 
 ?>
@@ -23,11 +24,14 @@
 			case 'Afwijkende reserveringen':
 				$active_tab = 'tab-2';
 				break;
-			case 'Activiteiten':
+			case 'Email adressen':
 				$active_tab = 'tab-3';
 				break;
-			case 'Log':
+			case 'Activiteiten':
 				$active_tab = 'tab-4';
+				break;
+			case 'Log':
+				$active_tab = 'tab-5';
 				break;
 		}
 	}
@@ -37,8 +41,9 @@
 	<ul class="nav nav-tabs">
 		<li class="<?php echo 'tab-1' === $active_tab ? 'active' : ''; ?>"><a href="#tab-1">Instellingen</a></li>
 		<li class="<?php echo 'tab-2' === $active_tab ? 'active' : ''; ?>"><a href="#tab-2">Afwijkende reserveringen</a></li>
-		<li class="<?php echo 'tab-3' === $active_tab ? 'active' : ''; ?>"><a href="#tab-3">Activiteiten</a></li>
-		<li class="<?php echo 'tab-4' === $active_tab ? 'active' : ''; ?>"><a href="#tab-4">Logs</a></li>
+		<li class="<?php echo 'tab-3' === $active_tab ? 'active' : ''; ?>"><a href="#tab-3">Email adressen</a></li>
+		<li class="<?php echo 'tab-4' === $active_tab ? 'active' : ''; ?>"><a href="#tab-4">Activiteiten</a></li>
+		<li class="<?php echo 'tab-5' === $active_tab ? 'active' : ''; ?>"><a href="#tab-5">Logs</a></li>
 	</ul>
 
 	<div class="tab-content">
@@ -49,15 +54,20 @@
 		</div>
 		<div id="tab-2" class="tab-pane <?php echo 'tab-2' === $active_tab ? 'active' : ''; ?>">
 			<?php
-				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-mappings.php';
+				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-url-mappings.php';
 			?>
 		</div>
 		<div id="tab-3" class="tab-pane <?php echo 'tab-3' === $active_tab ? 'active' : ''; ?>">
 			<?php
-				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-activities.php';
+				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-mail-mappings.php';
 			?>
 		</div>
 		<div id="tab-4" class="tab-pane <?php echo 'tab-4' === $active_tab ? 'active' : ''; ?>">
+			<?php
+				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-activities.php';
+			?>
+		</div>
+		<div id="tab-5" class="tab-pane <?php echo 'tab-5' === $active_tab ? 'active' : ''; ?>">
 			<?php
 				require_once plugin_dir_path( dirname( __FILE__ ) ) . 'partials/mhwp-ipso-admin-log.php';
 			?>

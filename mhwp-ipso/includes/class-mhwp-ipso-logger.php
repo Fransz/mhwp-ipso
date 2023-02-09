@@ -105,6 +105,8 @@ class MHWP_IPSO_Logger {
 	/**
 	 * Log a request to our api with the response from IPSO.
 	 *
+	 * Todo: add a column between uri and parameters with ipso's endpoint. Only after that the return code.
+	 *
 	 * @param array $res The response array from a call to wp_remote_request.
 	 * @param array $data The parameters of the made request.
 	 * @return string the added line.

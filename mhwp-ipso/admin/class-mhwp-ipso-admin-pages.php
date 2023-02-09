@@ -126,10 +126,15 @@ class MHWP_IPSO_Admin_Pages {
 	 * Renders output put for the admin settings page.
 	 */
 	public function index() {
-		// The edit parameter, used for editing a mapping, is processed while
+		// The edit parameter, used for editing a mapping, url or mail, is processed while
 		// rendering the page, not by the settings sanitizer.
+		// Because the edit parameter is used for url and mail mappings, we can have one of two nonces.
 		if ( isset( $_POST['edit'] ) ) {
-			if ( ! check_admin_referer( 'mhwp_ipso_mappings-options' ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$nonce = wp_unslash( $_REQUEST['_wpnonce'] );
+			if ( ! isset( $nonce )
+				|| ( ! wp_verify_nonce( $nonce, 'mhwp_ipso_url_mappings-options' )
+					&& ! wp_verify_nonce( $nonce, 'mhwp_ipso_mail_mappings-options' ) ) ) {
 				die( 'Security issues!' );
 			}
 			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );

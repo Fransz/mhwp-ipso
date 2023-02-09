@@ -1,5 +1,8 @@
 /**
+ * Todo add mailData in the ipso button so we can mail with the button also.
+ *
  * Todo addMessage ipv <div id='notice'>
+ * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;
  * Todo drop $jq;
@@ -270,7 +273,15 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const {img, title, intro, descr} = detail;
         $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
 
-        prepareForm(detail, node);
+        // We need the reservation, and extra data for mailing on the server.
+        // We added properties date and time to the activity already.
+        const mailData = {
+            'activityId': activity.activityID,
+            'activityTitle': activity.title,
+            'activityDate': activity.date,
+            'activityTime': activity.time,
+        }
+        prepareForm(detail, mailData, node);
     }
 
     /**
@@ -339,10 +350,11 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Remove the form if we dont not need it, otherwise add a validation-, and submit handler.
      *
-     * @param detail
+     * @param detail The activities data
+     * @param mailData Extra data needed for mailing.
      * @param container
      */
-    function prepareForm(detail, container) {
+    function prepareForm(detail, mailData, container) {
         if(detail.places <= 0) {
             // Reservations are not possible.Remove the form and button. add a notice.
             const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
@@ -351,6 +363,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
             const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet registreren.</div>';
             $jq('.mhwp-ipso-activity-detail', container).append(notice);
+
         } else if(detail.reservationUrl) {
             // We dont need the form. Prepare the button to redirect. remove the form.
             const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
@@ -358,6 +371,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             button.on('click', (e) => window.location = detail.reservationUrl );
 
             $jq('.mhwp-ipso-activity-reservation', container).remove();
+
         } else {
             // Add validation- and submit handlers to the form.
             const form = $jq('form', container);
@@ -368,7 +382,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
                         "normalizer": v => $jq.trim(v)
                     }
                 },
-                "submitHandler": (form, event) => makeReservation(detail, form, event),
+                "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
                 "invalidHandler": function () {
                     // TODO: We want an error message here.
                     console.log( 'invalid' );
