@@ -170,7 +170,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const from = d.toISOString().slice(0, -14);
         url.searchParams.append('from', from);
 
-        d.setDate(d.getDate() + nrDays);
+        d.setDate(d.getDate() + nrDays - 1);
         const till = d.toISOString().slice(0, -14);
         url.searchParams.append('till', till);
 
