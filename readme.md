@@ -58,9 +58,11 @@ Release 0.1.0  - Initial release.
 
 
 Release 0.7.0 
-- Fix javascript todos; Drop jquery etc..
 - Add functionaity to mail upon a reservation.
-- Collapse activiteiten met meerdere tijdslots op dezelfde dag.
+
+Release 0.8.0 
+- Fix javascript todos; Drop jquery etc..
+- Better logging, including emails. (Can we let mail log, does that bite wpforms)
 
 ## Deployment
 
