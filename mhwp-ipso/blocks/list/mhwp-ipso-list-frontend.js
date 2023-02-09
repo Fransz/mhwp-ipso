@@ -151,29 +151,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     /**
-     * Fetch all activities for a given date
-     * The from and till query parameters are set with the functions parameter.
-     *
-     * @param date Date to retrieve rthe activities for.
-     * @returns {Promise<void>}
-     */
-    async function getActivitiesByDate(date) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = "wp-json/mhwp-ipso/v1/activity";
-
-        const d = date.toISOString().slice(0, -14);
-        url.searchParams.append('from', d);
-        url.searchParams.append('till', d);
-
-        // Clear the listContainer.
-        Array.from(listContainer.querySelectorAll('li')).map((n) => n.remove());
-
-        clearErrors(listContainer);
-        clearMessages(listContainer);
-        return await fetchWpRest(url, {}, listContainer);
-    }
-
-    /**
      * Process the fetched activities.
      *
      * @param activities The activities to process
