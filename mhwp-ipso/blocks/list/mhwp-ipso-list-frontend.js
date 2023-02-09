@@ -87,6 +87,11 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
         await processActivities(activities);
+
+        // Enable the week picker buttons after we are done..
+        const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
+        buttons.map((b) => b.disabled = false);
+        clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
     }
 
     /**
@@ -127,16 +132,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
         buttons.map((b) => b.disabled = true);
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
-
-        // Enable them in 5 seconds.
-        // TODO do we want another solution for this?
-        //  - only load calendar, details only after opening an item;
-        //  - disable buttons after selecting a week; enable them after fetching the calendar and details (not 5 sec.)
-        setTimeout(function () {
-            const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
-            buttons.map((b) => b.disabled = false);
-            clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
-        }, 5000);
 
         main();
     }
