@@ -265,7 +265,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     function getDetail(activity, container) {
         return fetchDetail(activity, container).then((json) => {
             const detail = json.data;
-            const imageUrl = new URL(detail.mainImage);
+            const imageUrl = imageUrl ? new URL(detail.mainImage) : "";
             const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
 
             // Places left. If maxRegistrations === 0 there is no limit.
