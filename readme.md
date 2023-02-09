@@ -1,6 +1,9 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.7.0 
+- Add functionaity to mail upon a reservation.
+
 Release 0.6.1 - hotfix.
 - Days were not correctly seperated.
 
@@ -55,14 +58,9 @@ Release 0.2.0 - Frontend;
 Release 0.1.0  - Initial release.
 
 ## Roadmap
-
-
-Release 0.7.0 
-- Add functionaity to mail upon a reservation.
-
 Release 0.8.0 
-- Fix javascript todos; Drop jquery etc..
 - Better logging, including emails. (Can we let mail log, does that bite wpforms)
+- Fix javascript todos; Drop jquery, better code for button, ....
 
 ## Deployment
 
