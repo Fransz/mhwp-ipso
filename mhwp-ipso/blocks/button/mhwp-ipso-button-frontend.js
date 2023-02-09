@@ -1,3 +1,5 @@
+// Todo: We need to refactor this code in the spirit of ipso-list.
+
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
@@ -28,18 +30,18 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         const container = $jq('#mhwp-ipso-button-container');
 
         // Three parameters from the wp block;
-        const date = $jq('#mhwp-activity-date').val();
+        const dateField = $jq('#mhwp-activity-date').val();
         const id = parseInt($jq('#mhwp-activity-id').val());
         const title = $jq('#mhwp-activity-title').val();
 
         // Check the parameters.
-        if ( ! date || (! id && ! title)) {
+        if ( ! dateField || (! id && ! title)) {
             addError('Ongeldig formulier. Reserveren is niet mogelijk', container);
             throw new Error('MHWP error invalid form - incorrect parameters.');
         }
 
         // Add the date parameter to the query string.
-        let d = new Date(date);
+        let d = new Date(dateField);
         d = d.toISOString().slice(0, -14);
         url.searchParams.append('from', d);
         url.searchParams.append('till', d);
@@ -65,21 +67,40 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
             form.remove();
             throw new Error('MHWP error invalid form - no activities found.');
         }
+        const activity = filtered[0];
 
 
         // add the calendarId to the form
-        input.val(filtered[0].id);
+        input.val(activity.id);
 
-        await prepareForm(filtered[0], container);
+        // Prepare date and time for the mail; Dont euse date here.
+        const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+        const date = new Date(activity.timeStart);
+
+        activity.date = dateFormat(date);
+        activity.time = timeFormat(date);
+
+        // We need the reservation, and extra data for mailing on the server.
+        // We added properties date and time to the activity already.
+        const mailData = {
+            'activityId': activity.activityID,
+            'activityTitle': activity.title,
+            'activityDate': activity.date,
+            'activityTime': activity.time,
+        }
+
+        await prepareForm(activity, mailData, container);
     }
 
     /**
      * prepare the form belonging to this button.
      *
-     * @param activity The activity for which to fetch the deetails.
+     * @param activity The activity for which to fetch the details and create the form.
+     * @param mailData Extra data needed for mailing.
      * @param container The form belonging to this button.
      */
-    async function prepareForm(activity, container) {
+    async function prepareForm(activity, mailData, container) {
         const { data: detail } = await fetchDetail(activity, container);
         const form = $jq('form', container);
 
@@ -104,6 +125,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
             form.remove();
 
         } else {
+
             // Add validation- and submit handlers to the form.
             form.validate({
                 rules: {
@@ -112,7 +134,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
                         "normalizer": v => $jq.trim(v)
                     }
                 },
-                "submitHandler": (form, event) => makeReservation(detail, form, event),
+                "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
                 "invalidHandler": function () {
                     // TODO: We want an error message here.
                     console.log( 'invalid' );

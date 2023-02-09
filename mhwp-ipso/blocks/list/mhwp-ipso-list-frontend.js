@@ -2,6 +2,7 @@
  * Todo add mailData in the ipso button so we can mail with the button also.
  *
  * Todo addMessage ipv <div id='notice'>
+ * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;
  * Todo drop $jq;
@@ -349,7 +350,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Remove the form if we dont not need it, otherwise add a validation-, and submit handler.
      *
-     * @param detail
+     * @param detail The activities data
+     * @param mailData Extra data needed for mailing.
      * @param container
      */
     function prepareForm(detail, mailData, container) {

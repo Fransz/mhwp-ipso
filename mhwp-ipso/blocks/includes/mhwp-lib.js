@@ -4,6 +4,8 @@ const $jq = jQuery.noConflict();
  * Make a reservation by accessing our API.
  * Submit callback for the validator api
  *
+ * @param detail The activity.
+ * @param mailData extra data needed for mailing.
  * @param form The form  that is submitted.
  * @param event The submit event.
  * @returns {Promise<void>}
