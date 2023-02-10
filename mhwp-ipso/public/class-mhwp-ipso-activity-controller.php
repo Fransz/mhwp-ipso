@@ -138,7 +138,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			}
 
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( isset( $activity_resp->data->mainImage ) ) {
+			if ( ! empty( $activity_resp->data->mainImage ) ) {
 
 				// An image exists for this activity. Prepend scheme and host, the client knows about these.
 				$url                            = $client->url['scheme'] . rtrim( $client->url['host'], '/' );
