@@ -1,6 +1,7 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
  *
+ * Todo drop the globals; back to parameters.
  * Todo addMessage ipv <div id='notice'>
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
@@ -85,6 +86,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         await processActivities(activities);
 
         // Enable the week picker buttons after we are done..
+        // Toto this has to be in the then of the previous promise.
         const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
         buttons.map((b) => b.disabled = false);
         clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -169,6 +171,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
             return [activity, node];
         })
+
+        // Todo add a handler that fills the activity when clicked. in the handler remove it again.
 
         // Create a chain of promises to fetch the activity details. Return that chain.
         // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
