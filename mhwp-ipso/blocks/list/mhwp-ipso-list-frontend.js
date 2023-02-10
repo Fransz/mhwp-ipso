@@ -69,31 +69,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     /**
-     * Top level function.
-     *
-     * @returns {void}
-     */
-    async function main () {
-        // Clear the listContainer.
-        const items = Array.from(listContainer.querySelectorAll('li'));
-        items.map((n) => n.remove());
-
-        // Get all activities from our wp; property data; Sort them;
-        let activities = await getActivities();
-        activities = activities.data;
-        activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-        await processActivities(activities);
-
-        // Enable the week picker buttons after we are done..
-        // todo this has to be in the then of the previous promise.
-        // Todo: we dont need this when we fetch on demand.
-        const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
-        buttons.map((b) => b.disabled = false);
-        clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
-    }
-
-    /**
      * Handle clicks on the next/previous week button
      */
     function handleWeekChange(nrDays) {
@@ -107,10 +82,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
         currentDay = mon;
 
-        // Disable the next/prev week buttons
-        // Todo: we dont need this if we fetch on demand.
-        const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
-        buttons.map((b) => b.disabled = true);
+        // Show a message.
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
 
         main();
@@ -129,6 +101,27 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const last = new Date(first);
         last.setDate(first.getDate() + 6);
         return [first, last];
+    }
+
+    /**
+     * Top level function.
+     *
+     * @returns {void}
+     */
+    async function main () {
+        // Clear the listContainer.
+        const items = Array.from(listContainer.querySelectorAll('li'));
+        items.map((n) => n.remove());
+
+        // Get all activities from our wp; property data; Sort them;
+        let activities = await getActivities();
+        activities = activities.data;
+        activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+        processActivities(activities)
+
+        // Clean up message.
+        return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
     }
 
     /**
@@ -158,39 +151,26 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Process the fetched activities.
      *
      * @param activities The activities to process
-     * @returns {Promise<void>}
      */
     function processActivities(activities) {
         // Keep track of the activities date. For date headers.
         let curDate = null;
 
-        // todo: the map shouldd be a forEach
-        const pairs = activities.map( (activity) => {
+        activities.forEach( (activity) => {
             // Add all activities, with or without date separator.
             const node = addActivity(activity, activity.onDate !== curDate);
 
             // The button which shows the details.
+            // Todo: ugh. We need to drop jQuery
             const button = node[0].querySelector('button.mhwp-ipso-activity-show-detail')
 
             // update the current date.
             curDate = activity.onDate;
 
             // The handler for clicks on the button.
-            const clickHandler = async () => {
-                console.log('clicked');
-                await fillActivity(activity, node);
-            }
+            const clickHandler = async () => await fillActivity(activity, node);
             button.addEventListener('click', clickHandler, { once: true });
-            return [activity, node];
         })
-
-        // Create a chain of promises to fetch the activity details. Return that chain.
-        // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
-        // return pairs.reduce((ps, [activity, node]) => {
-        //     return ps.then( () => {
-        //         return fillActivity(activity, node);
-        //     })
-        // }, Promise.resolve());
     }
 
     /**
@@ -230,7 +210,16 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * @param node The jquery dom node for the activity.
      */
     async function fillActivity(activity, node) {
+        addMessage("Ophalen van gegevens, dit kan even duren", node);
+        const button = $jq(".mhwp-ipso-reservation-button", node);
+
+        // Get the details for the activity.
         const detail = await getDetail(activity, node);
+
+        clearMessages(node);
+        // The reservation button is disabeld by default.
+        // Todo: We really need to drop jq
+        button[0].disabled = false;
 
         const {img, title, intro, descr} = detail;
         $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
@@ -294,9 +283,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         url.searchParams.append('activityId', activity.activityID);
         url.searchParams.append('calendarId', activity.id);
 
-        clearErrors(container);
-        clearMessages(container);
-
         return fetchWpRest(url, {}, container, false).then((json) => {
             // Upon a 429 error (Too many requests), We try again.
             if ( json.mhwp_ipso_code === 429) {
@@ -305,6 +291,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
                     return fetchWpRest(url, {}, container, true);
                 });
             }
+            clearMessages(container);
             return json;
         });
     }

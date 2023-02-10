@@ -14,7 +14,7 @@ function template(activity) {
                    Lees meer
                 </button>
                 <div class="mhwp-ipso-activity-detail collapse" id="mhwp-ipso-collapse-detail-${id}">
-                    <button class="mhwp-ipso-activity-show-reservation mhwp-ipso-reservation-button" type="button"
+                    <button disabled class="mhwp-ipso-activity-show-reservation mhwp-ipso-reservation-button" type="button"
                        data-toggle="collapse" data-target="#mhwp-ipso-collapse-reservation-${id}"
                        aria-expanded="false" aria-controls="mhwp-ipso-collapse-reservation-${id}">
                         Reserveer
