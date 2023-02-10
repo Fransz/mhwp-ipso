@@ -1,6 +1,11 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.7.1 
+- We fetch details on demand now. The server cannot cope with fetching all server at once.
+- Fixed a bug in imageUrl (empyt url).
+- Droped the date picker.
+
 Release 0.7.0 
 - Add functionaity to mail upon a reservation.
 
