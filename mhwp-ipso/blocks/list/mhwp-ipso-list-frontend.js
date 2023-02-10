@@ -86,7 +86,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         await processActivities(activities);
 
         // Enable the week picker buttons after we are done..
-        // Toto this has to be in the then of the previous promise.
+        // todo this has to be in the then of the previous promise.
+        // Todo: we dont need this when we fetch on demand.
         const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
         buttons.map((b) => b.disabled = false);
         clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -107,6 +108,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         currentDay = mon;
 
         // Disable the next/prev week buttons
+        // Todo: we dont need this if we fetch on demand.
         const buttons = Array.from(document.querySelectorAll('#mhwp-ipso-list-weekpicker button'));
         buttons.map((b) => b.disabled = true);
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -162,25 +164,33 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         // Keep track of the activities date. For date headers.
         let curDate = null;
 
+        // todo: the map shouldd be a forEach
         const pairs = activities.map( (activity) => {
             // Add all activities, with or without date separator.
             const node = addActivity(activity, activity.onDate !== curDate);
 
+            // The button which shows the details.
+            const button = node[0].querySelector('button.mhwp-ipso-activity-show-detail')
+
             // update the current date.
             curDate = activity.onDate;
 
+            // The handler for clicks on the button.
+            const clickHandler = async () => {
+                console.log('clicked');
+                await fillActivity(activity, node);
+            }
+            button.addEventListener('click', clickHandler, { once: true });
             return [activity, node];
         })
 
-        // Todo add a handler that fills the activity when clicked. in the handler remove it again.
-
         // Create a chain of promises to fetch the activity details. Return that chain.
         // @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises#composition
-        return pairs.reduce((ps, [activity, node]) => {
-            return ps.then( () => {
-                return fillActivity(activity, node);
-            })
-        }, Promise.resolve());
+        // return pairs.reduce((ps, [activity, node]) => {
+        //     return ps.then( () => {
+        //         return fillActivity(activity, node);
+        //     })
+        // }, Promise.resolve());
     }
 
     /**
@@ -246,7 +256,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     function getDetail(activity, container) {
         return fetchDetail(activity, container).then((json) => {
             const detail = json.data;
-            const imageUrl = imageUrl ? new URL(detail.mainImage) : "";
+            const imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
             const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
 
             // Places left. If maxRegistrations === 0 there is no limit.
