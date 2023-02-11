@@ -1,6 +1,8 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
  *
+ * Todo: drop the bridge log in the frontend.
+ * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
  * Todo drop the globals; back to parameters.
  * Todo addMessage ipv <div id='notice'>
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
@@ -9,7 +11,6 @@
  * Todo drop $jq;
  * Todo detail template;
  * Todo ticket bij IPSO over filters;
- * Todo fetch details bij openklappen?
  */
 import template from './mhwp-ipso-list-template';
 
