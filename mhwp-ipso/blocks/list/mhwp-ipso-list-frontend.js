@@ -1,6 +1,7 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
  *
+ * Todo: in the mails send by the plugin in (and by ipso, forms), we want name and email of the subscriber.:qa
  * Todo: We wantg pricing added to the activities; IPSO and JS? Wordpress?
  * Todo: prevent going into the past with the weekpicker.
  * Todo: prevent displaying passed activities in the current week.
