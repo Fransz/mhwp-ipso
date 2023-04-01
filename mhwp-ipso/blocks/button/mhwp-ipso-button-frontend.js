@@ -94,17 +94,6 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         activity.date = dateFormat(date);
         activity.time = timeFormat(date);
 
-        // Check if the activity ws in the past (in days)
-        // Disable the button?
-        // .wp-block-mhwp-ipso-list .mhwp-ipso-disabled button.mhwp-ipso-reservation-button {
-        // 	display:none;
-        // }
-        const toDay = (new Date()).setHours(0, 0, 0, 0);
-        if (date < toDay) {
-            container.addClass('mhwp-ipso-disabled');
-            return;
-        }
-
         // We need the reservation, and extra data for mailing on the server.
         // We added properties date and time to the activity already.
         const mailData = {
@@ -113,6 +102,18 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
             'activityDate': activity.date,
             'activityTime': activity.time,
         }
+
+        // Check if the activity ws in the past (in days)
+        const toDay = (new Date()).setHours(0, 0, 0, 0);
+        if (date < toDay) {
+            // If so we cannot make a reservation, remove button and fom. We are done.
+            const button = $jq("button.mhwp-ipso-reservation-show-reservation", container);
+            const form = $jq('form', container);
+            button.remove();
+            form.remove();
+            return;
+        }
+
 
         await prepareForm(activity, mailData, container);
     }
@@ -125,8 +126,9 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
      * @param container The form belonging to this button.
      */
     async function prepareForm(activity, mailData, container) {
-        const { data: detail } = await fetchDetail(activity, container);
         const form = $jq('form', container);
+
+        const { data: detail } = await fetchDetail(activity, container);
 
         // Places left. If maxRegistrations === 0 there is no limit.
         detail.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;

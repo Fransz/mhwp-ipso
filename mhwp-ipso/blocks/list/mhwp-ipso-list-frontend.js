@@ -217,16 +217,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         // fill the template.
         const node = $jq(template(activity));
 
-        // Check if the activity ws in the past (in days)
-        // Disable the button?
-        // .wp-block-mhwp-ipso-list .mhwp-ipso-disabled button.mhwp-ipso-reservation-button {
-        // 	display:none;
-        // }
-        const toDay = (new Date()).setHours(0, 0, 0, 0);
-        if (date < toDay) {
-            node.addClass('mhwp-ipso-disabled');
-        }
-
         $jq(listContainer).append(node);
 
         return node;
@@ -252,6 +242,19 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
         const {img, title, intro, descr} = detail;
         $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
+
+        // Check if the activity ws in the past (in days)
+        // Disable the button?
+        // .wp-block-mhwp-ipso-list .mhwp-ipso-disabled button.mhwp-ipso-reservation-button {
+        // 	display:none;
+        // }
+        const toDay = (new Date()).setHours(0, 0, 0, 0);
+        const date = new Date(activity.timeStart)
+        if (date < toDay) {
+            button[0].disabled = true;
+            return;
+        }
+
 
         // We need the reservation, and extra data for mailing on the server.
         // We added properties date and time to the activity already.
