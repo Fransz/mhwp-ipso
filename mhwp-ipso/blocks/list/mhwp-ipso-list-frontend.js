@@ -315,13 +315,12 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      */
     function prepareForm(detail, mailData, container) {
         if(detail.places <= 0) {
-            // Reservations are not possible.Remove the form and button. add a notice.
-            const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
-            button.remove();
-            $jq('.mhwp-ipso-activity-reservation', container).remove();
+            // Reservations are not possible.Remove the form, add a notice.
+            $jq('.mhwp-ipso-activity-reservation form', container).remove();
 
-            const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet registreren.</div>';
-            $jq('.mhwp-ipso-activity-detail', container).append(notice);
+            // Don't use addMessage here. The message should be persistent
+            const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>';
+            $jq('.mhwp-ipso-activity-reservation', container).append(notice);
 
         } else if(detail.reservationUrl) {
             // We dont need the form. Prepare the button to redirect. remove the form.

@@ -57,13 +57,12 @@ async function makeReservation(detail, mailData, form, event) {
         // We made a successful reservation; Check to see if we can make another.
         detail.places -= 1;
         if (detail.places <= 0) {
-            // Reservations are no more possible.Remove the form and button, add a notice.
-            const button = $jq(".mhwp-ipso-reservation-button", container);
-            button.remove();
+            // Reservations are no more possible.Remove the form, add a notice.
             $jq(form).remove();
 
+            // Don't use addMessage here. The message should be persistent
             const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
-            container.append(notice);
+            formContainer.append(notice);
         }
 
         // Close the reservation form, add a message.

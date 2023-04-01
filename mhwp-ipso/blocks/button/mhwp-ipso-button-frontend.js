@@ -121,13 +121,12 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         detail.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
         if(detail.places <= 0) {
-            // Reservations are not possible. Remove the form and button. add a notice.
-            const button = $jq("button.mhwp-ipso-reservation-show-reservation", container);
-            button.remove();
+            // Reservations are not possible.Remove the form, add a notice.
             form.remove();
 
-            const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet registreren.</div>';
-            container.append(notice);
+            // Don't use addMessage here. The message should be persistent
+            const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>';
+            $jq('.mhwp-ipso-reservation-form', container).append(notice);
 
         } else if(detail.reservationUrl) {
             // there is an alternative URL. Prepare the button to redirect. Remove the form.
