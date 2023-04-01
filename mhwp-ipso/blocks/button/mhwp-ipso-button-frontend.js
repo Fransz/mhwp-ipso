@@ -106,7 +106,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         // Check if the activity ws in the past (in days)
         const toDay = (new Date()).setHours(0, 0, 0, 0);
         if (date < toDay) {
-            // If so we cannot make a reservation, remove button and fom. We are done.
+            // If so we cannot make a reservation, remove button and form. We are done.
             const button = $jq("button.mhwp-ipso-reservation-show-reservation", container);
             const form = $jq('form', container);
             button.remove();

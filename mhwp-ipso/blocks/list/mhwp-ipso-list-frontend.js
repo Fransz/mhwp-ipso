@@ -3,8 +3,6 @@
  *
  * Todo: in the mails send by the plugin in (and by ipso, forms), we want name and email of the subscriber.:qa
  * Todo: We wantg pricing added to the activities; IPSO and JS? Wordpress?
- * Todo: prevent going into the past with the weekpicker.
- * Todo: prevent displaying passed activities in the current week.
  * Todo: On mon 13/02 the calander starts with mon 20/02.
  * Todo: Weekpicker, we want different html so we can style with flex.
  * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
@@ -243,13 +241,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const {img, title, intro, descr} = detail;
         $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
 
-        // Check if the activity ws in the past (in days)
-        // Disable the button?
-        // .wp-block-mhwp-ipso-list .mhwp-ipso-disabled button.mhwp-ipso-reservation-button {
-        // 	display:none;
-        // }
+        // Check if the activity was in the past (in days).
         const toDay = (new Date()).setHours(0, 0, 0, 0);
         const date = new Date(activity.timeStart)
+        // If so we cannot make a reservation, disable button we dont need the form.
         if (date < toDay) {
             button[0].disabled = true;
             return;
