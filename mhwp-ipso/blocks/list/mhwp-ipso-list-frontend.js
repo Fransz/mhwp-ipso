@@ -13,7 +13,6 @@
  * Todo: drop the bridge log in the frontend.
  * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
  * Todo drop the globals; back to parameters.
- * Todo addMessage ipv <div id='notice'>
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;
@@ -89,12 +88,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const newDay = new Date(currentDay);
         newDay.setDate(newDay.getDate() + nrDays);
         const [mon, sun] = week(newDay);
-        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
-        currentDay = mon;
 
-        // Show a message.
+        const toDay = new Date();
+        if(sun < toDay) {
+            // We try to go back in time we do not allow that.
+            return;
+        }
+
+        // Adjust header
+        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
+
+        // Set our global, display a message
+        currentDay = mon;
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
 
+        // Display activities.
         main();
     }
 
