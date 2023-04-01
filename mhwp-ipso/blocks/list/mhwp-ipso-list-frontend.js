@@ -43,15 +43,12 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     // Todo Drop this if we use the week buttons.
     let nrDays = 7;
 
-    // Container for all activities.
-    let listContainer;
-
     /**
      * init globals, attach event handlers.
      */
     function init() {
         // the container for all activities.
-        listContainer = document.querySelector('#mhwp-ipso-list-container');
+        const listContainer = document.querySelector('#mhwp-ipso-list-container');
 
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
         $jq.validator.addMethod( "phoneNL", function( value, element ) {
@@ -126,15 +123,16 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      */
     async function main () {
         // Clear the listContainer.
+        const listContainer = document.querySelector('#mhwp-ipso-list-container');
         const items = Array.from(listContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
         // Get all activities from our wp; property data; Sort them;
-        let activities = await getActivities();
+        let activities = await getActivities(listContainer);
         activities = activities.data;
         activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
-        processActivities(activities)
+        processActivities(activities, listContainer)
 
         // Clean up message.
         return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -144,9 +142,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Fetch all activities.
      * The from and till query parameter are set with the value from the wp block.
      *
+     * @param listContainer The container for the calendar lisst.
      * @returns {Promise<void>}
      */
-    async function getActivities() {
+    async function getActivities(listContainer) {
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
@@ -166,15 +165,16 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Process the fetched activities.
      *
-     * @param activities The activities to process
+     * @param activities The activities to processs
+     * @param listContainer The container for the calendar list.
      */
-    function processActivities(activities) {
+    function processActivities(activities, listContainer) {
         // Keep track of the activities date. For date headers.
         let curDate = null;
 
         activities.forEach( (activity) => {
             // Add all activities, with or without date separator.
-            const node = addActivity(activity, activity.onDate !== curDate);
+            const node = addActivity(activity, activity.onDate !== curDate, listContainer);
 
             // The button which shows the details.
             // Todo: ugh. We need to drop jQuery
@@ -184,7 +184,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             curDate = activity.onDate;
 
             // The handler for clicks on the button.
-            const clickHandler = async () => await fillActivity(activity, node);
+            const clickHandler = async () => await fillActivity(activity, node, listContainer);
             button.addEventListener('click', clickHandler, { once: true });
         })
     }
@@ -194,9 +194,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      *
      * @param activity json data that describes the activity,
      * @param newDate Do we want to add a seperator for new date?
+     * @param listContainer The container for the calendar list.
      * @returns The jQuery object for the added node.
      */
-    function addActivity(activity, newDate) {
+    function addActivity(activity, newDate, listContainer) {
         // Formatters for time/date
         const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
         const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
