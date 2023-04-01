@@ -94,6 +94,17 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         activity.date = dateFormat(date);
         activity.time = timeFormat(date);
 
+        // Check if the activity ws in the past (in days)
+        // Disable the button?
+        // .wp-block-mhwp-ipso-list .mhwp-ipso-disabled button.mhwp-ipso-reservation-button {
+        // 	display:none;
+        // }
+        const toDay = (new Date()).setHours(0, 0, 0, 0);
+        if (date < toDay) {
+            container.addClass('mhwp-ipso-disabled');
+            return;
+        }
+
         // We need the reservation, and extra data for mailing on the server.
         // We added properties date and time to the activity already.
         const mailData = {
