@@ -7,8 +7,6 @@
 
 // Todo: we can have only one button on a page, but have no way to force that. May be we can have getActivities search first.
 
-// Todo: The text in the block in the block editor is not correct; we need the agenda id, not the activity id.
-// Todo: also below the title input, we talk of dat.
 // Todo: Buttons shouldn't throw; just display the message and remove the form.
 // Todo: We need to refactor this code in the spirit of ipso-list.
 // Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
