@@ -151,6 +151,18 @@ function wait(duration) {
 }
 
 /**
+ * Helper fpor creating Nodes from a HTML string.
+ *
+ * @link https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
+ * @param str The HTML string
+ */
+function createNodeFromHTML(htmlString) {
+    const div = document.createElement('div');
+    div.innerHTML = htmlString.trim();
+    return div.firstChild;
+}
+
+/**
  * Helper for adding a message text to a container.
  *
  * @param message The text message.
@@ -185,4 +197,4 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
-export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages, makeReservation};
+export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML};

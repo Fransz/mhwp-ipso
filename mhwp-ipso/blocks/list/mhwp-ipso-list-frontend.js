@@ -14,7 +14,6 @@
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;
- * Todo drop $jq;
  * Todo detail template;
  * Todo ticket bij IPSO over filters;
  */
@@ -23,7 +22,7 @@ import template from './mhwp-ipso-list-template';
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
-import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
+import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML} from "../includes/mhwp-lib";
 
 
 (function () {
@@ -177,14 +176,13 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             const node = addActivity(activity, activity.onDate !== curDate, listContainer);
 
             // The button which shows the details.
-            // Todo: ugh. We need to drop jQuery
-            const button = node[0].querySelector('button.mhwp-ipso-activity-show-detail')
+            const button = node.querySelector('button.mhwp-ipso-activity-show-detail')
 
             // update the current date.
             curDate = activity.onDate;
 
             // The handler for clicks on the button.
-            const clickHandler = async () => await fillActivity(activity, node, listContainer);
+            const clickHandler = async () => await fillActivity(activity, node);
             button.addEventListener('click', clickHandler, { once: true });
         })
     }
@@ -209,14 +207,13 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
         // Add a date header if the date changed.
         if (newDate) {
-            const dateHeader = `<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`;
-            $jq(listContainer).append($jq(dateHeader));
+            const dateHeader = createNodeFromHTML(`<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`);
+            listContainer.append(dateHeader)
         }
 
-        // fill the template.
-        const node = $jq(template(activity));
-
-        $jq(listContainer).append(node);
+        // fill the template, append to the DOM
+        const node = template(activity);
+        listContainer.append(node);
 
         return node;
     }
@@ -225,29 +222,29 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Fill an activity with its details and prepare the form
      *
      * @param activity The activity.
-     * @param node The jquery dom node for the activity.
+     * @param node The dom node for the activity.
      */
     async function fillActivity(activity, node) {
         addMessage("Ophalen van gegevens, dit kan even duren", node);
-        const button = $jq(".mhwp-ipso-reservation-button", node);
+        const button = node.querySelector('.mhwp-ipso-reservation-button');
 
         // Get the details for the activity.
         const detail = await getDetail(activity, node);
 
+        // Disable the reservation button by default.
         clearMessages(node);
-        // The reservation button is disabeld by default.
-        // Todo: We really need to drop jq
-        button[0].disabled = false;
+        button.disabled = false;
 
         const {img, title, intro, descr} = detail;
-        $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
+        const detailNode = node.querySelector('.mhwp-ipso-activity-detail');
+        detailNode.prepend(img, title, intro, descr);
 
         // Check if the activity was in the past (in days).
         const toDay = (new Date()).setHours(0, 0, 0, 0);
         const date = new Date(activity.timeStart)
         // If so we cannot make a reservation, disable button we dont need the form.
         if (date < toDay) {
-            button[0].disabled = true;
+            button.disabled = true;
             return;
         }
 
@@ -280,19 +277,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             const places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
             return {
-                img: `<img src="${imageUrl}" alt="${detail.title}" />`,
-                title: `<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`,
-                intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
-                descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
+                img: createNodeFromHTML(`<img src="${imageUrl}" alt="${detail.title}" />`),
+                title: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`),
+                intro: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`),
+                descr: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`),
                 places,
                 reservationUrl
             }
         }).catch((e) => {
             // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
             return {
-                intro: "Er was een probleem met het ophalen van de data",
-                description: "Er was een probleem met het ophalen van de data",
-                image: "",
+                img: "",
+                title: "",
+                intro: "",
+                descr: "",
+                places: 0,
                 reservationUrl: null
             }
         });
@@ -334,28 +333,28 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     function prepareForm(detail, mailData, container) {
         if(detail.places <= 0) {
             // Reservations are not possible.Remove the form, add a notice.
-            $jq('.mhwp-ipso-activity-reservation form', container).remove();
+            container.querySelector('.mhwp-ipso-activity-reservation form').remove();
 
             // Don't use addMessage here. The message should be persistent
-            const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>';
-            $jq('.mhwp-ipso-activity-reservation', container).append(notice);
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
+            container.querySelector('.mhwp-ipso-activity-reservation').append(notice);
 
         } else if(detail.reservationUrl) {
             // We dont need the form. Prepare the button to redirect. remove the form.
-            const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
+            const button = container.querySelector("button.mhwp-ipso-activity-show-reservation");
             ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
             button.on('click', (e) => window.location = detail.reservationUrl );
 
-            $jq('.mhwp-ipso-activity-reservation', container).remove();
+            container.querySelector('.mhwp-ipso-activity-reservation').remove();
 
         } else {
-            // Add validation- and submit handlers to the form.
+            // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
             const form = $jq('form', container);
             form.validate({
                 rules: {
                     phoneNumber: {
                         phoneNL: true,
-                        "normalizer": v => $jq.trim(v)
+                        "normalizer": v => v.trim()
                     }
                 },
                 "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),

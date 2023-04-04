@@ -1,7 +1,15 @@
+import {createNodeFromHTML} from "../includes/mhwp-lib";
+
+/**
+ * Fill in a template string and return the DOM node for it.
+ *
+ * @param activity The activity with data to use in the template.
+ * @returns The HTML Node
+ */
 function template(activity) {
     const id = activity.id;
-    // We just return an evaluated template string.
-    return `
+
+    return createNodeFromHTML(`
         <li class="mhwp-ipso-activity panel"><div>
                 <div class="mhwp-ipso-activity-header">
                     <span class="mhwp-ipso-activity-header-title">${activity.title}</span>
@@ -58,7 +66,7 @@ function template(activity) {
                     </form>
                 </div>
             </div>
-        </li>`;
+        </li>`);
 }
 
 export default template;
