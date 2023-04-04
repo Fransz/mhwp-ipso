@@ -1,5 +1,3 @@
-const $jq = jQuery.noConflict();
-
 /**
  * Make a reservation by accessing our API.
  * Submit callback for the validator api
@@ -18,8 +16,8 @@ async function makeReservation(detail, mailData, form, event) {
     const url = new URL( marikenhuisURL );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-    const formContainer = $jq(form).parent();
-    const container = $jq(formContainer).parent();
+    const formContainer = form.parentNode;
+    const container = formContainer.parentNode;
 
     // Clear messages.
     clearErrors(formContainer);
@@ -28,12 +26,12 @@ async function makeReservation(detail, mailData, form, event) {
     clearMessages(container);
 
     // Collect all data in an object.
-    const activityCalendarId = $jq('input[name="activityCalendarId"]', form).val();
-    const firstName = $jq('input[name="firstName"]', form).val();
-    const lastNamePrefix = $jq('input[name="lastNamePrefix"]', form).val();
-    const lastName = $jq('input[name="lastName"]', form).val();
-    const email = $jq('input[name="email"]', form).val();
-    let phoneNumber = $jq('input[name="phoneNumber"]', form).val();
+    const activityCalendarId = form.querySelector('input[name="activityCalendarId"]').value;
+    const firstName = form.querySelector('input[name="firstName"]').value;
+    const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
+    const lastName = form.querySelector('input[name="lastName"]').value;
+    const email = form.querySelector('input[name="email"]').value;
+    let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
     phoneNumber = phoneNumber === "" ? null : phoneNumber;
     const activityId = mailData.activityId;
     const activityTitle = mailData.activityTitle;
@@ -58,15 +56,15 @@ async function makeReservation(detail, mailData, form, event) {
         detail.places -= 1;
         if (detail.places <= 0) {
             // Reservations are no more possible.Remove the form, add a notice.
-            $jq(form).remove();
+            form.remove();
 
             // Don't use addMessage here. The message should be persistent
-            const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>';
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>');
             formContainer.append(notice);
         }
 
         // Close the reservation form, add a message.
-        $jq(formContainer).removeClass('in');
+        formContainer.classList.remove('in');
         addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
 
         // Close the message after 5 sec.
@@ -171,8 +169,8 @@ function createNodeFromHTML(htmlString) {
  */
 function addNode( message, className, container) {
     const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
-    const node = $jq(html);
-    $jq(container).append(node);
+    const node = createNodeFromHTML(html);
+    container.append(node);
 
 }
 function addError( message, container ) {
@@ -188,7 +186,7 @@ function addMessage( message, container ) {
  * @param container The container where to search.
  */
 function clearNodes(className, container) {
-    $jq(`.${className}-container`, container).remove();
+    container.querySelector(`.${className}-container`) ?. remove();
 }
 function clearErrors(container) {
     clearNodes('error', container);
