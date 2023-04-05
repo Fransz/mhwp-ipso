@@ -44,7 +44,7 @@ registerBlockType( metadata, {
                     <TextControl
                         value={ attributes.activity_title }
                         label={ __( 'De naam van de activiteit', 'mhwp-ipso' ) }
-                        help={ __( 'De datum van de activiteit, precies zo als in het IPSO systeem', 'mhwp-ipso' ) }
+                        help={ __( 'De naam van de activiteit, precies zo als in het IPSO systeem', 'mhwp-ipso' ) }
                         onChange={ (new_value) => {
                             setAttributes({activity_title: new_value})
                         }}
@@ -52,8 +52,8 @@ registerBlockType( metadata, {
 
                     <TextControl
                         value={ attributes.activity_id }
-                        label={ __( 'De id van de activiteit', 'mhwp-ipso' ) }
-                        help={ __( 'De id van de activiteit, precies zo als in het IPSO system', 'mhwp-ipso' ) }
+                        label={ __( 'De agenda id van de activiteit', 'mhwp-ipso' ) }
+                        help={ __( 'De agenda id van de activiteit, precies zo als in het IPSO system', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
                             if (/^\d*$/.test(new_value)) {
                                 setAttributes({activity_id: new_value})

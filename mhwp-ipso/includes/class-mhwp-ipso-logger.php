@@ -12,6 +12,7 @@
 	 * phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fopen
 	 * phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fclose
 	 * phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_fwrite
+	 * phpcs:disable WordPress.WP.AlternativeFunctions.file_system_read_file_put_contents
 	 */
 
 	/**
@@ -86,6 +87,31 @@ class MHWP_IPSO_Logger {
 	}
 
 	/**
+	 * Prepend to the logfile.
+	 *
+	 * @param string $message The string to prepend.
+	 * @param string $filename The filename of the original file.
+	 *
+	 * @return void
+	 */
+	private function prepend( string $message, string $filename ) {
+		$context = stream_context_create();
+
+		$orig_file     = fopen( $filename, 'r', 1, $context );
+		$temp_filename = tempnam( sys_get_temp_dir(), 'php_prepend_' );
+
+		file_put_contents( $temp_filename, $message );
+		file_put_contents( $temp_filename, $orig_file, FILE_APPEND );
+
+		// Close the original file, unlink it.
+		fclose( $orig_file );
+		unlink( $filename );
+
+		rename( $temp_filename, $filename );
+	}
+
+
+	/**
 	 * Count the number of lines in a file.
 	 *
 	 * @return int the number of lines.
@@ -112,10 +138,9 @@ class MHWP_IPSO_Logger {
 	 * @return string the added line.
 	 */
 	public function log( array $res, array $data = array() ) : string {
-		$timestamp = isset( $_SERVER ) && isset( $_SERVER['REQUEST_TIME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_TIME'] ) ) : '';
-		$ip        = isset( $_SERVER ) && isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$uri       = isset( $_SERVER ) && isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		$code      = $res['response']['code'];
+		$ip   = isset( $_SERVER ) && isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$uri  = isset( $_SERVER ) && isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$code = $res['response']['code'];
 
 		$params = '';
 		foreach ( $data as $param => $value ) {
@@ -133,9 +158,57 @@ class MHWP_IPSO_Logger {
 
 		$line = sprintf( '%-19s  %-15s  %-70s  %-3s  %s' . PHP_EOL, $time, $ip, $uri, $code, $params );
 
-		$fp = fopen( $this->logfile, 'a' );
-		fwrite( $fp, $line );
-		fclose( $fp );
+		$this->prepend( $line, $this->logfile );
+		return $line;
+	}
+
+	/**
+	 * Log a failure to mail.
+	 *
+	 * Note the plugin only mails internally, the guests are mailed by IPSO.
+	 *
+	 * @param string $mail_address The failed mail address.
+	 * @param string $logline The message tp log.
+	 *
+	 * @return string the added line.
+	 */
+	public function log_mail_failure( string $mail_address, string $logline ) : string {
+		try {
+			$time = ( new DateTime( 'now', new DateTimeZone( 'Europe/Amsterdam' ) ) );
+			$time = $time->format( 'd-m-Y H:i:s' );
+		} catch ( Exception $e ) {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			$time = date( 'Y-m-d H:i:s' );
+		}
+
+		$line = sprintf( '%-19s  Failed mail! %-20s  %s' . PHP_EOL, $time, $mail_address, $logline );
+
+		$this->prepend( $line, $this->logfile );
+		return $line;
+	}
+
+
+	/**
+	 * Log a success to mail.
+	 *
+	 * Note the plugin only mails internally, the guests are mailed by IPSO.
+	 *
+	 * @param string $subject The failed subject address.
+	 *
+	 * @return string the added line.
+	 */
+	public function log_mail_success( string $subject ) : string {
+		try {
+			$time = ( new DateTime( 'now', new DateTimeZone( 'Europe/Amsterdam' ) ) );
+			$time = $time->format( 'd-m-Y H:i:s' );
+		} catch ( Exception $e ) {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			$time = date( 'Y-m-d H:i:s' );
+		}
+
+		$line = sprintf( '%-19s  Successful mail: %s' . PHP_EOL, $time, $subject );
+
+		$this->prepend( $line, $this->logfile );
 		return $line;
 	}
 }
