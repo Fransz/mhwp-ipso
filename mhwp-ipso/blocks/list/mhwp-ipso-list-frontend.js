@@ -1,12 +1,6 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
- *
- * Todo: On mon 13/02 the calander starts with mon 20/02.
- * Todo: Weekpicker, we want different html so we can style with flex.
  * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
- * Todo: 'uur' na de tijdsaanduiding in de header.
- * Todo: als je de reservation openklapt schuift ie eerst uit beeld; Oplossing zet 'm eerst bovenaan de viewport
- * Todo: drop the bridge log in the frontend.
  * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
  * Todo drop the globals; back to parameters.
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?

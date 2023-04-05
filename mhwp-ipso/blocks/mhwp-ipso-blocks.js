@@ -5,4 +5,3 @@
  * - enqueue this script;
  * - add inline javascript to it with wp_add_inline_script
  */
-console.log('bridge');
