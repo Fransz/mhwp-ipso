@@ -365,5 +365,5 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(7);});
+    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0);});
 })();
