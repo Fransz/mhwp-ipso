@@ -1,8 +1,6 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
  *
- * Todo: in the mails send by the plugin in (and by ipso, forms), we want name and email of the subscriber.:qa
- * Todo: We wantg pricing added to the activities; IPSO and JS? Wordpress?
  * Todo: On mon 13/02 the calander starts with mon 20/02.
  * Todo: Weekpicker, we want different html so we can style with flex.
  * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
