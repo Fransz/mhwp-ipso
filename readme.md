@@ -1,6 +1,11 @@
 # MHWP\_IPSO
 
 ## Releases
+Release 0.8.0 
+- We start in the right week, reservations in the past are no longer possible.
+- We log mail success and failures.
+- Dropped jQuery in the frontend. It only used for the validator.
+
 Release 0.7.1 
 - We fetch details on demand now. The server cannot cope with fetching all server at once.
 - Fixed a bug in imageUrl (empyt url).
@@ -63,13 +68,13 @@ Release 0.2.0 - Frontend;
 Release 0.1.0  - Initial release.
 
 ## Roadmap
-Release 0.8.0 
-- Better logging, including emails. (Can we let mail log, does that bite wpforms)
-- Fix javascript todos; Drop jquery, better code for button, ....
+
+Release 0.8.1 
+- There is a bug in multiple reservations. That doesnt work.
 
 ## Deployment
 
-Je moet als je de plugin installeert niet vergeren de API key op tegevenin de backend.
+Je moet als je de plugin installeert niet vergeren de API key op tegeven in de backend.
 
 ### marikenhuis.nl/vrijwilligers
 
