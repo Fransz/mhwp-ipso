@@ -1,4 +1,15 @@
+// Todo: Buttons should go with the calendarId, not the activity id?
+// No. you'll have two id's in the backend; activityID for redirection/mail; agendaId for buttons.
+// That's confusing.
+
+// Todo: Messages go in the first button on a page.
+// This is not a bug.
+
+// Todo: we can have only one button on a page, but have no way to force that. May be we can have getActivities search first.
+
+// Todo: Buttons shouldn't throw; just display the message and remove the form.
 // Todo: We need to refactor this code in the spirit of ipso-list.
+// Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
 
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
@@ -6,7 +17,7 @@ import '../includes/bootstrap-transition';
 /*
  * Todo add mailData in the ipso button so we can mail with the button also.
  */
-import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait} from "../includes/mhwp-lib";
+import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait, createNodeFromHTML} from "../includes/mhwp-lib";
 
 (function() {
     const $jq = jQuery.noConflict();
@@ -27,12 +38,12 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-        const container = $jq('#mhwp-ipso-button-container');
+        const container = document.querySelector('#mhwp-ipso-button-container');
 
         // Three parameters from the wp block;
-        const dateField = $jq('#mhwp-activity-date').val();
-        const id = parseInt($jq('#mhwp-activity-id').val());
-        const title = $jq('#mhwp-activity-title').val();
+        const dateField = document.querySelector('#mhwp-activity-date').value;
+        const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value || "");
+        const title = document.querySelector('#mhwp-activity-title').value;
 
         // Check the parameters.
         if ( ! dateField || (! id && ! title)) {
@@ -50,8 +61,8 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         const activities = await fetchWpRest(url, {}, container);
 
         // form and hidden input for the activityCalendarid
-        const form = $jq('form', container);
-        const input = $jq('input[name=activityCalendarId', form);
+        const form = container.querySelector('form');
+        const input = form.querySelector('input[name=activityCalendarId]');
 
         // filter activities on id or name, we should be left with exactly one.
         let filtered = [];
@@ -71,7 +82,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
 
 
         // add the calendarId to the form
-        input.val(activity.id);
+        input.value = activity.id;
 
         // Prepare date and time for the mail; Dont euse date here.
         const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
@@ -90,6 +101,18 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
             'activityTime': activity.time,
         }
 
+        // Check if the activity ws in the past (in days)
+        const toDay = (new Date()).setHours(0, 0, 0, 0);
+        if (date < toDay) {
+            // If so we cannot make a reservation, remove button and form. We are done.
+            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
+            const form = container.querySelector('form');
+            button.remove();
+            form.remove();
+            return;
+        }
+
+
         await prepareForm(activity, mailData, container);
     }
 
@@ -101,24 +124,24 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
      * @param container The form belonging to this button.
      */
     async function prepareForm(activity, mailData, container) {
+        const form = container.querySelector('form');
+
         const { data: detail } = await fetchDetail(activity, container);
-        const form = $jq('form', container);
 
         // Places left. If maxRegistrations === 0 there is no limit.
         detail.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
         if(detail.places <= 0) {
-            // Reservations are not possible. Remove the form and button. add a notice.
-            const button = $jq("button.mhwp-ipso-reservation-show-reservation", container);
-            button.remove();
+            // Reservations are not possible.Remove the form, add a notice.
             form.remove();
 
-            const notice = '<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet registreren.</div>';
-            container.append(notice);
+            // Don't use addMessage here. The message should be persistent
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
+            container.querySelector('.mhwp-ipso-reservation-form').append(notice);
 
         } else if(detail.reservationUrl) {
             // there is an alternative URL. Prepare the button to redirect. Remove the form.
-            const button = $jq("button.mhwp-ipso-reservation-show-reservation", container);
+            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
             ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
             button.on('click', (e) => window.location = detail.reservationUrl );
 
@@ -127,11 +150,11 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         } else {
 
             // Add validation- and submit handlers to the form.
-            form.validate({
+            $jq(form).validate({
                 rules: {
                     phoneNumber: {
                         phoneNL: true,
-                        "normalizer": v => $jq.trim(v)
+                        "normalizer": v => v.trim()
                     }
                 },
                 "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
@@ -171,5 +194,5 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         });
     }
 
-    $jq(document).ready(getActivities);
+    document.addEventListener('DOMContentLoaded', getActivities);
 })();

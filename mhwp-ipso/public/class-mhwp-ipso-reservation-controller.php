@@ -7,6 +7,7 @@
  */
 
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-client.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-mhwp-ipso-logger.php';
 
 /**
  * Class for our rest api.
@@ -103,14 +104,22 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 
 			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			$subject  = sprintf( 'Marikenhuis - Inschrijving activiteit %s', $activity_title );
-			$message  = sprintf( 'Er is een inschrijving voor activiteit %s, op %s om %s.', $activity_title, $activity_date, $activity_time );
+			$message  = 'Beste begeleider,';
+			$message .= PHP_EOL . PHP_EOL . sprintf( 'Er is een inschrijving voor activiteit %s, op %s om %s in het Marikenhuis', $activity_title, $activity_date, $activity_time );
 			$message .= PHP_EOL . sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s.', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
+			$message .= PHP_EOL . 'Met vriendelijke groet, ';
 			// phpcs:enable
 
+			// Logging mails happens here not in the ipso client.
+			$logger   = new MHWP_IPSO_Logger();
+			$logline  = sprintf( 'activiteit %s, op %s om %s. ', $activity_title, $activity_date, $activity_time );
+			$logline .= sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s.', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
 			foreach ( $emails as $email ) {
 				$mailed = wp_mail( $email, $subject, $message );
 				if ( ! $mailed ) {
-					error_log( "We tried to mail: $email. Subject: $subject, message: $message" );
+					$logger->log_mail_failure( $email, $logline );
+				} else {
+					$logger->log_mail_success( $subject );
 				}
 			}
 		}

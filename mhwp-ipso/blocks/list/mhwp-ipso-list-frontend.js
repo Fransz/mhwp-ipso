@@ -1,22 +1,20 @@
 /**
  * Todo add mailData in the ipso button so we can mail with the button also.
- *
+ * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
+ * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
  * Todo drop the globals; back to parameters.
- * Todo addMessage ipv <div id='notice'>
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
  * Todo week buttons 5 sec buiten gebruik.
  * Todo classname mhwp-ipso-reservation-button;
- * Todo drop $jq;
  * Todo detail template;
  * Todo ticket bij IPSO over filters;
- * Todo fetch details bij openklappen?
  */
 import template from './mhwp-ipso-list-template';
 
 import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
-import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation} from "../includes/mhwp-lib";
+import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML} from "../includes/mhwp-lib";
 
 
 (function () {
@@ -36,15 +34,12 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     // Todo Drop this if we use the week buttons.
     let nrDays = 7;
 
-    // Container for all activities.
-    let listContainer;
-
     /**
      * init globals, attach event handlers.
      */
     function init() {
         // the container for all activities.
-        listContainer = document.querySelector('#mhwp-ipso-list-container');
+        const listContainer = document.querySelector('#mhwp-ipso-list-container');
 
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
         $jq.validator.addMethod( "phoneNL", function( value, element ) {
@@ -79,12 +74,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const newDay = new Date(currentDay);
         newDay.setDate(newDay.getDate() + nrDays);
         const [mon, sun] = week(newDay);
-        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
-        currentDay = mon;
 
-        // Show a message.
+        const toDay = new Date();
+        if(sun < toDay) {
+            // We try to go back in time we do not allow that.
+            return;
+        }
+
+        // Adjust header
+        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${dateFormat(mon)} - ${dateFormat(sun)}`;
+
+        // Set our global, display a message
+        currentDay = mon;
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
 
+        // Display activities.
         main();
     }
 
@@ -110,15 +114,16 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      */
     async function main () {
         // Clear the listContainer.
+        const listContainer = document.querySelector('#mhwp-ipso-list-container');
         const items = Array.from(listContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
         // Get all activities from our wp; property data; Sort them;
-        let activities = await getActivities();
+        let activities = await getActivities(listContainer);
         activities = activities.data;
         activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
-        processActivities(activities)
+        processActivities(activities, listContainer)
 
         // Clean up message.
         return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -128,9 +133,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Fetch all activities.
      * The from and till query parameter are set with the value from the wp block.
      *
+     * @param listContainer The container for the calendar lisst.
      * @returns {Promise<void>}
      */
-    async function getActivities() {
+    async function getActivities(listContainer) {
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
@@ -150,19 +156,19 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Process the fetched activities.
      *
-     * @param activities The activities to process
+     * @param activities The activities to processs
+     * @param listContainer The container for the calendar list.
      */
-    function processActivities(activities) {
+    function processActivities(activities, listContainer) {
         // Keep track of the activities date. For date headers.
         let curDate = null;
 
         activities.forEach( (activity) => {
             // Add all activities, with or without date separator.
-            const node = addActivity(activity, activity.onDate !== curDate);
+            const node = addActivity(activity, activity.onDate !== curDate, listContainer);
 
             // The button which shows the details.
-            // Todo: ugh. We need to drop jQuery
-            const button = node[0].querySelector('button.mhwp-ipso-activity-show-detail')
+            const button = node.querySelector('button.mhwp-ipso-activity-show-detail')
 
             // update the current date.
             curDate = activity.onDate;
@@ -178,9 +184,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      *
      * @param activity json data that describes the activity,
      * @param newDate Do we want to add a seperator for new date?
+     * @param listContainer The container for the calendar list.
      * @returns The jQuery object for the added node.
      */
-    function addActivity(activity, newDate) {
+    function addActivity(activity, newDate, listContainer) {
         // Formatters for time/date
         const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
         const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
@@ -192,13 +199,13 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
         // Add a date header if the date changed.
         if (newDate) {
-            const dateHeader = `<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`;
-            $jq(listContainer).append($jq(dateHeader));
+            const dateHeader = createNodeFromHTML(`<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`);
+            listContainer.append(dateHeader)
         }
 
-        // fill the template make it jQuery and add it to the dom.
-        const node = $jq(template(activity));
-        $jq(listContainer).append(node);
+        // fill the template, append to the DOM
+        const node = template(activity);
+        listContainer.append(node);
 
         return node;
     }
@@ -207,22 +214,32 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Fill an activity with its details and prepare the form
      *
      * @param activity The activity.
-     * @param node The jquery dom node for the activity.
+     * @param node The dom node for the activity.
      */
     async function fillActivity(activity, node) {
         addMessage("Ophalen van gegevens, dit kan even duren", node);
-        const button = $jq(".mhwp-ipso-reservation-button", node);
+        const button = node.querySelector('.mhwp-ipso-reservation-button');
 
         // Get the details for the activity.
         const detail = await getDetail(activity, node);
 
+        // Disable the reservation button by default.
         clearMessages(node);
-        // The reservation button is disabeld by default.
-        // Todo: We really need to drop jq
-        button[0].disabled = false;
+        button.disabled = false;
 
         const {img, title, intro, descr} = detail;
-        $jq(".mhwp-ipso-activity-detail", node).prepend(img, title, intro, descr);
+        const detailNode = node.querySelector('.mhwp-ipso-activity-detail');
+        detailNode.prepend(img, title, intro, descr);
+
+        // Check if the activity was in the past (in days).
+        const toDay = (new Date()).setHours(0, 0, 0, 0);
+        const date = new Date(activity.timeStart)
+        // If so we cannot make a reservation, disable button we dont need the form.
+        if (date < toDay) {
+            button.disabled = true;
+            return;
+        }
+
 
         // We need the reservation, and extra data for mailing on the server.
         // We added properties date and time to the activity already.
@@ -252,19 +269,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             const places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
 
             return {
-                img: `<img src="${imageUrl}" alt="${detail.title}" />`,
-                title: `<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`,
-                intro: `<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`,
-                descr: `<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`,
+                img: createNodeFromHTML(`<img src="${imageUrl}" alt="${detail.title}" />`),
+                title: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`),
+                intro: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`),
+                descr: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`),
                 places,
                 reservationUrl
             }
         }).catch((e) => {
             // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
             return {
-                intro: "Er was een probleem met het ophalen van de data",
-                description: "Er was een probleem met het ophalen van de data",
-                image: "",
+                img: "",
+                title: "",
+                intro: "",
+                descr: "",
+                places: 0,
                 reservationUrl: null
             }
         });
@@ -305,30 +324,29 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      */
     function prepareForm(detail, mailData, container) {
         if(detail.places <= 0) {
-            // Reservations are not possible.Remove the form and button. add a notice.
-            const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
-            button.remove();
-            $jq('.mhwp-ipso-activity-reservation', container).remove();
+            // Reservations are not possible.Remove the form, add a notice.
+            container.querySelector('.mhwp-ipso-activity-reservation form').remove();
 
-            const notice = '<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet registreren.</div>';
-            $jq('.mhwp-ipso-activity-detail', container).append(notice);
+            // Don't use addMessage here. The message should be persistent
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
+            container.querySelector('.mhwp-ipso-activity-reservation').append(notice);
 
         } else if(detail.reservationUrl) {
             // We dont need the form. Prepare the button to redirect. remove the form.
-            const button = $jq("button.mhwp-ipso-activity-show-reservation", container);
+            const button = container.querySelector("button.mhwp-ipso-activity-show-reservation");
             ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
             button.on('click', (e) => window.location = detail.reservationUrl );
 
-            $jq('.mhwp-ipso-activity-reservation', container).remove();
+            container.querySelector('.mhwp-ipso-activity-reservation').remove();
 
         } else {
-            // Add validation- and submit handlers to the form.
+            // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
             const form = $jq('form', container);
             form.validate({
                 rules: {
                     phoneNumber: {
                         phoneNL: true,
-                        "normalizer": v => $jq.trim(v)
+                        "normalizer": v => v.trim()
                     }
                 },
                 "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
@@ -341,5 +359,5 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(7);});
+    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0);});
 })();

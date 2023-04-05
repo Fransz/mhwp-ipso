@@ -19,9 +19,7 @@ $logger = new MHWP_IPSO_Logger();
 $lines = '';
 if ( file_exists( $logger->logfile ) ) {
 	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	$lines = file( $logger->logfile );
-	$lines = array_reverse( $lines );
-	$lines = implode( '', $lines );
+	$lines = file_get_contents( $logger->logfile );
 }
 ?>
 
