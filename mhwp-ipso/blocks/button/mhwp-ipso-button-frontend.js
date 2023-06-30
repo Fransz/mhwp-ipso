@@ -43,6 +43,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         // Three parameters from the wp block;
         const dateField = document.querySelector('#mhwp-activity-date').value;
         const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value || "");
+        // todo Check if the value exists. we need a default here.
         const title = document.querySelector('#mhwp-activity-title').value;
 
         // Check the parameters.
