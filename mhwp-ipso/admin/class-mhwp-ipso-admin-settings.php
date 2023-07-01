@@ -144,7 +144,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_url_mappings_id',
 				'title'    => 'Activiteit Id',
-				'callback' => array( $this, 'ipso_mappings_field' ),
+				'callback' => array( $this, 'ipso_url_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
@@ -156,7 +156,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_url_mappings_url',
 				'title'    => 'URL',
-				'callback' => array( $this, 'ipso_mappings_field' ),
+				'callback' => array( $this, 'ipso_url_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
@@ -168,7 +168,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_mail_mappings_id',
 				'title'    => 'Activiteit Id',
-				'callback' => array( $this, 'ipso_mappings_field' ),
+				'callback' => array( $this, 'ipso_mail_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mail_mappings_section',
 				'args'     => array(
@@ -178,14 +178,26 @@ class MHWP_IPSO_Admin_Settings {
 				),
 			),
 			array(
-				'id'       => 'mhwp_ipso_mail_mappings_email',
-				'title'    => 'Emailadres',
-				'callback' => array( $this, 'ipso_mappings_field' ),
+				'id'       => 'mhwp_ipso_mail_mappings_title',
+				'title'    => 'Titel',
+				'callback' => array( $this, 'ipso_mail_mappings_field' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mail_mappings_section',
 				'args'     => array(
 					'setting'   => 'mhwp_ipso_mail_mappings',
-					'label_for' => 'mhwp_ipso_mail_mappings_email',
+					'label_for' => 'mhwp_ipso_mail_mappings_title',
+					'classes'   => 'mhwp-ipso-ui-mapping-url',
+				),
+			),
+			array(
+				'id'       => 'mhwp_ipso_mail_mappings_addresses',
+				'title'    => 'Emailadres',
+				'callback' => array( $this, 'ipso_mail_mappings_field' ),
+				'page'     => 'mhwp_ipso_dashboard',
+				'section'  => 'mhwp_ipso_mail_mappings_section',
+				'args'     => array(
+					'setting'   => 'mhwp_ipso_mail_mappings',
+					'label_for' => 'mhwp_ipso_mail_mappings_addresses',
 					'classes'   => 'mhwp-ipso-ui-mapping-url',
 				),
 			),
@@ -375,7 +387,9 @@ class MHWP_IPSO_Admin_Settings {
 
 	/**
 	 * Sanitize mail mappings before they are stored.
-	 * An email mapping is a mapping from an activity id to a string of email addresses seperated by ','
+	 * An email mapping is a mapping from an activity id to an array with a title
+	 * and a string of email addresses seperated by ','
+	 *
 	 * Deleting and adding mail mappings are handled here, after being processed by options.php and option.php.
 	 * Editing mail mappings are handled by the index method filling the add form while displaying the page.
 	 *
@@ -426,7 +440,7 @@ class MHWP_IPSO_Admin_Settings {
 
 			// We want to add a mapping. Check the emailaddresses.
 			$email_list = '';
-			$emails     = preg_split( '/\s*,\s*/', $input['mhwp_ipso_mail_mappings_email'] );
+			$emails     = preg_split( '/\s*,\s*/', trim( $input['mhwp_ipso_mail_mappings_addresses'] ) );
 			foreach ( $emails as $email ) {
 				if ( ! is_email( $email ) ) {
 					add_settings_error( 'mhwp_ipso_mail_mappings', 'mhwp-ipso-error', 'Not a valid email address: ' . $email );
@@ -436,8 +450,25 @@ class MHWP_IPSO_Admin_Settings {
 			}
 			$email_list = ltrim( $email_list, ',' );
 
+			// Todo feature: retrieve the activities title. store it with the mapping.
+			$client        = new MHWP_IPSO_Client();
+			$data          = array(
+				'activityID' => $activity_id,
+			);
+			$activity_resp = $client->get_activity( $data );
+
+			// If we could not correctly fetch the activity we have no title.
+			if ( is_wp_error( $activity_resp ) || 200 !== $activity_resp->mhwp_ipso_code || ! isset( $activity_resp->data ) ) {
+				$title = '';
+			} else {
+				$title = $activity_resp->data->title;
+			}
+
 			// Store the mapping in the setting under its activity-id.
-			$output[ $activity_id ] = $email_list;
+			$output[ $activity_id ] = array(
+				'addresses' => $email_list,
+				'title'     => $title,
+			);
 		}
 		return $output;
 	}
@@ -485,14 +516,64 @@ class MHWP_IPSO_Admin_Settings {
 	}
 
 	/**
-	 * Render callback for mapping fields;
-	 * If we are editing a mapping these fields are filled
+	 * Render callback for mail mapping fields;
 	 *
 	 * @param array $args  The array of arguments.
 	 *
 	 * @return void
 	 */
-	public function ipso_mappings_field( array $args ) {
+	public function ipso_mail_mappings_field( array $args ) {
+		$id       = $args['label_for'];
+		$value    = '';
+		$readonly = '';
+		$classes  = $args['classes'];
+		$name     = $args['setting'] . '[' . $id . ']';
+
+		if ( isset( $_POST['edit'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
+			// If we are editing, retrieve values for the fields from the mail_mappings
+			// option with the id that is in $edit.
+			// We checked the nonce already in the index function.
+			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
+			$edit = preg_replace( '/[^0-9]/', '', $edit );
+
+			$option = get_option( $args['setting'] );
+
+			if ( 'mhwp_ipso_mail_mappings_id' === $id ) {
+				// readonly inputs, the value is in the EDIT parameter.
+				$value    = $edit;
+				$readonly = 'readonly';
+			} elseif ( 'mhwp_ipso_mail_mappings_title' === $id ) {
+				$value    = $option[ $edit ]['title'];
+				$readonly = 'readonly';
+			} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
+				$value = $option[ $edit ]['addresses'];
+			}
+		} else {
+			// If we are adding We dont have a value for the title.
+			if ( 'mhwp_ipso_mail_mappings_title' === $id ) {
+				$readonly = 'readonly';
+			}
+		}
+
+		// Todo we need an extra field here for the activities title.
+		echo sprintf(
+			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+			esc_attr( $classes ),
+			esc_attr( $id ),
+			esc_attr( $name ),
+			esc_attr( $value ),
+			esc_attr( $readonly )
+		);
+	}
+
+	/**
+	 * Render callback for mail mapping fields;
+	 *
+	 * @param array $args  The array of arguments.
+	 *
+	 * @return void
+	 */
+	public function ipso_url_mappings_field( array $args ) {
 		$id       = $args['label_for'];
 		$value    = '';
 		$readonly = '';
@@ -508,7 +589,8 @@ class MHWP_IPSO_Admin_Settings {
 
 			$option = get_option( $args['setting'] );
 
-			if ( 'mhwp_ipso_url_mappings_id' === $id || 'mhwp_ipso_mail_mappings_id' === $id ) {
+			if ( 'mhwp_ipso_url_mappings_id' === $id ) {
+				// readonly inputs, the value is in the EDIT parameter.
 				$value    = $edit;
 				$readonly = 'readonly';
 			} else {
@@ -517,6 +599,7 @@ class MHWP_IPSO_Admin_Settings {
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
+		// Todo we need an extra field here for the activities title.
 		echo sprintf(
 			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
 			esc_attr( $classes ),
