@@ -528,14 +528,7 @@ class MHWP_IPSO_Admin_Settings {
 
 			$option = get_option( $args['setting'] );
 
-			/**
-			 * Make an array off a mapping.
-			 * TODO: remove this when all entries are fixed.
-			 *
-			 * @param array | string $m The mapping to convert.
-			 *
-			 * @return array
-			 */
+			// Todo: Remove this if all mappings are arrays.
 			$mappings = array_map(
 				function ( $m ): array {
 					if ( is_array( $m ) ) {
