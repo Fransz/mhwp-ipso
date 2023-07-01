@@ -178,18 +178,6 @@ class MHWP_IPSO_Admin_Settings {
 				),
 			),
 			array(
-				'id'       => 'mhwp_ipso_mail_mappings_title',
-				'title'    => 'Titel',
-				'callback' => array( $this, 'ipso_mail_mappings_field' ),
-				'page'     => 'mhwp_ipso_dashboard',
-				'section'  => 'mhwp_ipso_mail_mappings_section',
-				'args'     => array(
-					'setting'   => 'mhwp_ipso_mail_mappings',
-					'label_for' => 'mhwp_ipso_mail_mappings_title',
-					'classes'   => 'mhwp-ipso-ui-mapping-url',
-				),
-			),
-			array(
 				'id'       => 'mhwp_ipso_mail_mappings_addresses',
 				'title'    => 'Emailadres',
 				'callback' => array( $this, 'ipso_mail_mappings_field' ),
@@ -388,7 +376,9 @@ class MHWP_IPSO_Admin_Settings {
 	/**
 	 * Sanitize mail mappings before they are stored.
 	 * An email mapping is a mapping from an activity id to an array with a title
-	 * and a string of email addresses seperated by ','
+	 * and a string of email addresses seperated by ','.
+	 * The id and addresses list are settings, the title isn't. We store it with the settings
+	 * for displaying only.
 	 *
 	 * Deleting and adding mail mappings are handled here, after being processed by options.php and option.php.
 	 * Editing mail mappings are handled by the index method filling the add form while displaying the page.
@@ -450,7 +440,7 @@ class MHWP_IPSO_Admin_Settings {
 			}
 			$email_list = ltrim( $email_list, ',' );
 
-			// Todo feature: retrieve the activities title. store it with the mapping.
+			// Fetch the activites title from ipso, add it to the mail mapping.
 			$client        = new MHWP_IPSO_Client();
 			$data          = array(
 				'activityID' => $activity_id,
@@ -542,16 +532,8 @@ class MHWP_IPSO_Admin_Settings {
 				// readonly inputs, the value is in the EDIT parameter.
 				$value    = $edit;
 				$readonly = 'readonly';
-			} elseif ( 'mhwp_ipso_mail_mappings_title' === $id ) {
-				$value    = $option[ $edit ]['title'];
-				$readonly = 'readonly';
 			} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
 				$value = $option[ $edit ]['addresses'];
-			}
-		} else {
-			// If we are adding We dont have a value for the title.
-			if ( 'mhwp_ipso_mail_mappings_title' === $id ) {
-				$readonly = 'readonly';
 			}
 		}
 
