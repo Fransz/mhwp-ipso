@@ -123,13 +123,17 @@ class MHWP_IPSO_Admin_Pages {
 	}
 
 	/**
-	 * Renders output put for the admin settings page.
+	 * Renders output for the admin settings page.
+	 *
+	 * This function dispatches to admin/partials/mhwp-ipso-admin-index.php, which
+	 * renders the content in different tabs.
+	 * Parameters sanitized here are $POST['edit'] and $POST['date'], as well
+	 * as $REQUEST['mhwp_ipso_tab']
 	 */
 	public function index() {
-		// The edit parameter, used for editing a mapping, url or mail, is processed while
-		// rendering the page, not by the settings sanitizer.
-		// Because the edit parameter is used for url and mail mappings, we can have one of two nonces.
 		if ( isset( $_POST['edit'] ) ) {
+			// The edit parameter used for url and mail mappings,
+			// We can have one of tewo nonces here.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 			$nonce = wp_unslash( $_REQUEST['_wpnonce'] );
 			if ( ! isset( $nonce )
@@ -144,8 +148,7 @@ class MHWP_IPSO_Admin_Pages {
 			}
 		}
 
-		// The date parameter, used for displaying activities, is processed while
-		// rendering the page.
+		// The date parameter, used for displaying activities.
 		if ( isset( $_POST['date'] ) ) {
 			if ( ! check_admin_referer( 'mhwp_ipso_activities-options' ) ) {
 				die( 'Security issues!' );

@@ -20,6 +20,9 @@ class MHWP_IPSO_Activator {
 	 * todo mail: init setting. rename setting
 	 */
 	public static function activate() {
+		// Todo: add security checks.
+		// https://wordpress.stackexchange.com/questions/25910/uninstall-activate-deactivate-a-plugin-typical-features-how-to/25979#25979
+
 		add_option( 'mhwp_ipso_live_apikey', '', '', false );
 		add_option( 'mhwp_ipso_test_apikey', '', '', false );
 		add_option( 'mhwp_ipso_is_test', '1', '', false );
