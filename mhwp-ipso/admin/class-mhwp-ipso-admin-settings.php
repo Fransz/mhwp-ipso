@@ -528,12 +528,34 @@ class MHWP_IPSO_Admin_Settings {
 
 			$option = get_option( $args['setting'] );
 
+			/**
+			 * Make an array off a mapping.
+			 * TODO: remove this when all entries are fixed.
+			 *
+			 * @param array | string $m The mapping to convert.
+			 *
+			 * @return array
+			 */
+			$mappings = array_map(
+				function ( $m ): array {
+					if ( is_array( $m ) ) {
+						return $m;
+					} else {
+						return array(
+							'title'     => 'onbekend',
+							'addresses' => $m,
+						);
+					}
+				},
+				$option
+			);
+
 			if ( 'mhwp_ipso_mail_mappings_id' === $id ) {
 				// readonly inputs, the value is in the EDIT parameter.
 				$value    = $edit;
 				$readonly = 'readonly';
 			} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
-				$value = $option[ $edit ]['addresses'];
+				$value = $mappings[ $edit ]['addresses'];
 			}
 		}
 

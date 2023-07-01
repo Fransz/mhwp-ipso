@@ -19,7 +19,27 @@
 
 <?php
 	// Get the current mappings.
-	$mappings = get_option( 'mhwp_ipso_mail_mappings', array() );
+	$option = get_option( 'mhwp_ipso_mail_mappings', array() );
+
+	/**
+	 * Make an array off a mapping.
+	 * TODO: remove this when all entries are fixed.
+	 *
+	 * @param array | string $m The mapping to convert.
+	 *
+	 * @return array
+	 */
+function fix_mapping( $m ): array {
+	if ( is_array( $m ) ) {
+		return $m;
+	} else {
+		return array(
+			'title'     => 'onbekend',
+			'addresses' => $m,
+		);
+	}
+}
+	$mappings = array_map( 'fix_mapping', $option );
 
 	// Write a header.
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
