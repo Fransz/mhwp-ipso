@@ -24,9 +24,9 @@
 	// Write a header.
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
-        echo '<h4>Er zijn nog geen emails gedefineerd</h4>';
+	echo '<h4>Er zijn nog geen emails gedefineerd</h4>';
         } else {
-        echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>Titel</h4></li><li><li><h4>Email adressen</h4></li><li></li></ul>';
+	echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>Titel</h4></li><li><li><h4>Email adressen</h4></li><li></li></ul>';
     }
 	// phpcs:enable
 ?>
@@ -36,9 +36,9 @@
 			<li>
 				<span><?php echo esc_html( $activity_id ); ?></span>
 			</li>
-            <li>
-                <span><?php echo esc_html( $mapping['title'] ); ?></span>
-            </li>
+			<li>
+				<span><?php echo esc_html( $mapping['title'] ); ?></span>
+			</li>
 			<li>
 				<span><?php echo esc_html( $mapping['addresses'] ); ?></span>
 			</li>
