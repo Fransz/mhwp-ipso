@@ -224,7 +224,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         // Get the details for the activity.
         const detail = await getDetail(activity, node);
 
-        // Disable the reservation button by default.
+        // Enable the reservation button by default.
         clearMessages(node);
         button.disabled = false;
 
@@ -232,15 +232,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const detailNode = node.querySelector('.mhwp-ipso-activity-detail');
         detailNode.prepend(img, title, intro, descr);
 
-        // Check if the activity was in the past (in days).
+        // Check if we want the reservation hidden. This is a setting in the backend.
+        // If so hide the button, we dont need a form
+        if (detail.disableReservation) {
+            button.hidden = true;
+            return;
+        }
+
+        // Check if the activity was in the past (in days), if so we cannot make a reservation
+        // Disable the button and we dont need a form.
         const toDay = (new Date()).setHours(0, 0, 0, 0);
         const date = new Date(activity.timeStart)
-        // If so we cannot make a reservation, disable button we dont need the form.
         if (date < toDay) {
             button.disabled = true;
             return;
         }
-
 
         // We need the reservation, and extra data for mailing on the server.
         // We added properties date and time to the activity already.
@@ -275,7 +281,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
                 intro: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`),
                 descr: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`),
                 places,
-                reservationUrl
+                reservationUrl,
+                disableReservation: detail.disableReservation
             }
         }).catch((e) => {
             // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
@@ -332,7 +339,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
             container.querySelector('.mhwp-ipso-activity-reservation').append(notice);
 
-        } else if(detail.reservationUrl) {
+        } else if(detail.reservationUrl && ! detail.disableReservation) {
             // We dont need the form. Prepare the button to redirect. remove the form.
             const button = container.querySelector("button.mhwp-ipso-activity-show-reservation");
             ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
