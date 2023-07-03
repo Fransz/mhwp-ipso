@@ -219,29 +219,31 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * @param node The dom node for the activity.
      */
     async function fillActivity(activity, node) {
+        // Get the details for the activity. Template strings and properties.
         addMessage("Ophalen van gegevens, dit kan even duren", node);
-        const button = node.querySelector('.mhwp-ipso-reservation-button');
-
-        // Get the details for the activity.
         const detail = await getDetail(activity, node);
+        clearMessages(node);
 
         // Enable the reservation button by default.
-        clearMessages(node);
+        const button = node.querySelector('.mhwp-ipso-reservation-button');
         button.disabled = false;
 
+        // Prepend the details template strings to the detail node
         const {img, title, intro, descr} = detail;
         const detailNode = node.querySelector('.mhwp-ipso-activity-detail');
         detailNode.prepend(img, title, intro, descr);
 
-        // Check if we want the reservation hidden. This is a setting in the backend.
-        // If so hide the button, we dont need a form
-        if (detail.disableReservation) {
+
+        // properties we process here.
+        const { disableReservation, places, reservationUrl} = detail;
+
+        // Check if we want the reservation button to be hidden.
+        if (disableReservation) {
             button.hidden = true;
             return;
         }
 
-        // Check if the activity was in the past (in days), if so we cannot make a reservation
-        // Disable the button and we dont need a form.
+        // Check if the activity was in the past (in days).
         const toDay = (new Date()).setHours(0, 0, 0, 0);
         const date = new Date(activity.timeStart)
         if (date < toDay) {
@@ -249,8 +251,24 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             return;
         }
 
+        // Check if we have a alternative URL for reservations.
+        if(reservationUrl) {
+            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
+            button.addEventListener('click', (e) => window.location = reservationUrl);
+            return;
+        }
+
+        // Check if there are places left.
+        if(places <= 0) {
+            button.hidden = true;
+
+            // Don't use addMessage here. The message should be persistent
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
+            node.querySelector('.mhwp-ipso-activity-detail').append(notice);
+            return;
+        }
+
         // We need the reservation, and extra data for mailing on the server.
-        // We added properties date and time to the activity already.
         const mailData = {
             'activityId': activity.activityID,
             'activityTitle': activity.title,
@@ -293,7 +311,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
                 intro: "",
                 descr: "",
                 places: 0,
-                reservationUrl: null
+                reservationUrl: null,
+                disableReservation: false
             }
         });
     }
@@ -332,38 +351,21 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * @param container
      */
     function prepareForm(detail, mailData, container) {
-        if(detail.places <= 0) {
-            // Reservations are not possible.Remove the form, add a notice.
-            container.querySelector('.mhwp-ipso-activity-reservation form').remove();
-
-            // Don't use addMessage here. The message should be persistent
-            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
-            container.querySelector('.mhwp-ipso-activity-reservation').append(notice);
-
-        } else if(detail.reservationUrl && ! detail.disableReservation) {
-            // We dont need the form. Prepare the button to redirect. remove the form.
-            const button = container.querySelector("button.mhwp-ipso-activity-show-reservation");
-            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
-            button.addEventListener('click', (e) => window.location = detail.reservationUrl );
-            container.querySelector('.mhwp-ipso-activity-reservation').remove();
-
-        } else {
-            // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
-            const form = $jq('form', container);
-            form.validate({
-                rules: {
-                    phoneNumber: {
-                        phoneNL: true,
-                        "normalizer": v => v.trim()
-                    }
-                },
-                "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
-                "invalidHandler": function () {
-                    // TODO: We want an error message here.
-                    console.log( 'invalid' );
+        // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
+        const form = $jq('form', container);
+        form.validate({
+            rules: {
+                phoneNumber: {
+                    phoneNL: true,
+                    "normalizer": v => v.trim()
                 }
-            })
-        }
+            },
+            "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
+            "invalidHandler": function () {
+                // TODO: We want an error message here.
+                console.log( 'invalid' );
+            }
+        })
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
