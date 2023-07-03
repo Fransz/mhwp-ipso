@@ -335,9 +335,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         } else if(detail.reservationUrl) {
             // We dont need the form. Prepare the button to redirect. remove the form.
             const button = container.querySelector("button.mhwp-ipso-activity-show-reservation");
-            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
-            button.on('click', (e) => window.location = detail.reservationUrl );
-
+            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
+            button.addEventListener('click', (e) => window.location = detail.reservationUrl );
             container.querySelector('.mhwp-ipso-activity-reservation').remove();
 
         } else {
