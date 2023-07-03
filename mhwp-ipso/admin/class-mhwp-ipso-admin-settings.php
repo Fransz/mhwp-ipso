@@ -380,9 +380,9 @@ class MHWP_IPSO_Admin_Settings {
 			}
 
 			// we want to add a mapping, sanitize the disable registration checkbox.
-			$disabled = ( sanitize_text_field( wp_unslash( $input['mhwp_ipso_url_mappings_disabled'] ) ) === 'on' );
+			$disabled = isset( $input['mhwp_ipso_url_mappings_disabled'] );
 
-			// We want to add a mapping. Fetch the activitys' title.
+			// We want to add a mapping. Fetch the activities title.
 			$title = $this->fetch_title( $activity_id );
 
 			// Store the mapping in the setting under its activity-id.
