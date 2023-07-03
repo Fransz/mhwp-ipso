@@ -212,7 +212,8 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     /**
-     * Fill an activity with its details and prepare the form
+     * Fill an activity with its details and prepare the reservation button.
+     * If necessary prepare the reservation form.
      *
      * @param activity The activity.
      * @param node The dom node for the activity.
