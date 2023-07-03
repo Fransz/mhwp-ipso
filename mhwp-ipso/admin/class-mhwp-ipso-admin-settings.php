@@ -144,7 +144,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_url_mappings_id',
 				'title'    => 'Activiteit Id',
-				'callback' => array( $this, 'ipso_url_mappings_field' ),
+				'callback' => array( $this, 'ipso_url_mappings_fields' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
@@ -156,7 +156,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_url_mappings_url',
 				'title'    => 'URL',
-				'callback' => array( $this, 'ipso_url_mappings_field' ),
+				'callback' => array( $this, 'ipso_url_mappings_fields' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
@@ -168,7 +168,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_url_mappings_disabled',
 				'title'    => 'Verberg reservering',
-				'callback' => array( $this, 'ipso_url_mappings_field' ),
+				'callback' => array( $this, 'ipso_url_mappings_fields' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_url_mappings_section',
 				'args'     => array(
@@ -180,7 +180,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_mail_mappings_id',
 				'title'    => 'Activiteit Id',
-				'callback' => array( $this, 'ipso_mail_mappings_field' ),
+				'callback' => array( $this, 'ipso_mail_mappings_fields' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mail_mappings_section',
 				'args'     => array(
@@ -192,7 +192,7 @@ class MHWP_IPSO_Admin_Settings {
 			array(
 				'id'       => 'mhwp_ipso_mail_mappings_addresses',
 				'title'    => 'Emailadres',
-				'callback' => array( $this, 'ipso_mail_mappings_field' ),
+				'callback' => array( $this, 'ipso_mail_mappings_fields' ),
 				'page'     => 'mhwp_ipso_dashboard',
 				'section'  => 'mhwp_ipso_mail_mappings_section',
 				'args'     => array(
@@ -491,9 +491,9 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * @param int $activity_id The activity for which we want to know the title.
 	 *
-	 * @return $title The title for the activity.
+	 * @return string The title for the activity.
 	 */
-	private function fetch_title ( $activity_id ) {
+	private function fetch_title( $activity_id ) {
 		$client        = new MHWP_IPSO_Client();
 		$data          = array(
 			'activityID' => $activity_id,
@@ -558,12 +558,12 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * @return void
 	 */
-	public function ipso_mail_mappings_field( array $args ) {
-		$id       = $args['label_for'];
-		$value    = '';
-		$readonly = '';
-		$classes  = $args['classes'];
-		$name     = $args['setting'] . '[' . $id . ']';
+	public function ipso_mail_mappings_fields( array $args ) {
+		$id      = $args['label_for'];
+		$classes = $args['classes'];
+		$name    = $args['setting'] . '[' . $id . ']';
+
+		$mappings = array();
 
 		if ( isset( $_POST['edit'] ) ) { // phpcs:disable WordPress.Security.NonceVerification.Missing
 			// If we are editing, retrieve values for the fields from the mail_mappings
@@ -581,37 +581,43 @@ class MHWP_IPSO_Admin_Settings {
 						return $m;
 					} else {
 						return array(
-							'title'     => 'onbekend',
+							'title'     => '',
 							'addresses' => $m,
 						);
 					}
 				},
 				$option
 			);
+		}
 
-			if ( 'mhwp_ipso_mail_mappings_id' === $id ) {
-				// readonly inputs, the value is in the EDIT parameter.
+		if ( 'mhwp_ipso_mail_mappings_id' === $id ) {
+			// readonly inputs, the value is in the EDIT parameter.
+			$value    = '';
+			$readonly = '';
+			if ( isset( $edit ) ) {
 				$value    = $edit;
 				$readonly = 'readonly';
-				echo sprintf(
-					'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
-					esc_attr( $classes ),
-					esc_attr( $id ),
-					esc_attr( $name ),
-					esc_attr( $value ),
-					esc_attr( $readonly )
-				);
-			} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
-				$value = $mappings[ $edit ]['addresses'];
-				echo sprintf(
-					'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
-					esc_attr( $classes ),
-					esc_attr( $id ),
-					esc_attr( $name ),
-					esc_attr( $value ),
-					esc_attr( $readonly )
-				);
 			}
+			echo sprintf(
+				'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+				esc_attr( $classes ),
+				esc_attr( $id ),
+				esc_attr( $name ),
+				esc_attr( $value ),
+				esc_attr( $readonly )
+			);
+		} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
+			$value = '';
+			if ( isset( $edit ) ) {
+				$value = $mappings[ $edit ]['addresses'];
+			}
+			echo sprintf(
+				'<div class="%s"><input type="text" id="%s" name="%s" value="%s" required /></div>',
+				esc_attr( $classes ),
+				esc_attr( $id ),
+				esc_attr( $name ),
+				esc_attr( $value )
+			);
 		}
 
 	}
@@ -623,7 +629,7 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * @return void
 	 */
-	public function ipso_url_mappings_field( array $args ) {
+	public function ipso_url_mappings_fields( array $args ) {
 		$id      = $args['label_for'];
 		$classes = $args['classes'];
 		$name    = $args['setting'] . '[' . $id . ']';
@@ -646,6 +652,7 @@ class MHWP_IPSO_Admin_Settings {
 						return $m;
 					} else {
 						return array(
+							'title'               => '',
 							'url'                 => $m,
 							'disable_reservation' => false,
 						);
@@ -659,7 +666,7 @@ class MHWP_IPSO_Admin_Settings {
 			$value    = '';
 			$readonly = '';
 			if ( isset( $edit ) ) {
-				$value    = $edit ?? '';
+				$value    = $edit;
 				$readonly = 'readonly';
 			}
 			echo sprintf(

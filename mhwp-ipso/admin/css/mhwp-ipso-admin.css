@@ -115,10 +115,13 @@ ul.ui-list li.ui-list-id {
   flex: 0 0 5%;
 }
 ul.ui-list li.ui-list-title {
-  flex: 1 1 35%;
+  flex: 1 1 25%;
 }
-ul.ui-list li.ui-list-mapping {
-  flex: 1 1 35%;
+ul.ui-list li.ui-list-url-mapping {
+  flex: 1 0 40%;
+}
+ul.ui-list li.ui-list-mail-mapping {
+  flex: 1 0 50%;
 }
 ul.ui-list li.ui-list-dis-res {
   text-align:center;

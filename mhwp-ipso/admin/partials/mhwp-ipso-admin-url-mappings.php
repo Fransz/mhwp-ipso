@@ -41,7 +41,7 @@
     if ( empty( $mappings ) ) {
 		echo '<h4>Er zijn nog geen uitzonderingen gedefineerd</h4>';
     } else {
-		echo '<ul class="ui-list"><li class="ui-list-id"><h4>Id</h4></li><li class="ui-list-title"><h4>Naam</H4></li><li class="ui-list-mapping"><h4>URL</h4></li><li class="ui-list-dis-res"><h4>Verberg</h4></li></li><li class="ui-list-buttons"></li></ul>';
+		echo '<ul class="ui-list"><li class="ui-list-id"><h4>Id</h4></li><li class="ui-list-title"><h4>Naam</H4></li><li class="ui-list-url-mapping"><h4>URL</h4></li><li class="ui-list-dis-res"><h4>Verberg</h4></li></li><li class="ui-list-buttons"></li></ul>';
     }
 	// phpcs:enable
 
@@ -56,7 +56,7 @@
 			<li class="ui-list-title">
 				<span><?php echo esc_html( $mapping['title'] ); ?></span>
 			</li>
-			<li class="ui-list-mapping">
+			<li class="ui-list-url-mapping">
 				<span><?php echo esc_url( $mapping['url'] ); ?></span>
 			</li>
 			<li class="ui-list-dis-res">

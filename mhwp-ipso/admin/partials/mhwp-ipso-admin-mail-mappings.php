@@ -41,7 +41,7 @@
     if ( empty( $mappings ) ) {
 		echo '<h4>Er zijn nog geen emails gedefineerd</h4>';
         } else {
-		echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>Titel</h4></li><li><li><h4>Email adressen</h4></li><li></li></ul>';
+            echo '<ul class="ui-list"><li class="ui-list-id"><h4>Id</h4></li><li class="ui-list-title"><h4>Naam</H4></li><li class="ui-list-mail-mapping"><h4>Mail adressen</h4></li><li class="ui-list-buttons"></li></ul>';
     }
 	// phpcs:enable
 
@@ -49,16 +49,16 @@
 
 <?php foreach ( $mappings as $activity_id => $mapping ) : ?>
 		<ul class="ui-list">
-			<li>
+			<li class="ui-list-id">
 				<span><?php echo esc_html( $activity_id ); ?></span>
 			</li>
-			<li>
+			<li class="ui-list-title">
 				<span><?php echo esc_html( $mapping['title'] ); ?></span>
 			</li>
-			<li>
+			<li class="ui-list-mail-mapping">
 				<span><?php echo esc_html( $mapping['addresses'] ); ?></span>
 			</li>
-			<li>
+			<li class="ui-list-button">
 				<div>
 					<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 						<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />
