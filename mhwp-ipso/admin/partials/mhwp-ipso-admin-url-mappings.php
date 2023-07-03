@@ -20,26 +20,50 @@
 
 <?php
 	// Get the current mappings, write a header.
-	$mappings = get_option( 'mhwp_ipso_url_mappings', array() );
+	$option = get_option( 'mhwp_ipso_url_mappings', array() );
+
+	// Todo: Remove this if all mappings are arrays.
+	$mappings = array_map(
+		function ( $m ): array {
+			if ( is_array( $m ) ) {
+				return $m;
+			} else {
+				return array(
+					'url'                 => $m,
+					'disable_reservation' => false,
+				);
+			}
+		},
+		$option
+	);
 
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
-	echo '<h4>Er zijn nog geen uitzonderingen gedefineerd</h4>';
+		echo '<h4>Er zijn nog geen uitzonderingen gedefineerd</h4>';
     } else {
-	echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>URL</H4></li><li></li></ul>';
+		echo '<ul class="ui-list"><li class="ui-list-id"><h4>Id</h4></li><li class="ui-list-title"><h4>Naam</H4></li><li class="ui-list-mapping"><h4>URL</h4></li><li class="ui-list-dis-res"><h4>Verberg</h4></li></li><li class="ui-list-buttons"></li></ul>';
     }
 	// phpcs:enable
-?>
 
-<?php foreach ( $mappings as $activity_id => $url ) : ?>
+
+	?>
+
+<?php foreach ( $mappings as $activity_id => $mapping ) : ?>
 		<ul class="ui-list">
-			<li>
+			<li class="ui-list-id">
 				<span><?php echo esc_html( $activity_id ); ?></span>
 			</li>
-			<li>
-				<span><?php echo esc_url( $url ); ?></span>
+			<li class="ui-list-title">
+				<span><?php echo esc_html( $mapping['title'] ); ?></span>
 			</li>
-			<li>
+			<li class="ui-list-mapping">
+				<span><?php echo esc_url( $mapping['url'] ); ?></span>
+			</li>
+			<li class="ui-list-dis-res">
+				<?php $checked = $mapping['disable_reservation'] ? 'checked' : ''; ?>
+				<input type="checkbox" disabled <?php echo esc_html( $checked ); ?> value="disable_reservation"/>
+			</li>
+			<li class="ui-list-buttons">
 				<div>
 					<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 						<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />

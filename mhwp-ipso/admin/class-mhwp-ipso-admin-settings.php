@@ -166,6 +166,18 @@ class MHWP_IPSO_Admin_Settings {
 				),
 			),
 			array(
+				'id'       => 'mhwp_ipso_url_mappings_disabled',
+				'title'    => 'Verberg reservering',
+				'callback' => array( $this, 'ipso_url_mappings_field' ),
+				'page'     => 'mhwp_ipso_dashboard',
+				'section'  => 'mhwp_ipso_url_mappings_section',
+				'args'     => array(
+					'setting'   => 'mhwp_ipso_url_mappings',
+					'label_for' => 'mhwp_ipso_url_mappings_disabled',
+					'classes'   => 'mhwp-ipso-ui-mapping-url',
+				),
+			),
+			array(
 				'id'       => 'mhwp_ipso_mail_mappings_id',
 				'title'    => 'Activiteit Id',
 				'callback' => array( $this, 'ipso_mail_mappings_field' ),
@@ -356,19 +368,29 @@ class MHWP_IPSO_Admin_Settings {
 			$activity_id = sanitize_text_field( wp_unslash( $input['mhwp_ipso_url_mappings_id'] ) );
 			$activity_id = preg_replace( '/[^0-9]/', '', $activity_id );
 			if ( empty( $activity_id ) ) {
-				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Ongeldige activiteitsid' );
 				return $output;
 			}
 
 			// We want to add a mapping. Sanitize url.
 			$url = esc_url_raw( wp_unslash( $input['mhwp_ipso_url_mappings_url'] ), array( 'http', 'https' ) );
 			if ( empty( $url ) ) {
-				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Security issues!' );
+				add_settings_error( 'mhwp_ipso_url_mappings', 'mhwp-ipso-error', 'Ongeldige URL' );
 				return $output;
 			}
 
+			// we want to add a mapping, sanitize the disable registration checkbox.
+			$disabled = ( sanitize_text_field( wp_unslash( $input['mhwp_ipso_url_mappings_disabled'] ) ) === 'on' );
+
+			// We want to add a mapping. Fetch the activitys' title.
+			$title = $this->fetch_title( $activity_id );
+
 			// Store the mapping in the setting under its activity-id.
-			$output[ $activity_id ] = $url;
+			$output[ $activity_id ] = array(
+				'title'               => $title,
+				'url'                 => $url,
+				'disable_reservation' => $disabled,
+			);
 		}
 		return $output;
 	}
@@ -440,7 +462,7 @@ class MHWP_IPSO_Admin_Settings {
 			}
 			$email_list = ltrim( $email_list, ',' );
 
-			// Fetch the activites title from ipso, add it to the mail mapping.
+			// Fetch the activity's title from ipso, add it to the mail mapping.
 			$client        = new MHWP_IPSO_Client();
 			$data          = array(
 				'activityID' => $activity_id,
@@ -461,6 +483,30 @@ class MHWP_IPSO_Admin_Settings {
 			);
 		}
 		return $output;
+	}
+
+	/**
+	 * Helper function for fetching an activity's title.
+	 * The title is added to the url or mail mappings setting.
+	 *
+	 * @param int $activity_id The activity for which we want to know the title.
+	 *
+	 * @return $title The title for the activity.
+	 */
+	private function fetch_title ( $activity_id ) {
+		$client        = new MHWP_IPSO_Client();
+		$data          = array(
+			'activityID' => $activity_id,
+		);
+		$activity_resp = $client->get_activity( $data );
+
+		// If we could not correctly fetch the activity we have no title.
+		if ( is_wp_error( $activity_resp ) || 200 !== $activity_resp->mhwp_ipso_code || ! isset( $activity_resp->data ) ) {
+			$title = '';
+		} else {
+			$title = $activity_resp->data->title;
+		}
+		return $title;
 	}
 
 	/**
@@ -547,63 +593,109 @@ class MHWP_IPSO_Admin_Settings {
 				// readonly inputs, the value is in the EDIT parameter.
 				$value    = $edit;
 				$readonly = 'readonly';
+				echo sprintf(
+					'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+					esc_attr( $classes ),
+					esc_attr( $id ),
+					esc_attr( $name ),
+					esc_attr( $value ),
+					esc_attr( $readonly )
+				);
 			} elseif ( 'mhwp_ipso_mail_mappings_addresses' === $id ) {
 				$value = $mappings[ $edit ]['addresses'];
+				echo sprintf(
+					'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+					esc_attr( $classes ),
+					esc_attr( $id ),
+					esc_attr( $name ),
+					esc_attr( $value ),
+					esc_attr( $readonly )
+				);
 			}
 		}
 
-		// Todo we need an extra field here for the activities title.
-		echo sprintf(
-			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
-			esc_attr( $classes ),
-			esc_attr( $id ),
-			esc_attr( $name ),
-			esc_attr( $value ),
-			esc_attr( $readonly )
-		);
 	}
 
 	/**
-	 * Render callback for mail mapping fields;
+	 * Render callback for url mapping text fields;
 	 *
 	 * @param array $args  The array of arguments.
 	 *
 	 * @return void
 	 */
 	public function ipso_url_mappings_field( array $args ) {
-		$id       = $args['label_for'];
-		$value    = '';
-		$readonly = '';
-		$classes  = $args['classes'];
-		$name     = $args['setting'] . '[' . $id . ']';
+		$id      = $args['label_for'];
+		$classes = $args['classes'];
+		$name    = $args['setting'] . '[' . $id . ']';
 
-		// If we are editing, retrieve values for the id that is in $edit.
-		// We already checked the nonce and validity.
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$mappings = array();
+
 		if ( isset( $_POST['edit'] ) ) {
+			// If we are editing, retrieve values for the fields from the mail_mappings
+			// option with the id that is in $edit.
+			// We checked the nonce already in the index function.
 			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
 			$edit = preg_replace( '/[^0-9]/', '', $edit );
 
 			$option = get_option( $args['setting'] );
 
-			if ( 'mhwp_ipso_url_mappings_id' === $id ) {
-				// readonly inputs, the value is in the EDIT parameter.
-				$value    = $edit;
-				$readonly = 'readonly';
-			} else {
-				$value = $option[ $edit ];
-			}
+			// Todo: Remove this if all mappings are arrays.
+			$mappings = array_map(
+				function ( $m ): array {
+					if ( is_array( $m ) ) {
+						return $m;
+					} else {
+						return array(
+							'url'                 => $m,
+							'disable_reservation' => false,
+						);
+					}
+				},
+				$option
+			);
 		}
-		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		// Todo we need an extra field here for the activities title.
-		echo sprintf(
-			'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
-			esc_attr( $classes ),
-			esc_attr( $id ),
-			esc_attr( $name ),
-			esc_attr( $value ),
-			esc_attr( $readonly )
-		);
+		if ( 'mhwp_ipso_url_mappings_id' === $id ) {
+			$value    = '';
+			$readonly = '';
+			if ( isset( $edit ) ) {
+				$value    = $edit ?? '';
+				$readonly = 'readonly';
+			}
+			echo sprintf(
+				'<div class="%s"><input type="text" id="%s" name="%s" value="%s" %s required /></div>',
+				esc_attr( $classes ),
+				esc_attr( $id ),
+				esc_attr( $name ),
+				esc_attr( $value ),
+				esc_attr( $readonly )
+			);
+		}
+		if ( 'mhwp_ipso_url_mappings_url' === $id ) {
+			$value = '';
+			if ( isset( $edit ) ) {
+				$value = $mappings[ $edit ]['url'];
+			}
+			echo sprintf(
+				'<div class="%s"><input type="text" id="%s" name="%s" value="%s" required /></div>',
+				esc_attr( $classes ),
+				esc_attr( $id ),
+				esc_attr( $name ),
+				esc_attr( $value )
+			);
+		}
+		if ( 'mhwp_ipso_url_mappings_disabled' === $id ) {
+			$checked = '';
+			if ( isset( $edit ) ) {
+				$checked = $mappings[ $edit ]['disable_reservation'] ? 'checked' : '';
+			}
+			echo sprintf(
+				'<div class="%s"><input type="checkbox" id="%s" name="%s" %s /></div>',
+				esc_attr( $classes ),
+				esc_attr( $id ),
+				esc_attr( $name ),
+				esc_attr( $checked )
+			);
+		}
 	}
 }
