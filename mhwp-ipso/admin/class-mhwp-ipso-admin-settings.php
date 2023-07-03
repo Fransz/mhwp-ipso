@@ -405,7 +405,7 @@ class MHWP_IPSO_Admin_Settings {
 	 * Deleting and adding mail mappings are handled here, after being processed by options.php and option.php.
 	 * Editing mail mappings are handled by the index method filling the add form while displaying the page.
 	 *
-	 * @param mixed $input An array of id and emailadresses for the mapping or null if we want to delete.
+	 * @param mixed $input An array of id and email addresses for the mapping or null if we want to delete.
 	 *
 	 * @return array An array of all mappings. The array key is the activity id. The values are email addresses seperated by ','
 	 */
@@ -462,19 +462,8 @@ class MHWP_IPSO_Admin_Settings {
 			}
 			$email_list = ltrim( $email_list, ',' );
 
-			// Fetch the activity's title from ipso, add it to the mail mapping.
-			$client        = new MHWP_IPSO_Client();
-			$data          = array(
-				'activityID' => $activity_id,
-			);
-			$activity_resp = $client->get_activity( $data );
-
-			// If we could not correctly fetch the activity we have no title.
-			if ( is_wp_error( $activity_resp ) || 200 !== $activity_resp->mhwp_ipso_code || ! isset( $activity_resp->data ) ) {
-				$title = '';
-			} else {
-				$title = $activity_resp->data->title;
-			}
+			// We want to add a mapping. Fetch the activitys' title.
+			$title = $this->fetch_title( $activity_id );
 
 			// Store the mapping in the setting under its activity-id.
 			$output[ $activity_id ] = array(
@@ -493,7 +482,7 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * @return string The title for the activity.
 	 */
-	private function fetch_title( $activity_id ) {
+	private function fetch_title( int $activity_id ) : string {
 		$client        = new MHWP_IPSO_Client();
 		$data          = array(
 			'activityID' => $activity_id,
@@ -514,7 +503,7 @@ class MHWP_IPSO_Admin_Settings {
 	 *
 	 * @param array $args Arguments.
 	 */
-	public function ipso_text_field( $args ) {
+	public function ipso_text_field( array $args ) {
 		$id        = $args['label_for'];
 		$value     = get_option( $args['setting'] );
 		$classes   = $args['classes'];
@@ -591,7 +580,6 @@ class MHWP_IPSO_Admin_Settings {
 		}
 
 		if ( 'mhwp_ipso_mail_mappings_id' === $id ) {
-			// readonly inputs, the value is in the EDIT parameter.
 			$value    = '';
 			$readonly = '';
 			if ( isset( $edit ) ) {
@@ -619,7 +607,6 @@ class MHWP_IPSO_Admin_Settings {
 				esc_attr( $value )
 			);
 		}
-
 	}
 
 	/**
