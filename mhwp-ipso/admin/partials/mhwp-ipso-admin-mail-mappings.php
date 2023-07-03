@@ -58,7 +58,7 @@
 			<li class="ui-list-mail-mapping">
 				<span><?php echo esc_html( $mapping['addresses'] ); ?></span>
 			</li>
-			<li class="ui-list-button">
+			<li class="ui-list-buttons">
 				<div>
 					<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 						<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />

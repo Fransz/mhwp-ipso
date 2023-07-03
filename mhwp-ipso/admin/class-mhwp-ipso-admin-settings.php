@@ -493,7 +493,7 @@ class MHWP_IPSO_Admin_Settings {
 		if ( is_wp_error( $activity_resp ) || 200 !== $activity_resp->mhwp_ipso_code || ! isset( $activity_resp->data ) ) {
 			$title = '';
 		} else {
-			$title = $activity_resp->data->title;
+			$title = $activity_resp->data->title ?? '';
 		}
 		return $title;
 	}
