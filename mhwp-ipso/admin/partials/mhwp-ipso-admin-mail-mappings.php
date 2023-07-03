@@ -15,6 +15,22 @@
 
 ?>
 
+
+<h2><?php echo isset( $edit ) ? 'Verander de email adressen die gemaild worden bij een reservering voor deze activiteit' : 'Geef de email adressen, die gemaild worden bij een reservering van deze activiteit'; ?></h2>
+<h5>Meerdere email adressen scheid je met een komma, bijvoorbeeld: webmaster@marikenhuis.nl,pr@marikenhuis.nl,welkom@marikenhuis.nl</h5>
+<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
+    <input type="hidden" name="mhwp_ipso_tab" value="Email adressen" />
+	<?php
+		settings_fields( 'mhwp_ipso_mail_mappings' );
+		echo '<table class="form-table" role="presentation">';
+		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_mail_mappings_section' );
+		echo '</table>';
+		submit_button( 'save' );
+	?>
+</form>
+
+<hr />
+
 <h2>Email adressen die gemaild worden bij een reservering van een activiteit.</h2>
 
 <?php
@@ -80,18 +96,3 @@
 			</li>
 		</ul>
 <?php endforeach; ?>
-
-<hr />
-
-<h2><?php echo isset( $edit ) ? 'Verander de email adressen die gemaild worden bij een reservering voor deze activiteit' : 'Geef de email adressen, die gemaild worden bij een reservering van deze activiteit'; ?></h2>
-<h5>Meerdere email adressen scheid je met een komma, bijvoorbeeld: webmaster@marikenhuis.nl,pr@marikenhuis.nl,welkom@marikenhuis.nl</h5>
-<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
-	<input type="hidden" name="mhwp_ipso_tab" value="Email adressen" />
-	<?php
-		settings_fields( 'mhwp_ipso_mail_mappings' );
-		echo '<table class="form-table" role="presentation">';
-		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_mail_mappings_section' );
-		echo '</table>';
-		submit_button( 'save' );
-	?>
-</form>

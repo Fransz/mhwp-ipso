@@ -16,6 +16,20 @@
 
 ?>
 
+<h2><?php echo isset( $edit ) ? 'Verander de URL waarop gereserveerd wordt' : 'Geef een url voor een resevering voor deze activiteit'; ?></h2>
+<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
+    <input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
+	<?php
+		settings_fields( 'mhwp_ipso_url_mappings' );
+		echo '<table class="form-table" role="presentation">';
+		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_url_mappings_section' );
+		echo '</table>';
+		submit_button( 'save' );
+	?>
+</form>
+
+<hr />
+
 <h2>Reserveringen die buiten IPSO om verwerkt worden.</h2>
 
 <?php
@@ -85,17 +99,3 @@
 			</li>
 		</ul>
 <?php endforeach; ?>
-
-<hr />
-
-<h2><?php echo isset( $edit ) ? 'Verander de URL waarop gereserveerd wordt' : 'Geef een url voor een resevering voor deze activiteit'; ?></h2>
-<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
-	<input type="hidden" name="mhwp_ipso_tab" value="Afwijkende reserveringen" />
-	<?php
-		settings_fields( 'mhwp_ipso_url_mappings' );
-		echo '<table class="form-table" role="presentation">';
-		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_url_mappings_section' );
-		echo '</table>';
-		submit_button( 'save' );
-	?>
-</form>
