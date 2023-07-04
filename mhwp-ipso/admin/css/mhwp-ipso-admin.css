@@ -111,25 +111,40 @@ ul.ui-list li {
   margin-top: 1em;
   height: 1em;
 }
-ul.ui-list li {
-  flex: 1 1 10%;
+ul.ui-list li.ui-list-id {
+  flex: 0 0 5%;
 }
-ul.ui-list li+li {
-  flex: 1 1 70%;
+ul.ui-list li.ui-list-title {
+  flex: 1 1 25%;
 }
-ul.ui-list li+li+li {
-  flex: 1 1 20%;
+ul.ui-list li.ui-list-url-mapping {
+  flex: 1 0 40%;
+}
+ul.ui-list li.ui-list-mail-mapping {
+  flex: 1 0 50%;
+}
+ul.ui-list li.ui-list-dis-res {
+  flex: 0 0 10%;
+  text-align:center;
+}
+ul.ui-list li.ui-list-buttons {
+  flex: 0 0 20%;
 }
 ul.ui-list li h4 {
   margin-top:1em;
   margin-bottom:1em;
 }
-ul.ui-list li div {
+
+ul li.ui-list-dis-res input[type=checkbox] {
+  cursor: default;
+}
+
+ul.ui-list li.ui-list-buttons div {
   display:flex;
   justify-content: space-evenly;
 }
 
-ul.ui-list li form {
+ul.ui-list li.ui-list-buttons form {
   display: inline-block;
 }
 
@@ -138,6 +153,11 @@ ul.ui-list li form {
 .mhwp-ipso-ui-mapping-url input {
   border: 1px solid blue;
   width: 20em;
+}
+
+.mhwp-ipso-ui-mapping-url input[type=checkbox] {
+  border: 1px solid blue;
+  width: 1em;
 }
 
 #mhwp-ipso-admin-log textarea {

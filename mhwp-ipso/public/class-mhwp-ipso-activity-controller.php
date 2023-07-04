@@ -100,7 +100,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get a single activity (really a activity type!) from the ipso system.
+	 * Get a single activity (really an activity type!) from the ipso system.
 	 *
 	 * The data is extended with reservation mappings; images url;
 	 * The data is extended with the nr of participants.
@@ -109,7 +109,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * Doing that in the client would expose names and email for participants.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return object Response object on success, or WP_Error object on failure.
+	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ): WP_REST_Response {
 		$activity_id = $request->get_param( 'activityId' );
@@ -132,9 +132,14 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			$mappings = get_option( 'mhwp_ipso_url_mappings', array() );
 
 			if ( isset( $activity_resp->data->id ) && array_key_exists( $activity_resp->data->id, $mappings ) ) {
-
-				// A mapping exists for this activity. Add the url.
-				$activity_resp->data->reservationUrl = $mappings[ $activity_resp->data->id ];
+				// A mapping exists for this activity. Add an url and/or a bool for disable registration.
+				// Todo drop the else clause when all mappings are arrays.
+				if ( is_array( $mappings[ $activity_resp->data->id ] ) ) {
+					$activity_resp->data->reservationUrl     = $mappings[ $activity_resp->data->id ]['url'];
+					$activity_resp->data->disableReservation = $mappings[ $activity_resp->data->id ]['disable_reservation'];
+				} else {
+					$activity_resp->data->reservationUrl = $mappings[ $activity_resp->data->id ];
+				}
 			}
 
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -147,7 +152,7 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			// phpcs:enable
 		}
 
-		// Make another request for the participants data.
+		// Make another request for the participants' data.
 		$data = array(
 			'activityId' => $calendar_id,
 		);

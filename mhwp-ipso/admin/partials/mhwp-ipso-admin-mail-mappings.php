@@ -15,30 +15,66 @@
 
 ?>
 
+
+<h2><?php echo isset( $edit ) ? 'Verander de email adressen die gemaild worden bij een reservering voor deze activiteit' : 'Geef de email adressen, die gemaild worden bij een reservering van deze activiteit'; ?></h2>
+<h5>Meerdere email adressen scheid je met een komma, bijvoorbeeld: webmaster@marikenhuis.nl,pr@marikenhuis.nl,welkom@marikenhuis.nl</h5>
+<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
+    <input type="hidden" name="mhwp_ipso_tab" value="Email adressen" />
+	<?php
+		settings_fields( 'mhwp_ipso_mail_mappings' );
+		echo '<table class="form-table" role="presentation">';
+		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_mail_mappings_section' );
+		echo '</table>';
+		submit_button( 'save' );
+	?>
+</form>
+
+<hr />
+
 <h2>Email adressen die gemaild worden bij een reservering van een activiteit.</h2>
 
 <?php
-	// Get the current mappings, write a header.
-	$mappings = get_option( 'mhwp_ipso_mail_mappings', array() );
+	// Get the current mappings.
+	$option = get_option( 'mhwp_ipso_mail_mappings', array() );
 
+	// Todo: Remove this if all mappings are arrays.
+	$mappings = array_map(
+		function ( $m ): array {
+			if ( is_array( $m ) ) {
+				return $m;
+			} else {
+				return array(
+					'title'     => 'onbekend',
+					'addresses' => $m,
+				);
+			}
+		},
+		$option
+	);
+
+	// Write a header.
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
-	echo '<h4>Er zijn nog geen emails gedefineerd</h4>';
-    } else {
-	echo '<ul class="ui-list"><li><h4>Activiteit Id</h4></li><li><h4>Email adressen</H4></li><li></li></ul>';
+		echo '<h4>Er zijn nog geen emails gedefineerd</h4>';
+        } else {
+            echo '<ul class="ui-list"><li class="ui-list-id"><h4>Id</h4></li><li class="ui-list-title"><h4>Naam</H4></li><li class="ui-list-mail-mapping"><h4>Mail adressen</h4></li><li class="ui-list-buttons"></li></ul>';
     }
 	// phpcs:enable
+
 ?>
 
-<?php foreach ( $mappings as $activity_id => $emails ) : ?>
+<?php foreach ( $mappings as $activity_id => $mapping ) : ?>
 		<ul class="ui-list">
-			<li>
+			<li class="ui-list-id">
 				<span><?php echo esc_html( $activity_id ); ?></span>
 			</li>
-			<li>
-				<span><?php echo esc_html( $emails ); ?></span>
+			<li class="ui-list-title">
+				<span><?php echo esc_html( $mapping['title'] ); ?></span>
 			</li>
-			<li>
+			<li class="ui-list-mail-mapping">
+				<span><?php echo esc_html( $mapping['addresses'] ); ?></span>
+			</li>
+			<li class="ui-list-buttons">
 				<div>
 					<form id="mhwp-ipso-mapping-edit" method="post" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 						<input type="hidden" name="edit" value="<?php echo esc_attr( $activity_id ); ?>" />
@@ -60,18 +96,3 @@
 			</li>
 		</ul>
 <?php endforeach; ?>
-
-<hr />
-
-<h2><?php echo isset( $edit ) ? 'Verander de email adressen die gemaild worden bij een reservering voor deze activiteit' : 'Geef de email adressen, die gemaild worden bij een reservering van deze activiteit'; ?></h2>
-<h5>Meerdere email adressen scheid je met een komma, bijvoorbeeld: webmaster@marikenhuis.nl,pr@marikenhuis.nl,welkom@marikenhuis.nl</h5>
-<form id="mhwp-ipso-mapping-add" method="post" action="options.php">
-	<input type="hidden" name="mhwp_ipso_tab" value="Email adressen" />
-	<?php
-		settings_fields( 'mhwp_ipso_mail_mappings' );
-		echo '<table class="form-table" role="presentation">';
-		do_settings_fields( 'mhwp_ipso_dashboard', 'mhwp_ipso_mail_mappings_section' );
-		echo '</table>';
-		submit_button( 'save' );
-	?>
-</form>
