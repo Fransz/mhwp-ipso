@@ -99,8 +99,15 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 
 		// If there is a mapping for the activity_id, mail.
 		if ( isset( $activity_id ) && array_key_exists( $activity_id, $mappings ) ) {
-			$mail_list = $mappings[ $activity_id ];
-			$emails    = explode( ',', $mail_list );
+
+			// Todo drop the else clause when all mappings are arrays.
+			if ( is_array( $mappings[ $activity_id ] ) ) {
+				$mail_list = $mappings[ $activity_id ]['addresses'];
+			} else {
+				$mail_list = $mappings[ $activity_id ];
+			}
+
+			$emails = explode( ',', $mail_list );
 
 			// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			$subject  = sprintf( 'Marikenhuis - Inschrijving activiteit %s', $activity_title );

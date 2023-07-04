@@ -43,6 +43,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
         // Three parameters from the wp block;
         const dateField = document.querySelector('#mhwp-activity-date').value;
         const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value || "");
+        // todo Check if the value exists. we need a default here.
         const title = document.querySelector('#mhwp-activity-title').value;
 
         // Check the parameters.
@@ -139,11 +140,17 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
             const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
             container.querySelector('.mhwp-ipso-reservation-form').append(notice);
 
+        } else if(detail.disableReservation) {
+            // we want to hide the button for this activity ID.
+            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
+            button.hidden = true;
+            form.remove();
+
         } else if(detail.reservationUrl) {
             // there is an alternative URL. Prepare the button to redirect. Remove the form.
             const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
-            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttr(attr));
-            button.on('click', (e) => window.location = detail.reservationUrl );
+            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
+            button.addEventListener('click', (e) => window.location = detail.reservationUrl );
 
             form.remove();
 

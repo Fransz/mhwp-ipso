@@ -1,6 +1,10 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.8.1
+- We have titles for activities in the mail-mappings and url-mappings panels in the backend.
+- We can hide the reservation buttons in the calendar for activities.
+
 Release 0.8.0 
 - We start in the right week, reservations in the past are no longer possible.
 - We log mail success and failures.
