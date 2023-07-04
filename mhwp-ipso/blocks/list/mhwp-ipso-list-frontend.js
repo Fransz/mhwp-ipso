@@ -1,5 +1,6 @@
 /**
  * Todo: waarom staat er in ipspo 'invalid date'; (8 mei tajij laura peters;; de inschrijving staat wel in ipso.)
+ * Todo: clear reservation form after submission.
  * Todo add mailData in the ipso button so we can mail with the button also.
  * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
  * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
