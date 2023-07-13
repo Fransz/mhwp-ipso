@@ -55,13 +55,30 @@ registerBlockType( metadata, {
         const blockProps = useBlockProps.save();
         return (
             <div { ...blockProps } >
+
+                <template id="mhwp-ipso-month-card">
+                    <li className="mhwp-ipso-month-card">
+                        <span className="mhwp-ipso-card-title"></span>
+                        <span className="mhwp-ipso-card-date"></span>
+                        <span className="mhwp-ipso-card-time"></span>
+                        <button className="mhwp-ipso-show-detail" type="button">
+                            Lees meer
+                        </button>
+                    </li>
+                </template>
+
                 <div id="mhwp-ipso-list-weekpicker">
                     <div id="mhwp-ipso-current-week">21 januari- 28 januari</div>
                     <button id="mhwp-ipso-prev-week">vorige week</button>
                     <button id="mhwp-ipso-next-week">volgende week</button>
                 </div>
+                <ul id="mhwp-ipso-week-container">
+                </ul>
                 <ul id="mhwp-ipso-list-container">
                     <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
+                </ul>
+
+                <ul id="mhwp-ipso-month-container">
                 </ul>
 
             </div>

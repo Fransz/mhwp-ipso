@@ -23,7 +23,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     /**
      * Globales.
      */
-        // jQuery.
+    // jQuery.
     const $jq = jQuery.noConflict();
 
     // An alias for our origin.
@@ -35,6 +35,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     // Days to show in the calendar, a hidden field in our wp block, default 7.
     // Todo Drop this if we use the week buttons.
     let nrDays = 7;
+
+    let cardTemplate = document.getElementById("mhwp-ipso-month-card");
+
+    let activities = Array();
 
     /**
      * init globals, attach event handlers.
@@ -94,8 +98,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         main();
     }
 
-    /**
-     * Calculate first and last day of the week in which d falls.
+    /** Calculate first and last day of the week in which d falls.
      * Monday is the first day of our week;
      *
      * @param d The day for which we have to calculate the week.
@@ -113,7 +116,6 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Top level function.
      *
      * @returns {void}
-     */
     async function main () {
         // Clear the listContainer.
         const listContainer = document.querySelector('#mhwp-ipso-list-container');
@@ -126,6 +128,28 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
         processActivities(activities, listContainer)
+
+        // Clean up message.
+        return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
+    }
+     */
+    async function main () {
+        // Clear the listContainer.
+        const listContainer = document.querySelector('#mhwp-ipso-list-container');
+        const items = Array.from(listContainer.querySelectorAll('li'));
+        items.map((n) => n.remove());
+
+        // Get all activities from our wp; property data; Sort them;
+        const activities = await fetchActivities(new Date(), 30, listContainer).then(json => {
+            const as = json.data;
+            as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
+
+            const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
+            as.forEach( a => displayActivity(a, template, listContainer));
+
+            return as;
+        });
 
         // Clean up message.
         return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
@@ -153,6 +177,49 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         clearErrors(listContainer);
         clearMessages(listContainer);
         return await fetchWpRest(url, {}, listContainer);
+    }
+
+    /**
+     * Fetch activities.
+     *
+     * @param d startDate.
+     * @param nr number of days.
+     * @param msgContainer container for messages.
+     * @returns Object The json representation of the activities.
+     */
+    async function fetchActivities(d, nr, msgContainer) {
+        const url = new URL( marikenhuisURL );
+        url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+        const from = d.toISOString().slice(0, -14);
+        url.searchParams.append('from', from);
+
+        d.setDate(d.getDate() + nr - 1);
+        const till = d.toISOString().slice(0, -14);
+        url.searchParams.append('till', till);
+
+        clearErrors(msgContainer);
+        clearMessages(msgContainer);
+        return await fetchWpRest(url, {}, msgContainer);
+    }
+
+    /**
+     * For each activity display a card.
+     *
+     * @param activity
+     * @param template the template for an activity.
+     * @param listContainer Where to add the activity element.
+     */
+    function displayActivity(activity, template, listContainer) {
+        const element = template.cloneNode(true);
+
+        element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
+        element.querySelector('.mhwp-ipso-card-date').innerHTML = activity.onDate;
+
+        element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
+            console.log(activity.title)
+        });
+        listContainer.append(element);
     }
 
     /**
