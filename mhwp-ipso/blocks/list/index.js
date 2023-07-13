@@ -58,9 +58,9 @@ registerBlockType( metadata, {
 
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
-                        <span className="mhwp-ipso-card-title"></span>
-                        <span className="mhwp-ipso-card-date"></span>
-                        <span className="mhwp-ipso-card-time"></span>
+                        <div className="mhwp-ipso-card-title"></div>
+                        <div className="mhwp-ipso-card-date"></div>
+                        <div className="mhwp-ipso-card-time"></div>
                         <button className="mhwp-ipso-show-detail" type="button">
                             Lees meer
                         </button>

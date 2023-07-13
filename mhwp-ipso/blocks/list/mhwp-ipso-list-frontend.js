@@ -142,10 +142,9 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         // Get all activities, collapse, sort and display.
         const activities = await fetchActivities(new Date(), 30, listContainer).then(json => {
             const as = collapseActivities(json.data);
-            as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+            as.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
 
-            const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
-            as.forEach( a => displayActivity(a, template, listContainer));
+            displayActivities(as, listContainer);
 
             return as;
         });
@@ -181,6 +180,9 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         }
 
         function collect(acts) {
+            // Sort all same activities on the same day.
+            acts.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+
             const items = acts.map( a => {
                 return { id: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
             });
@@ -244,22 +246,34 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     /**
-     * For each activity display a card.
+     * For all activities display a card.
      *
-     * @param activity
-     * @param template the template for an activity.
+     * @param activities
      * @param listContainer Where to add the activity element.
      */
-    function displayActivity(activity, template, listContainer) {
-        const element = template.cloneNode(true);
+    function displayActivities (activities, listContainer) {
+        const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
 
-        element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
-        element.querySelector('.mhwp-ipso-card-date').innerHTML = activity.onDate;
+        const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
-        element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
-            console.log(activity.title)
+        activities.forEach( activity => {
+            const element = template.cloneNode(true);
+
+            const date = new Date(activity.onDate);
+            activity.onDate = dateFormat(date);
+            let times = activity.items.map( i => timeFormat (new Date(i.timeStart))).join('; ');
+
+            element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
+            element.querySelector('.mhwp-ipso-card-date').innerHTML = activity.onDate;
+            element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
+
+            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
+                console.log(activity.title)
+            });
+            listContainer.append(element);
+
         });
-        listContainer.append(element);
     }
 
     /**
