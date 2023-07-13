@@ -139,40 +139,10 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         const items = Array.from(listContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
-        // Get all activities from our wp; property data; Sort them;
+        // Get all activities, collapse, sort and display.
         const activities = await fetchActivities(new Date(), 30, listContainer).then(json => {
-            const as = json.data;
+            const as = collapseActivities(json.data);
             as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-            let groups = as.reduce( groupById, {} );
-            Object.keys(groups).forEach( k => groups[k] = groups[k].reduce( groupByDate, {} ));
-            const result = Object.keys(groups).flatMap( ak => Object.keys(groups[ak]).map( dk => collect(groups[ak][dk])));
-
-            function groupById(acc, cur) {
-                return group( cur.activityID, acc, cur);
-            }
-            function groupByDate(acc,cur) {
-                return group( cur.onDate, acc, cur);
-            }
-            function group (key, acc, cur) {
-                const grp = acc[key] ?? [];
-                return { ...acc, [key]: [...grp, cur]}
-            }
-
-            function collect(acts) {
-                const items = acts.map( a => {
-                    return { id: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
-                });
-               return {
-                   activityID: acts[0].activityID,
-                   title: acts[0].title,
-                   extraInfo: acts[0].extraInfo,
-                   mentors: acts[0].mentors,
-                   onDate: acts[0].onDate,
-                   items
-               }
-            }
-
 
             const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
             as.forEach( a => displayActivity(a, template, listContainer));
@@ -182,6 +152,47 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
 
         // Clean up message.
         return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
+    }
+
+    /**
+     * Collapse the same activities on the same day.
+     * Create an object with all activityIds as key and as value an object with all dates for that activity as key
+     * and as value an array of all those activities on that day.
+     * Then collect all activities into a single array again.
+     *
+     * @param activities
+     * @returns {{activityID: *, onDate: *, mentors: *, title: *, items: *, extraInfo: *}[]}
+     */
+    function collapseActivities (activities) {
+        let groups = activities.reduce( groupById, {} );
+        Object.keys(groups).forEach( k => groups[k] = groups[k].reduce( groupByDate, {} ));
+
+        return Object.keys(groups).flatMap( ak => Object.keys(groups[ak]).map( dk => collect(groups[ak][dk])));
+
+        function groupById(acc, cur) {
+            return groupBy( cur.activityID, acc, cur);
+        }
+        function groupByDate(acc,cur) {
+            return groupBy( cur.onDate, acc, cur);
+        }
+        function groupBy (key, acc, cur) {
+            const grp = acc[key] ?? [];
+            return { ...acc, [key]: [...grp, cur]}
+        }
+
+        function collect(acts) {
+            const items = acts.map( a => {
+                return { id: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
+            });
+            return {
+                activityID: acts[0].activityID,
+                title: acts[0].title,
+                extraInfo: acts[0].extraInfo,
+                mentors: acts[0].mentors,
+                onDate: acts[0].onDate,
+                items
+            }
+        }
     }
 
     /**
