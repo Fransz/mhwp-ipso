@@ -149,10 +149,10 @@ function wait(duration) {
 }
 
 /**
- * Helper fpor creating Nodes from a HTML string.
+ * Helper for creating Nodes from a HTML string.
  *
  * @link https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
- * @param str The HTML string
+ * @param htmlString The HTML string
  */
 function createNodeFromHTML(htmlString) {
     const div = document.createElement('div');
