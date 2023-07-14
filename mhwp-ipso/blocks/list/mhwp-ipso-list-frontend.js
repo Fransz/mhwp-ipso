@@ -184,7 +184,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             acts.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
             const items = acts.map( a => {
-                return { id: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
+                return { agendaId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
             });
             return {
                 activityID: acts[0].activityID,
@@ -260,20 +260,39 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         activities.forEach( activity => {
             const element = template.cloneNode(true);
 
-            const date = new Date(activity.onDate);
-            activity.onDate = dateFormat(date);
-            let times = activity.items.map( i => timeFormat (new Date(i.timeStart))).join('; ');
+            const date = dateFormat(new Date(activity.onDate));
+            const times = activity.items.map( i => timeFormat (new Date(i.timeStart))).join('; ');
 
             element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
-            element.querySelector('.mhwp-ipso-card-date').innerHTML = activity.onDate;
+            element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
             element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
-                console.log(activity.title)
+                processActivity(activity, element);
             });
             listContainer.append(element);
 
         });
+    }
+
+    async function processActivity (activity, msgContainer) {
+        const { data: detail } = await fetchDetail(activity, msgContainer);
+
+        // Extend detail with items extended with freePlaces.
+
+        detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
+
+        displayDetails(detail);
+    }
+
+    function displayDetails(activity) {
+        const box = document.getElementById('mhwp-ipso-box').content.firstElementChild.cloneNode(true);
+
+        box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
+
+        const parent = document.getElementById('mhwp-ipso-list-container');
+        parent.prepend(box);
+
     }
 
     /**
@@ -443,24 +462,24 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
      * Actually make the request for the details, and again if necessary.
      *
      * @param activity The activity for which to fetch the detail
-     * @param container The parent for messages.
+     * @param msgContainer The parent for messages.
      * @returns {Promise<any>}
      */
-    async function fetchDetail(activity, container) {
+    async function fetchDetail(activity, msgContainer) {
         const url = new URL( marikenhuisURL );
         url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
         url.searchParams.append('activityId', activity.activityID);
         url.searchParams.append('calendarId', activity.id);
 
-        return fetchWpRest(url, {}, container, false).then((json) => {
+        return fetchWpRest(url, {}, msgContainer, false).then((json) => {
             // Upon a 429 error (Too many requests), We try again.
             if ( json.mhwp_ipso_code === 429) {
                 console.log('Error 429, retrying');
                 return wait(1000).then(() => {
-                    return fetchWpRest(url, {}, container, true);
+                    return fetchWpRest(url, {}, msgContainer, true);
                 });
             }
-            clearMessages(container);
+            clearMessages(msgContainer);
             return json;
         });
     }
