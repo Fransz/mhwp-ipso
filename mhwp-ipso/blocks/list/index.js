@@ -69,6 +69,7 @@ registerBlockType( metadata, {
 
                 <template id="mhwp-ipso-box">
                     <div>
+                        <div id="mhwp-ipso-box-close" style="font-size:32px;">*</div>
                         <div id="mhwp-ipso-box-items"></div>
                         <img id="mhwp-ipso-box-image" src="" alt="" />
                         <div id="mhwp-ipso-box-title"></div>
@@ -78,6 +79,8 @@ registerBlockType( metadata, {
                             <input type="hidden" name="activityCalendarId" value="${activity.id}" />
 
                             <div>
+                                <fieldset className="mhwp-ipso-res-items">
+                                </fieldset>
                                 <fieldset className="mhwp-ipso-res-firstname">
                                     <label htmlFor="mhwp-ipso-res-firstname">Voornaam</label>
                                     <span className="required">*</span>
@@ -125,8 +128,8 @@ registerBlockType( metadata, {
                     <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
                 </ul>
 
-                <ul id="mhwp-ipso-month-container">
-                </ul>
+                <div id="mhwp-ipso-box-container"></div>
+                <ul id="mhwp-ipso-month-container"></ul>
 
             </div>
         )

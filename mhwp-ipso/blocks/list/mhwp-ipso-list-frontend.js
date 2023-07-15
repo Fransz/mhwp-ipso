@@ -136,7 +136,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
      */
     async function main () {
         // Clear the listContainer.
-        const listContainer = document.querySelector('#mhwp-ipso-list-container');
+        const listContainer = document.querySelector('#mhwp-ipso-month-container');
         const items = Array.from(listContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
@@ -268,8 +268,16 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
             element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
-            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
-                processActivity(activity, element).then( act => displayActivity(act));
+            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
+                addMessage('Gevens ophalen, dit kan even duren', element);
+                const detail = await processActivity(activity, element);
+                if (detail.items.length === 0) {
+                    clearMessages(element);
+                    addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+                    setTimeout(() => clearMessages(element), 5000);
+                } else {
+                    displayActivity(detail, element);
+                }
             });
             listContainer.append(element);
 
@@ -302,21 +310,38 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
     /**
      *  Display an activity in a modal popup.
-     * @param activity
+     * @param activity Current activity
+     * @param cardElement DOM node of the card element of the activity
      */
-    function displayActivity(activity) {
+    function displayActivity(activity, cardElement) {
         const box = document.getElementById('mhwp-ipso-box').content.firstElementChild.cloneNode(true);
+        const parent = document.getElementById('mhwp-ipso-box-container');
 
-        activity.items.reduce( (acc, i) => {
-           return acc += i.calendarId;
-        }, "");
+        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
 
-        box.querySelector('#mhwp-ipso-box-items').innerHTML = activity.items;
+        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', e => {
+           clearMessages(cardElement);
+           box.remove();
+        })
+        box.querySelector('#mhwp-ipso-box-items').innerHTML = activity.items.map(i => timeFormat(new Date(i.timeStart))).join('; ');
         box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
 
-        const parent = document.getElementById('mhwp-ipso-list-container');
+        box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
         parent.prepend(box);
 
+    }
+
+    function itemsCheckbox(items) {
+        if (items.length === 1) {
+            items = `<input type="hidden" id="mhwp-ipso-res-item" name="item" value="${items[0].calendarId}" />`;
+        } else if (items.length > 1) {
+            items = items.map( (item, idx) => {
+                return `<input type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
+                    `<label for="mhwp-ipso-res-item-${idx}">${item.timeStart}</label>`;
+            });
+            items = `<div><span id="label">Kies je tijd</span>${items.join("")}</div>`;
+        }
+        return createNodeFromHTML(items);
     }
 
     /**
@@ -503,7 +528,6 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
                     return fetchWpRest(url, {}, msgContainer, true);
                 });
             }
-            clearMessages(msgContainer);
             return json;
         });
     }
@@ -528,7 +552,6 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
                     return fetchWpRest(url, {}, msgContainer, true);
                 });
             }
-            clearMessages(msgContainer);
             return json;
         });
     }
