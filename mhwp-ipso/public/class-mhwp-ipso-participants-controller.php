@@ -58,22 +58,16 @@ class MHWP_IPSO_Participants_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get a single activity (really an activity type!) from the ipso system.
-	 *
-	 * The data is extended with reservation mappings; images url;
-	 * The data is extended with the nr of participants.
-	 *
-	 * For the participants we make an extra request to IPSO.
-	 * Doing that in the client would expose names and email for participants.
+	 * Get the nr of participants for an calendar item..
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ): WP_REST_Response {
-		$activity_id = $request->get_param( 'activityId' );
+		$calendar_id = $request->get_param( 'calendarId' );
 
 		$data = array(
-			'activityId' => $activity_id,
+			'activityId' => $calendar_id,
 		);
 
 		$client            = new MHWP_IPSO_Client();
@@ -101,7 +95,7 @@ class MHWP_IPSO_Participants_Controller extends WP_REST_Controller {
 			'title'      => 'participants',
 			'type'       => 'object',
 			'properties' => array(
-				'activityId' => array(
+				'calendarId' => array(
 					'description' => esc_html__( 'The id of the activity in the calendar', 'mhwp-ipso' ),
 					'type'        => 'string',
 				),
