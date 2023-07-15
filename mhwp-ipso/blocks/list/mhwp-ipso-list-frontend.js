@@ -17,6 +17,7 @@ import '../includes/bootstrap-collapse';
 import '../includes/bootstrap-transition';
 
 import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML} from "../includes/mhwp-lib";
+import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
 
 (function () {
@@ -184,7 +185,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
             acts.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
 
             const items = acts.map( a => {
-                return { agendaId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
+                return { calendarId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
             });
             return {
                 activityID: acts[0].activityID,
@@ -276,18 +277,58 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     async function processActivity (activity, msgContainer) {
+        // We need a async filter.
+        async function afilter (arr, cb) {
+            const fail = Symbol();
+            return (
+                await Promise.all(arr.map( async i => (await cb(i)) ? i : fail))
+            ).filter (i => i !== fail );
+        }
+        // d.items = await afilter( activity.items, async i => {
+        //     await fetchParticipants(i.calendarId, msgContainer).then( r => {
+        //         const places = d.maxRegistrations === 0 ? 1000 : d.maxRegistrations - r.data.nrParticipants;
+        //         return (places > 0);
+        //     });
+        // })
+
+        // const detail = await fetchDetail(activity, msgContainer).then( resp => {
+        //     const d = resp.data;
+        //     return Promise.all( activity.items.map( i => {
+        //         return fetchParticipants(i.calendarId, msgContainer).then( r => {
+        //             i.places = d.maxRegistrations === 0 ? 1000 : d.maxRegistrations - r.data.nrParticipants;
+        //             return i;
+        //         });
+        //     })).then ( arr => {
+        //         d.items = arr;
+        //         return d;
+        //     })});
+        //
+        // detail.items = detail.items.filter( i => i.places > 0);
+        // detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
+        // displayDetails(detail);
+
         const { data: detail } = await fetchDetail(activity, msgContainer);
+        const items = await Promise.all( activity.items.map( item => {
+                return fetchParticipants(i.calendarId, msgContainer).then( r => {
+                    i.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
+                    return i;
+                });
+            })
+        );
 
-        // Extend detail with items extended with freePlaces.
-
+        detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-
         displayDetails(detail);
     }
 
     function displayDetails(activity) {
         const box = document.getElementById('mhwp-ipso-box').content.firstElementChild.cloneNode(true);
 
+        activity.items.reduce( (acc, i) => {
+           return acc += i.calendarId;
+        }, "");
+
+        box.querySelector('#mhwp-ipso-box-items').innerHTML = activity.items;
         box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
 
         const parent = document.getElementById('mhwp-ipso-list-container');
@@ -459,7 +500,7 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
     }
 
     /**
-     * Actually make the request for the details, and again if necessary.
+     * Make the request for the details, and again if necessary.
      *
      * @param activity The activity for which to fetch the detail
      * @param msgContainer The parent for messages.
@@ -470,6 +511,31 @@ import { fetchWpRest, wait, addMessage, clearErrors, clearMessages, makeReservat
         url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
         url.searchParams.append('activityId', activity.activityID);
         url.searchParams.append('calendarId', activity.id);
+
+        return fetchWpRest(url, {}, msgContainer, false).then((json) => {
+            // Upon a 429 error (Too many requests), We try again.
+            if ( json.mhwp_ipso_code === 429) {
+                console.log('Error 429, retrying');
+                return wait(1000).then(() => {
+                    return fetchWpRest(url, {}, msgContainer, true);
+                });
+            }
+            clearMessages(msgContainer);
+            return json;
+        });
+    }
+
+    /**
+     * Make the request for the nr of participants, and again if necessary.
+     *
+     * @param calendarId The calendarId of the activity.
+     * @param msgContainer The parent for messages.
+     * @returns {Promise<any>}
+     */
+    async function fetchParticipants(calendarId, msgContainer) {
+        const url = new URL( marikenhuisURL );
+        url.pathname = 'wp-json/mhwp-ipso/v1/participants';
+        url.searchParams.append('calendarId', calendarId);
 
         return fetchWpRest(url, {}, msgContainer, false).then((json) => {
             // Upon a 429 error (Too many requests), We try again.
