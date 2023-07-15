@@ -269,59 +269,42 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
             element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', (e) => {
-                processActivity(activity, element);
+                processActivity(activity, element).then( act => displayActivity(act));
             });
             listContainer.append(element);
 
         });
     }
 
+    /**
+     * Fetch the details for an activity, filter all of its items on places available.
+     *
+     * @param activity
+     * @param msgContainer
+     * @returns {Promise<{detail}>} All information for an activity.
+     */
     async function processActivity (activity, msgContainer) {
-        // We need a async filter.
-        async function afilter (arr, cb) {
-            const fail = Symbol();
-            return (
-                await Promise.all(arr.map( async i => (await cb(i)) ? i : fail))
-            ).filter (i => i !== fail );
-        }
-        // d.items = await afilter( activity.items, async i => {
-        //     await fetchParticipants(i.calendarId, msgContainer).then( r => {
-        //         const places = d.maxRegistrations === 0 ? 1000 : d.maxRegistrations - r.data.nrParticipants;
-        //         return (places > 0);
-        //     });
-        // })
-
-        // const detail = await fetchDetail(activity, msgContainer).then( resp => {
-        //     const d = resp.data;
-        //     return Promise.all( activity.items.map( i => {
-        //         return fetchParticipants(i.calendarId, msgContainer).then( r => {
-        //             i.places = d.maxRegistrations === 0 ? 1000 : d.maxRegistrations - r.data.nrParticipants;
-        //             return i;
-        //         });
-        //     })).then ( arr => {
-        //         d.items = arr;
-        //         return d;
-        //     })});
-        //
-        // detail.items = detail.items.filter( i => i.places > 0);
-        // detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-        // displayDetails(detail);
-
         const { data: detail } = await fetchDetail(activity, msgContainer);
+        // For all items, fetch the nr of participants in parallel.
         const items = await Promise.all( activity.items.map( item => {
-                return fetchParticipants(i.calendarId, msgContainer).then( r => {
-                    i.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
-                    return i;
+                return fetchParticipants(item.calendarId, msgContainer).then( r => {
+                    item.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
+                    return item;
                 });
             })
         );
 
         detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-        displayDetails(detail);
+
+        return detail;
     }
 
-    function displayDetails(activity) {
+    /**
+     *  Display an activity in a modal popup.
+     * @param activity
+     */
+    function displayActivity(activity) {
         const box = document.getElementById('mhwp-ipso-box').content.firstElementChild.cloneNode(true);
 
         activity.items.reduce( (acc, i) => {
@@ -532,7 +515,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
      * @param msgContainer The parent for messages.
      * @returns {Promise<any>}
      */
-    async function fetchParticipants(calendarId, msgContainer) {
+    function fetchParticipants(calendarId, msgContainer) {
         const url = new URL( marikenhuisURL );
         url.pathname = 'wp-json/mhwp-ipso/v1/participants';
         url.searchParams.append('calendarId', calendarId);
