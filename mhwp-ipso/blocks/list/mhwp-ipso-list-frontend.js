@@ -269,6 +269,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
             element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
+
                 addMessage('Gevens ophalen, dit kan even duren', element);
                 const detail = await processActivity(activity, element);
                 if (detail.items.length === 0) {
@@ -278,9 +279,9 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
                 } else {
                     displayActivity(detail, element);
                 }
+
             });
             listContainer.append(element);
-
         });
     }
 
@@ -331,13 +332,21 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
     }
 
+    /**
+     * Generate html for the choose time checkbox, or the hidden input if there is only one time available.
+     * @param items
+     * @returns {ChildNode}
+     */
     function itemsCheckbox(items) {
+        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+
         if (items.length === 1) {
             items = `<input type="hidden" id="mhwp-ipso-res-item" name="item" value="${items[0].calendarId}" />`;
         } else if (items.length > 1) {
             items = items.map( (item, idx) => {
+                const time = timeFormat(new Date(item.timeStart));
                 return `<input type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
-                    `<label for="mhwp-ipso-res-item-${idx}">${item.timeStart}</label>`;
+                    `<label for="mhwp-ipso-res-item-${idx}">${time}</label>`;
             });
             items = `<div><span id="label">Kies je tijd</span>${items.join("")}</div>`;
         }
