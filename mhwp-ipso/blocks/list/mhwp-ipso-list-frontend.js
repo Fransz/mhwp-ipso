@@ -270,6 +270,9 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
             element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
 
+                /**
+                 * click handler for read more buttons.
+                 */
                 addMessage('Gevens ophalen, dit kan even duren', element);
                 const detail = await processActivity(activity, element);
                 if (detail.items.length === 0) {
@@ -315,21 +318,46 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
      * @param cardElement DOM node of the card element of the activity
      */
     function displayActivity(activity, cardElement) {
-        const box = document.getElementById('mhwp-ipso-box').content.firstElementChild.cloneNode(true);
-        const parent = document.getElementById('mhwp-ipso-box-container');
-
         const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+        const box = displayModalBox(cardElement);
 
-        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', e => {
-           clearMessages(cardElement);
-           box.remove();
-        })
         box.querySelector('#mhwp-ipso-box-items').innerHTML = activity.items.map(i => timeFormat(new Date(i.timeStart))).join('; ');
         box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
 
         box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
-        parent.prepend(box);
+    }
 
+    /**
+     * Display the modal popup. define an eventhandler for closing it again.
+     * @param cardElement
+     * @returns {HTMLElement}
+     */
+    function displayModalBox(cardElement) {
+        const overlay = document.createElement('div')
+        overlay.id = "mhwp-ipso-box-overlay";
+        document.body.append(overlay);
+        document.body.style.overflow = 'hidden';
+
+        const box = document.getElementById('mhwp-ipso-modal-box');
+        box.setAttribute('open', 'true')
+
+        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox, {once: true})
+        document.body.addEventListener('keydown', keyHandler)
+
+        function keyHandler(e) {
+            if (e.key === 'Escape') {
+                closeBox();
+            }
+        }
+        function closeBox(e) {
+            clearMessages(cardElement);
+            document.body.removeEventListener('keydown', keyHandler);
+            box.removeAttribute('open');
+            overlay.remove();
+            document.body.style.overflow = 'visible';
+        }
+
+        return box;
     }
 
     /**

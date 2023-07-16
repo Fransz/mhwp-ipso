@@ -70,3 +70,42 @@ div#mhwp-ipso-list-container {
     }
   }
 }
+
+div#mhwp-ipso-modal-box {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+
+  display:none;
+  align-items:center;
+  justify-content:center; ;
+
+  z-index:1;
+
+  &[open] {
+    display:flex;
+  }
+
+}
+
+div#mhwp-ipso-box-overlay {
+  position:fixed;
+  width: 100%;
+  height: 100%;
+  top:0;
+  left:0;
+  z-index:0;
+  background-color: black;
+  opacity: 0.5;
+}
+
+
+div#mhwp-ipso-box-inner {
+  background-color: white;
+  border-radius: 0.5em;
+  max-width:600px;
+  padding:2em;
+  margin:auto
+}
