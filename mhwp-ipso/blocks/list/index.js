@@ -76,12 +76,19 @@ registerBlockType( metadata, {
                 <div id="mhwp-ipso-box-container">
                     <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                         <div id="mhwp-ipso-box-inner" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
-                            <button id="mhwp-ipso-box-close" aria-label="Close">&times;</button>
-                            <div id="mhwp-ipso-box-close" style="font-size:32px;">*</div>
-                            <div id="mhwp-ipso-box-items"></div>
-                            <img id="mhwp-ipso-box-image" src="" alt="" />
-                            <div id="mhwp-ipso-box-title"></div>
-                            <div id="mhwp-ipso-box-intro"></div>
+                            <div id="mhwp-ipso-box-titlerow" className="mhwp-ipso-box-flexwrap">
+                                <div id="mhwp-ipso-box-title"></div>
+                                <button id="mhwp-ipso-box-close" aria-label="Close">&times;</button>
+                            </div>
+                            <div id="mhwp-ipso-box-daterow" className="mhwp-ipso-box-flexwrap">
+                                <div id="mhwp-ipso-box-date"></div>
+                                <div id="mhwp-ipso-box-items"></div>
+                            </div>
+                            <hr />
+                            <div id="mhwp-ipso-box-introrow" className="mhwp-ipso-box-flexwrap">
+                                <img id="mhwp-ipso-box-image" src="" alt="" />
+                                <div id="mhwp-ipso-box-intro"></div>
+                            </div>
                             <div id="mhwp-ipso-box-description"></div>
                             <form>
                                 <input type="hidden" name="activityCalendarId" value="${activity.id}" />

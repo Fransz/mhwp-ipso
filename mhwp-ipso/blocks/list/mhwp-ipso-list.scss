@@ -71,25 +71,6 @@ div#mhwp-ipso-list-container {
   }
 }
 
-div#mhwp-ipso-modal-box {
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-
-  display:none;
-  align-items:center;
-  justify-content:center; ;
-
-  z-index:1;
-
-  &[open] {
-    display:flex;
-  }
-
-}
-
 div#mhwp-ipso-box-overlay {
   position:fixed;
   width: 100%;
@@ -102,10 +83,88 @@ div#mhwp-ipso-box-overlay {
 }
 
 
+div#mhwp-ipso-modal-box {
+  position:fixed;
+  top:160px;
+  left:0;
+  width:100%;
+
+  display:none;
+  align-items:center;
+  justify-content:center; ;
+
+  z-index:1;
+
+  &[open] {
+    display:flex;
+  }
+}
+
 div#mhwp-ipso-box-inner {
-  background-color: white;
-  border-radius: 0.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   max-width:600px;
-  padding:2em;
-  margin:auto
+
+  border-radius: 0.5em;
+  padding:0 32px;
+  margin:0 auto;
+
+  background-color: white;
+
+  overflow: auto;
+  height:80vh;
+
+  div.mhwp-ipso-box-flexwrap {
+    width:100%;
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  div#mhwp-ipso-box-titlerow {
+    justify-content: space-between;
+  }
+
+  div#mhwp-ipso-box-daterow {
+    margin-bottom:15px;
+    justify-content: start;
+  }
+
+  hr {
+    color: #e24219;
+    height:2px;
+    margin:0 0 10px 0;
+    width:100%;
+  }
+
+  div#mhwp-ipso-box-introrow {
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom:15px;
+
+    #mhwp-ipso-box-image {
+      height:100px;
+    }
+    #mhwp-ipso-box-intro {
+      text-align:left;
+      padding-left: 20px;
+      padding-right: 40px;
+    }
+  }
+
+  div#mhwp-ipso-box-description {
+    text-align: left;
+  }
+
+  form span#mhwp-ipso-res-itemslabel {
+    padding: 0 10px 0 0;
+  }
+  form input.mhwp-ipso-res-itemchoice {
+    padding: 0 5px;
+  }
+  form label.mhwp-ipso-res-itemlabel {
+    padding: 0 15px 0 0;
+  }
 }

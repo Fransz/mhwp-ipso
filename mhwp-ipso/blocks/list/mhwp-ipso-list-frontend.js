@@ -309,20 +309,37 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
         detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
 
+        detail.onDate = activity.onDate;
+
         return detail;
     }
 
+    function formatTime(datetime) {
+        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+        return timeFormat(new Date(datetime));
+    }
+
+    function formatDate(datetime) {
+        const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+        return dateFormat(new Date(datetime));
+    }
     /**
-     *  Display an activity in a modal popup.
+     * Display an activity in a modal popup. Fill the template we served from the wp block;
      * @param activity Current activity
      * @param cardElement DOM node of the card element of the activity
      */
     function displayActivity(activity, cardElement) {
-        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
         const box = displayModalBox(cardElement);
 
-        box.querySelector('#mhwp-ipso-box-items').innerHTML = activity.items.map(i => timeFormat(new Date(i.timeStart))).join('; ');
+        box.querySelector('#mhwp-ipso-box-title').innerHTML = activity.title;
+
+        box.querySelector('#mhwp-ipso-box-date').innerHTML = formatDate(activity.onDate);
+        box.querySelector('#mhwp-ipso-box-items').innerHTML = '&nbsp;' + activity.items.map(i => formatTime(i.timeStart)).join('&comma;&nbsp;');
+
+        box.querySelector('#mhwp-ipso-box-intro').innerHTML = activity.intro;
         box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
+
+        box.querySelector('#mhwp-ipso-box-description').innerHTML = activity.description;
 
         box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
     }
@@ -353,6 +370,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
             clearMessages(cardElement);
             document.body.removeEventListener('keydown', keyHandler);
             box.removeAttribute('open');
+            box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
             overlay.remove();
             document.body.style.overflow = 'visible';
         }
@@ -373,10 +391,10 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
         } else if (items.length > 1) {
             items = items.map( (item, idx) => {
                 const time = timeFormat(new Date(item.timeStart));
-                return `<input type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
-                    `<label for="mhwp-ipso-res-item-${idx}">${time}</label>`;
+                return `<input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
+                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label>`;
             });
-            items = `<div><span id="label">Kies je tijd</span>${items.join("")}</div>`;
+            items = `<div><span id="mhwp-ipso-res-itemslabel">Kies je tijd</span>${items.join("")}</div>`;
         }
         return createNodeFromHTML(items);
     }
