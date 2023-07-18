@@ -76,59 +76,64 @@ registerBlockType( metadata, {
                 <div id="mhwp-ipso-box-container">
                     <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                         <div id="mhwp-ipso-box-inner" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
-                            <div id="mhwp-ipso-box-titlerow" className="mhwp-ipso-box-flexwrap">
+                            <div id="mhwp-ipso-box-titlerow" className="mhwp-ipso-box-row">
                                 <div id="mhwp-ipso-box-title"></div>
                                 <button id="mhwp-ipso-box-close" aria-label="Close">&times;</button>
                             </div>
-                            <div id="mhwp-ipso-box-daterow" className="mhwp-ipso-box-flexwrap">
+                            <div id="mhwp-ipso-box-daterow" className="mhwp-ipso-box-row">
                                 <div id="mhwp-ipso-box-date"></div>
                                 <div id="mhwp-ipso-box-items"></div>
                             </div>
-                            <hr />
-                            <div id="mhwp-ipso-box-introrow" className="mhwp-ipso-box-flexwrap">
-                                <img id="mhwp-ipso-box-image" src="" alt="" />
-                                <div id="mhwp-ipso-box-intro"></div>
+                            <div className="mhwp-ipso-box-row">
+                                <hr />
                             </div>
-                            <div id="mhwp-ipso-box-description"></div>
-                            <form>
-                                <input type="hidden" name="activityCalendarId" value="${activity.id}" />
 
-                                <div>
-                                    <fieldset className="mhwp-ipso-res-items">
-                                    </fieldset>
-                                    <fieldset className="mhwp-ipso-res-firstname">
-                                        <label htmlFor="mhwp-ipso-res-firstname">Voornaam</label>
-                                        <span className="required">*</span>
-                                        <input type="text" id="mhwp-ipso-res-firstname" name="firstName" required placeholder="" />
-                                    </fieldset>
-                                    <fieldset className="mhwp-ipso-res-prefix">
-                                        <label htmlFor="mhwp-ipso-res-prefix">Tussenvoegsel</label>
-                                        <input type="text" id="mhwp-ipso-res-prefix" name="lastNamePrefix" placeholder="" />
-                                    </fieldset>
-                                    <fieldset className="mhwp-ipso-res-lastname">
-                                        <label htmlFor="mhwp-ipso-res-lastname">Achternaam</label>
-                                        <span className="required">*</span>
-                                        <input type="text" id="mhwp-ipso-res-lastname" name="lastName" required placeholder="" />
-                                    </fieldset>
-                                    <fieldset className="mhwp-ipso-res-telephone">
-                                        <label htmlFor="mhwp-ipso-res-telephone">Telefoonnummer</label>
-                                        <input type="tel" id="mhwp-ipso-res-telephone" name="phoneNumber" placeholder="" />
-                                        <span className="validity"></span>
-                                    </fieldset>
-                                    <fieldset className="mhwp-ipso-res-email">
-                                        <label htmlFor="mhwp-ipso-res-email">Emailadres</label>
-                                        <span className="required">*</span>
-                                        <input type="email" id="mhwp-ipso-res-email" name="email" required placeholder="" />
-                                        <span className="validity"></span>
-                                    </fieldset>
-                                    <div>
-                                        {
-                                            // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
-                                        }
-                                        <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                            <div id="mhwp-ipso-box-contentrow" className="mhwp-ipso-box-row">
+                                <div className="mhwp-ipso-box-column">
+                                    <div id="mhwp-ipso-box-introrow" className="mhwp-ipso-box-row">
+                                        <img id="mhwp-ipso-box-image" src="" alt="" />
+                                        <div id="mhwp-ipso-box-intro"></div>
                                     </div>
+                                    <div id="mhwp-ipso-box-description"></div>
                                 </div>
-                            </form>
+
+                                <div className="mhwp-ipso-box-column">
+                                    <form id="mhwp-ipso-box-form">
+                                            <fieldset className="mhwp-ipso-res-items">
+                                            </fieldset>
+                                            <fieldset className="mhwp-ipso-res-firstname">
+                                                <label htmlFor="mhwp-ipso-res-firstname">Voornaam</label>
+                                                <span className="required">*</span>
+                                                <input type="text" id="mhwp-ipso-res-firstname" name="firstName" required placeholder="" />
+                                            </fieldset>
+                                            <fieldset className="mhwp-ipso-res-prefix">
+                                                <label htmlFor="mhwp-ipso-res-prefix">Tussenvoegsel</label>
+                                                <input type="text" id="mhwp-ipso-res-prefix" name="lastNamePrefix" placeholder="" />
+                                            </fieldset>
+                                            <fieldset className="mhwp-ipso-res-lastname">
+                                                <label htmlFor="mhwp-ipso-res-lastname">Achternaam</label>
+                                                <span className="required">*</span>
+                                                <input type="text" id="mhwp-ipso-res-lastname" name="lastName" required placeholder="" />
+                                            </fieldset>
+                                            <fieldset className="mhwp-ipso-res-telephone">
+                                                <label htmlFor="mhwp-ipso-res-telephone">Telefoonnummer</label>
+                                                <input type="tel" id="mhwp-ipso-res-telephone" name="phoneNumber" placeholder="" />
+                                                <span className="validity"></span>
+                                            </fieldset>
+                                            <fieldset className="mhwp-ipso-res-email">
+                                                <label htmlFor="mhwp-ipso-res-email">Emailadres</label>
+                                                <span className="required">*</span>
+                                                <input type="email" id="mhwp-ipso-res-email" name="email" required placeholder="" />
+                                                <span className="validity"></span>
+                                            </fieldset>
+                                            <input type="hidden" name="activityCalendarId" value="${activity.id}" />
+                                                {
+                                                    // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
+                                                }
+                                                <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
