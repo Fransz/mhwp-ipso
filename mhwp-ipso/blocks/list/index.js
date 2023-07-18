@@ -84,12 +84,12 @@ registerBlockType( metadata, {
                                 <div id="mhwp-ipso-box-date"></div>
                                 <div id="mhwp-ipso-box-items"></div>
                             </div>
-                            <div className="mhwp-ipso-box-row">
+                            <div id="mhwp-ipso-box-rulerrow" className="mhwp-ipso-box-row">
                                 <hr />
                             </div>
 
                             <div id="mhwp-ipso-box-contentrow" className="mhwp-ipso-box-row">
-                                <div className="mhwp-ipso-box-column">
+                                <div id="mhwp-ipso-box-contentcolumn" className="mhwp-ipso-box-column">
                                     <div id="mhwp-ipso-box-introrow" className="mhwp-ipso-box-row">
                                         <img id="mhwp-ipso-box-image" src="" alt="" />
                                         <div id="mhwp-ipso-box-intro"></div>

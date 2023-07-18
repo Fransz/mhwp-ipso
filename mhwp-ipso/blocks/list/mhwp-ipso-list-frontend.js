@@ -391,8 +391,8 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
         } else if (items.length > 1) {
             items = items.map( (item, idx) => {
                 const time = timeFormat(new Date(item.timeStart));
-                return `<div><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
-                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></div>`;
+                return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
+                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></spab>`;
             });
             items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
         }

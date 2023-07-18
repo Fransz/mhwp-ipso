@@ -54,7 +54,16 @@ class MHWP_IPSO_Participants_Controller extends WP_REST_Controller {
 	 * @return true True if the request has access to get_items, WP_Error object otherwise.
 	 */
 	public function get_item_permissions_check( $request ): bool {
-		return true;
+		$nonce = $request->get_param( 'X_WP_NONCE' );
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			$nonce = $_REQUEST['_wpnonce'];
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		} else {
+			return false;
+		}
+
+		return wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 
 	/**
