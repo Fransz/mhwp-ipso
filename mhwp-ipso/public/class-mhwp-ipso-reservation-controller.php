@@ -52,10 +52,20 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 	 * Check permissions for making a reservation.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has access to create items, WP_Error object otherwise.
+	 * @return bool|int True if the request has access to create items, WP_Error object otherwise.
 	 */
-	public function create_item_permissions_check( $request ) {
-		return true;
+	public function create_item_permissions_check( $request ) : bool {
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_REQUEST['_wpnonce'];
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		} else {
+			return false;
+		}
+
+		return wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 
 	/**
