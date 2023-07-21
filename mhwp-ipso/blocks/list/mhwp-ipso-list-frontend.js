@@ -329,7 +329,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
      * @param cardElement DOM node of the card element of the activity
      */
     function displayActivity(activity, cardElement) {
-        const box = displayModalBox(cardElement);
+        const box = displayModalBox(activity, cardElement);
 
         box.querySelector('#mhwp-ipso-box-title').innerHTML = activity.title;
 
@@ -349,7 +349,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
      * @param cardElement
      * @returns {HTMLElement}
      */
-    function displayModalBox(cardElement) {
+    function displayModalBox(activity, cardElement) {
         const overlay = document.createElement('div')
         overlay.id = "mhwp-ipso-box-overlay";
         document.body.append(overlay);
@@ -358,9 +358,23 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
         const box = document.getElementById('mhwp-ipso-modal-box');
         const inner = document.getElementById('mhwp-ipso-box-inner');
-        box.setAttribute('open', 'true')
         box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox);
         box.addEventListener('click', closeBoxFromOverlay);
+
+        if(! activity.reservationUrl) {
+            box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'none';
+        } else {
+            box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'none';
+
+            const button = box.querySelector('#mhwp-ipso-box-directbutton button');
+            button.addEventListener('click', redirectReservation);
+
+            if(activity.disableReservation) {
+                box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'none';
+            }
+        }
+
+        box.setAttribute('open', 'true')
 
         function keyHandler(e) {
             if (e.key === 'Escape') {
@@ -386,7 +400,21 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
                 box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
                 overlay.remove();
 
+                const form = box.querySelector('form');
+                if(form) {
+                    form.reset();
+                }
+
+                box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
+                box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
+                const button = box.querySelector('#mhwp-ipso-box-directbutton button')
+                button.removeEventListener('click', redirectReservation);
+
                 e.stopImmediatePropagation();
+        }
+
+        function redirectReservation(e) {
+            window.location = activity.reservationUrl;
         }
 
         return box;

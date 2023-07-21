@@ -95,9 +95,12 @@ registerBlockType( metadata, {
                                         <div id="mhwp-ipso-box-intro"></div>
                                     </div>
                                     <div id="mhwp-ipso-box-description"></div>
+                                    <div id="mhwp-ipso-box-directbutton">
+                                        <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                                    </div>
                                 </div>
 
-                                <div className="mhwp-ipso-box-column">
+                                <div id="mhwp-ipso-box-formcolumn" className="mhwp-ipso-box-column">
                                     <form id="mhwp-ipso-box-form">
                                             <fieldset className="mhwp-ipso-res-items">
                                             </fieldset>
@@ -126,11 +129,10 @@ registerBlockType( metadata, {
                                                 <input type="email" id="mhwp-ipso-res-email" name="email" required placeholder="" />
                                                 <span className="validity"></span>
                                             </fieldset>
-                                            <input type="hidden" name="activityCalendarId" value="${activity.id}" />
-                                                {
-                                                    // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
-                                                }
-                                                <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
+                                            {
+                                                // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
+                                            }
+                                            <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
                                     </form>
                                 </div>
                             </div>
