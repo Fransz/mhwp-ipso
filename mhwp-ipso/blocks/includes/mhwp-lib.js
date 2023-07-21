@@ -195,4 +195,37 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
-export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML};
+/**
+ * Helper for formating dates.
+ *
+ * @param datetime
+ * @returns {string}
+ */
+function formatTime(datetime) {
+    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
+    return timeFormat(new Date(datetime));
+}
+
+/**
+ * Helper for formating times.
+ *
+ * @param datetime
+ * @returns {string}
+ */
+function formatDate(datetime) {
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+    return dateFormat(new Date(datetime));
+}
+
+export {
+    fetchWpRest
+    , wait
+    , addError
+    , addMessage
+    , clearErrors
+    , clearMessages
+    , makeReservation
+    , createNodeFromHTML
+    , formatTime
+    , formatDate
+};
