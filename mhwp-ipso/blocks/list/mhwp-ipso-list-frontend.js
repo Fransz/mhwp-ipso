@@ -345,7 +345,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
     }
 
     /**
-     * Display the modal popup. define an eventhandler for closing it again.
+     * Display the modal popup. Define eventhandlers for closing it again.
      * @param cardElement
      * @returns {HTMLElement}
      */
@@ -354,25 +354,39 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
         overlay.id = "mhwp-ipso-box-overlay";
         document.body.append(overlay);
         document.body.style.overflow = 'hidden';
+        document.body.addEventListener('keydown', keyHandler)
 
         const box = document.getElementById('mhwp-ipso-modal-box');
+        const inner = document.getElementById('mhwp-ipso-box-inner');
         box.setAttribute('open', 'true')
-
-        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox, {once: true})
-        document.body.addEventListener('keydown', keyHandler)
+        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox);
+        box.addEventListener('click', closeBoxFromOverlay);
 
         function keyHandler(e) {
             if (e.key === 'Escape') {
-                closeBox();
+                closeBox(e);
             }
         }
+        function closeBoxFromOverlay(e) {
+            if(! inner.contains(e.target)) {
+                closeBox(e);
+            }
+
+        }
         function closeBox(e) {
-            clearMessages(cardElement);
-            document.body.removeEventListener('keydown', keyHandler);
-            box.removeAttribute('open');
-            box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
-            overlay.remove();
-            document.body.style.overflow = 'visible';
+                clearMessages(cardElement);
+
+                document.body.style.overflow = 'visible';
+                box.removeAttribute('open');
+
+                document.body.removeEventListener('keydown', keyHandler);
+                box.querySelector('#mhwp-ipso-box-close').removeEventListener('click', closeBox);
+                box.removeEventListener('click', closeBoxFromOverlay);
+
+                box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
+                overlay.remove();
+
+                e.stopImmediatePropagation();
         }
 
         return box;
