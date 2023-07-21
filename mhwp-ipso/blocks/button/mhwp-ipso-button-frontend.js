@@ -17,7 +17,7 @@ import '../includes/bootstrap-transition';
 /*
  * Todo add mailData in the ipso button so we can mail with the button also.
  */
-import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait, createNodeFromHTML} from "../includes/mhwp-lib";
+import {addError, clearErrors, clearMessages, fetchWpRest, makeButtonReservation, wait, createNodeFromHTML} from "../includes/mhwp-lib";
 
 (function() {
     const $jq = jQuery.noConflict();
@@ -164,7 +164,7 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeReservation, wait
                         "normalizer": v => v.trim()
                     }
                 },
-                "submitHandler": (form, event) => makeReservation(detail, mailData, form, event),
+                "submitHandler": (form, event) => makeButtonReservation(detail, mailData, form, event),
                 "invalidHandler": function () {
                     // TODO: We want an error message here.
                     console.log( 'invalid' );

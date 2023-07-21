@@ -8,7 +8,7 @@
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeReservation(detail, mailData, form, event) {
+async function makeButtonReservation(detail, mailData, form, event) {
     event.preventDefault();
 
     // The URL for making the reservation
@@ -224,7 +224,7 @@ export {
     , addMessage
     , clearErrors
     , clearMessages
-    , makeReservation
+    , makeButtonReservation
     , createNodeFromHTML
     , formatTime
     , formatDate

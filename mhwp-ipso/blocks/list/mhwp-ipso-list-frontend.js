@@ -22,7 +22,6 @@ import {
     , addMessage
     , clearErrors
     , clearMessages
-    , makeReservation
     , createNodeFromHTML
     , formatDate
     , formatTime
@@ -317,21 +316,21 @@ import {
         //         'activityDate': activity.date,
         //         'activityTime': activity.time,
         //     }
-        // if (form) {
-        //     form.validate({
-        //         rules: {
-        //             phoneNumber: {
-        //                 phoneNL: true,
-        //                 "normalizer": v => v.trim()
-        //             }
-        //         },
-        //         "submitHandler": (form, event) => makeReservation(activity, mailData, form, event),
-        //         "invalidHandler": function () {
-        //             // TODO: We want an error message here.
-        //             console.log( 'invalid' );
-        //         }
-        //     })
-        // }
+        if (form) {
+            $jq(form).validate({
+                rules: {
+                    phoneNumber: {
+                        phoneNL: true,
+                        "normalizer": v => v.trim()
+                    }
+                },
+                "submitHandler": (form, event) => makeReservation(activity, form, event),
+                "invalidHandler": function () {
+                    // TODO: We want an error message here.
+                    console.log( 'invalid' );
+                }
+            })
+        }
     }
 
     /**
@@ -438,13 +437,16 @@ import {
      */
     function itemsCheckbox(items) {
         if (items.length === 1) {
-            items = `<input type="hidden" id="mhwp-ipso-res-item" name="item" value="${items[0].calendarId}" />`;
+            items = `<input type="hidden" id="mhwp-ipso-res-item" name="calendarId" value="${items[0].calendarId}" />`;
         } else if (items.length > 1) {
             items = items.map( (item, idx) => {
                 const time = formatTime(new Date(item.timeStart));
-                return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="item" value="${item.calendarId}"/>` +
-                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></spab>`;
+                return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
+                            name="calendarId" value="${item.calendarId}"/>` +
+                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`;
             });
+
+            items[0] = items[0].replace('type="radio"', 'type="radio" checked');
             items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
         }
         return createNodeFromHTML(items);
@@ -671,6 +673,97 @@ import {
      */
     function prepareForm(detail, mailData) {
         // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
+    }
+
+    /**
+     * Make a reservation by accessing our API.
+     * Submit callback for the validator api
+     *
+     * @param detail The activity.
+     * @param form The form  that is submitted.
+     * @param event The submit event.
+     * @returns {Promise<void>}
+     */
+    async function makeReservation(detail, form, event) {
+        event.preventDefault();
+
+        // The URL for making the reservation
+        const marikenhuisURL = document.location.origin;
+        const url = new URL( marikenhuisURL );
+        url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+
+        const formContainer = form.parentNode;
+        const container = formContainer.parentNode;
+
+        // Clear messages.
+        clearErrors(formContainer);
+        clearMessages(formContainer);
+        clearErrors(container);
+        clearMessages(container);
+
+        // Get the item corresponding to the hidden input or selected radiobutton.
+        let calendarId;
+        if(form.querySelector('#mhwp-ipso-res-item')) {
+           calendarId = parseInt(form.querySelector('#mhwp-ipso-res-item').value);
+        } else {
+            calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
+        }
+        const item = detail.items.filter(item => item.calendarId === calendarId)[0];
+
+        const activityCalendarId = item.calendarId.toString();
+
+        const firstName = form.querySelector('input[name="firstName"]').value;
+        const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
+        const lastName = form.querySelector('input[name="lastName"]').value;
+        const email = form.querySelector('input[name="email"]').value;
+        let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
+        phoneNumber = phoneNumber === "" ? null : phoneNumber;
+
+        const activityId = detail.id;
+        const activityTitle = detail.title;
+        const activityDate = formatDate(detail.onDate);
+        const activityTime = formatTime(item.timeStart);
+
+        // Data for our endpoint. activityId, activityTime, activitydate and activityTitle are used for mail.
+        const data = {
+            activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
+            activityId, activityTitle, activityDate, activityTime
+        };
+
+        const fetchInit = {
+            method: 'POST',
+            body: JSON.stringify( data )
+        }
+        await fetchWpRest(
+            url, fetchInit, container
+        ).then(() => {
+            // TODO: if ! 200 addError
+
+            // We made a successful reservation; Check to see if we can make another.
+            detail.places -= 1;
+            if (detail.places <= 0) {
+                // Reservations are no more possible.Remove the form, add a notice.
+                form.remove();
+
+                // Don't use addMessage here. The message should be persistent
+                const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>');
+                formContainer.append(notice);
+            }
+
+            // Close the reservation form, add a message.
+            formContainer.classList.remove('in');
+            addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+
+            // Close the message after 5 sec.
+            setTimeout(() => {
+                clearMessages(container);
+            }, 5000);
+        }).catch((_) => {
+            console.log('catched');
+            // TODO: addError
+            // No op. We had an error making a reservation. We still want to continue, maybe an other one
+            // succeeds.
+        });
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
