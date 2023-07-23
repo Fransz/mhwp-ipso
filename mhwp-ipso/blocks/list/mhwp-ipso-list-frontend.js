@@ -239,12 +239,11 @@ import {
             element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
+            /**
+             * click handler for read more buttons.
+             * Get the activities details and show them in a popup, or display a message if the activity is sold out.
+             */
             element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
-
-                /**
-                 * click handler for read more buttons.
-                 * Get the activities details and show them in a popup, or display a message if the activity is sold out.
-                 */
                 addMessage('Gevens ophalen, dit kan even duren', element);
                 const detail = await processActivity(activity, element);
                 if (detail.items.length === 0) {
@@ -307,30 +306,6 @@ import {
         box.querySelector('#mhwp-ipso-box-description').innerHTML = activity.description;
 
         box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
-
-        // If we have a form in our popup, prepare it.
-        const form = box.querySelector('#mhwp-ipso-box-form');
-        //     const mailData = {
-        //         'activityId': activity.activityID,
-        //         'activityTitle': activity.title,
-        //         'activityDate': activity.date,
-        //         'activityTime': activity.time,
-        //     }
-        if (form) {
-            $jq(form).validate({
-                rules: {
-                    phoneNumber: {
-                        phoneNL: true,
-                        "normalizer": v => v.trim()
-                    }
-                },
-                "submitHandler": (form, event) => makeReservation(activity, form, event),
-                "invalidHandler": function () {
-                    // TODO: We want an error message here.
-                    console.log( 'invalid' );
-                }
-            })
-        }
     }
 
     /**
@@ -367,6 +342,31 @@ import {
 
         box.setAttribute('open', 'true')
 
+        // If we have a form in our popup, prepare it.
+        const form = box.querySelector('#mhwp-ipso-box-form');
+        if(form) {
+            const v = $jq(form).validate();
+            if (v) v.destroy();
+
+            function submitHandler (form, event) {
+                makeReservation(activity, form, box, event).then(() => closeBox(null));
+            }
+
+            $jq(form).validate({
+                rules: {
+                    phoneNumber: {
+                        phoneNL: true,
+                        "normalizer": v => v.trim()
+                    }
+                },
+                submitHandler,
+                "invalidHandler": function () {
+                    // TODO: We want an error message here.
+                    console.log( 'invalid' );
+                }
+            })
+        }
+
         /**
          * Handler for the escape key.
          *
@@ -386,7 +386,6 @@ import {
             if(! innerBox.contains(e.target)) {
                 closeBox(e);
             }
-
         }
 
         /**
@@ -394,29 +393,31 @@ import {
          * @param e
          */
         function closeBox(e) {
-                clearMessages(cardElement);
+            clearErrors(cardElement);
+            clearMessages(cardElement);
 
-                document.body.style.overflow = 'visible';
-                box.removeAttribute('open');
+            document.body.style.overflow = 'visible';
+            box.removeAttribute('open');
 
-                document.body.removeEventListener('keydown', keyHandler);
-                box.querySelector('#mhwp-ipso-box-close').removeEventListener('click', closeBox);
-                box.removeEventListener('click', closeBoxFromOverlay);
+            document.body.removeEventListener('keydown', keyHandler);
+            box.querySelector('#mhwp-ipso-box-close').removeEventListener('click', closeBox);
+            box.removeEventListener('click', closeBoxFromOverlay);
 
-                box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
-                overlay.remove();
+            box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
+            overlay.remove();
 
-                const form = box.querySelector('form');
-                if(form) {
-                    form.reset();
-                }
+            const form = box.querySelector('form');
+            if(form) {
+                form.reset();
+            }
 
-                box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
-                box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
-                const button = box.querySelector('#mhwp-ipso-box-directbutton button')
-                button.removeEventListener('click', redirectReservation);
+            box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
+            box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
+            box.querySelector('#mhwp-ipso-box-form button').disabled = false;
+            const button = box.querySelector('#mhwp-ipso-box-directbutton button')
+            button.removeEventListener('click', redirectReservation);
 
-                e.stopImmediatePropagation();
+            if(e) e.stopImmediatePropagation();
         }
 
         /**
@@ -676,15 +677,50 @@ import {
     }
 
     /**
+     * Prepare the form.
+     * This has to be a seperate function (scope), or the activity in the anonymous function will
+     * be bound to the activity of the first definition.
+     *
+     * @param activity
+     * @param form
+     */
+    function makeForm(activity, form, box) {
+        // We don't always have a form.
+        if (! form) return
+
+        // If we had a previous validator remove it.
+        const v = $jq(form).validate();
+        if (v) v.destroy();
+
+        function submitHandler (form, event) {
+            makeReservation(activity, form, event).then(box.close());
+        }
+
+        $jq(form).validate({
+            rules: {
+                phoneNumber: {
+                    phoneNL: true,
+                    "normalizer": v => v.trim()
+                }
+            },
+            submitHandler,
+            "invalidHandler": function () {
+                // TODO: We want an error message here.
+                console.log( 'invalid' );
+            }
+        })
+    }
+    /**
      * Make a reservation by accessing our API.
      * Submit callback for the validator api
      *
      * @param detail The activity.
      * @param form The form  that is submitted.
+     * @param box The modal box whitch contains the form.
      * @param event The submit event.
      * @returns {Promise<void>}
      */
-    async function makeReservation(detail, form, event) {
+    async function makeReservation(detail, form, box, event) {
         event.preventDefault();
 
         // The URL for making the reservation
@@ -692,14 +728,11 @@ import {
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-        const formContainer = form.parentNode;
-        const container = formContainer.parentNode;
+        const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
 
         // Clear messages.
-        clearErrors(formContainer);
-        clearMessages(formContainer);
-        clearErrors(container);
-        clearMessages(container);
+        clearErrors(msgContainer);
+        clearMessages(msgContainer);
 
         // Get the item corresponding to the hidden input or selected radiobutton.
         let calendarId;
@@ -735,29 +768,17 @@ import {
             body: JSON.stringify( data )
         }
         await fetchWpRest(
-            url, fetchInit, container
+            url, fetchInit, msgContainer
         ).then(() => {
             // TODO: if ! 200 addError
 
-            // We made a successful reservation; Check to see if we can make another.
-            detail.places -= 1;
-            if (detail.places <= 0) {
-                // Reservations are no more possible.Remove the form, add a notice.
-                form.remove();
-
-                // Don't use addMessage here. The message should be persistent
-                const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>');
-                formContainer.append(notice);
-            }
-
-            // Close the reservation form, add a message.
-            formContainer.classList.remove('in');
-            addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+            addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
+            form.querySelector('button').disabled = true;
 
             // Close the message after 5 sec.
-            setTimeout(() => {
-                clearMessages(container);
-            }, 5000);
+            return new Promise((resolve, _) => {
+                    setTimeout(() => { clearMessages(msgContainer); return resolve(); }, 5000);
+            })
         }).catch((_) => {
             console.log('catched');
             // TODO: addError

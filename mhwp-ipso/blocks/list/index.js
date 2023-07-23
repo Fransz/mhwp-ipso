@@ -107,26 +107,31 @@ registerBlockType( metadata, {
                                             <fieldset className="mhwp-ipso-res-firstname">
                                                 <label htmlFor="mhwp-ipso-res-firstname">Voornaam</label>
                                                 <span className="required">*</span>
-                                                <input type="text" id="mhwp-ipso-res-firstname" name="firstName" required placeholder="" />
+                                                <input type="text" id="mhwp-ipso-res-firstname" name="firstName"
+                                                       required placeholder="" />
                                             </fieldset>
                                             <fieldset className="mhwp-ipso-res-prefix">
                                                 <label htmlFor="mhwp-ipso-res-prefix">Tussenvoegsel</label>
-                                                <input type="text" id="mhwp-ipso-res-prefix" name="lastNamePrefix" placeholder="" />
+                                                <input type="text" id="mhwp-ipso-res-prefix" name="lastNamePrefix"
+                                                       placeholder="" />
                                             </fieldset>
                                             <fieldset className="mhwp-ipso-res-lastname">
                                                 <label htmlFor="mhwp-ipso-res-lastname">Achternaam</label>
                                                 <span className="required">*</span>
-                                                <input type="text" id="mhwp-ipso-res-lastname" name="lastName" required placeholder="" />
+                                                <input type="text" id="mhwp-ipso-res-lastname" name="lastName" required
+                                                       placeholder="" />
                                             </fieldset>
                                             <fieldset className="mhwp-ipso-res-telephone">
                                                 <label htmlFor="mhwp-ipso-res-telephone">Telefoonnummer</label>
-                                                <input type="tel" id="mhwp-ipso-res-telephone" name="phoneNumber" placeholder="" />
+                                                <input type="tel" id="mhwp-ipso-res-telephone" name="phoneNumber"
+                                                       placeholder="" />
                                                 <span className="validity"></span>
                                             </fieldset>
                                             <fieldset className="mhwp-ipso-res-email">
                                                 <label htmlFor="mhwp-ipso-res-email">Emailadres</label>
                                                 <span className="required">*</span>
-                                                <input type="email" id="mhwp-ipso-res-email" name="email" required placeholder="" />
+                                                <input type="email" id="mhwp-ipso-res-email" name="email" required
+                                                       placeholder="" />
                                                 <span className="validity"></span>
                                             </fieldset>
                                             {
@@ -136,6 +141,8 @@ registerBlockType( metadata, {
                                     </form>
                                 </div>
                             </div>
+                            <div id="mhwp-ipso-box-messagerow" className="mhwp-ipso-box-row"></div>
+
                         </div>
                     </div>
                 </div>
