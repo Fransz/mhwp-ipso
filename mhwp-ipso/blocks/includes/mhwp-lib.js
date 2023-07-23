@@ -202,8 +202,8 @@ function clearMessages(container) {
  * @returns {string}
  */
 function formatTime(datetime) {
-    const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
-    return timeFormat(new Date(datetime));
+    const timeFormat = new Intl.DateTimeFormat('nl-NL', {hour: 'numeric', minute: 'numeric'}).format;
+    return timeFormat(new Date(datetime)).replace(':', '.');
 }
 
 /**
@@ -214,7 +214,7 @@ function formatTime(datetime) {
  */
 function formatDate(datetime) {
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    return dateFormat(new Date(datetime));
+    return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
 }
 
 export {

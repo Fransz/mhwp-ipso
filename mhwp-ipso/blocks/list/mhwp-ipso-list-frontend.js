@@ -213,11 +213,14 @@ import {
             const element = template.cloneNode(true);
 
             const date = formatDate(new Date(activity.onDate));
-            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join('; ');
+            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(';&nbsp;');
 
             element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
             element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
+
+            element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
+            listContainer.append(element);
 
             /**
              * click handler for read more buttons.
@@ -236,19 +239,6 @@ import {
                     displayActivity(detail, element);
                 }
             }
-            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', readMore);
-            // element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
-            //     addMessage('Gevens ophalen, dit kan even duren', element);
-            //     const detail = await processActivity(activity, element);
-            //     if (detail.items.length === 0) {
-            //         clearMessages(element);
-            //         addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-            //         setTimeout(() => clearMessages(element), 5000);
-            //     } else {
-            //         displayActivity(detail, element);
-            //     }
-            // });
-            listContainer.append(element);
         });
     }
 

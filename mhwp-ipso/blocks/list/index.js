@@ -64,7 +64,7 @@ registerBlockType( metadata, {
                             <span className="mhwp-ipso-card-time"></span>
                         </div>
                         <div className="mhwp-ipso-card-buttonrow">
-                        <button className="mhwp-ipso-show-detail" type="button">
+                        <button className="mhwp-ipso-card-more" type="button">
                             Lees meer
                         </button>
                         </div>
