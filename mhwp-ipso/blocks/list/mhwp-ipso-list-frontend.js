@@ -395,6 +395,8 @@ import {
         function closeBox(e) {
             clearErrors(cardElement);
             clearMessages(cardElement);
+            clearErrors(box);
+            clearMessages(box);
 
             document.body.style.overflow = 'visible';
             box.removeAttribute('open');
@@ -711,16 +713,16 @@ import {
         })
     }
     /**
-     * Make a reservation by accessing our API.
-     * Submit callback for the validator api
+     * Make a reservation by accessing our API with the correct parameters.
+     * After the request we return a promise that gets resolved after 5 seconds.
      *
-     * @param detail The activity.
+     * @param activity The activity.
      * @param form The form  that is submitted.
      * @param box The modal box whitch contains the form.
      * @param event The submit event.
      * @returns {Promise<void>}
      */
-    async function makeReservation(detail, form, box, event) {
+    async function makeReservation(activity, form, box, event) {
         event.preventDefault();
 
         // The URL for making the reservation
@@ -730,10 +732,6 @@ import {
 
         const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
 
-        // Clear messages.
-        clearErrors(msgContainer);
-        clearMessages(msgContainer);
-
         // Get the item corresponding to the hidden input or selected radiobutton.
         let calendarId;
         if(form.querySelector('#mhwp-ipso-res-item')) {
@@ -741,10 +739,9 @@ import {
         } else {
             calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
         }
-        const item = detail.items.filter(item => item.calendarId === calendarId)[0];
+        const item = activity.items.filter(item => item.calendarId === calendarId)[0];
 
         const activityCalendarId = item.calendarId.toString();
-
         const firstName = form.querySelector('input[name="firstName"]').value;
         const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
         const lastName = form.querySelector('input[name="lastName"]').value;
@@ -752,12 +749,13 @@ import {
         let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
         phoneNumber = phoneNumber === "" ? null : phoneNumber;
 
-        const activityId = detail.id;
-        const activityTitle = detail.title;
-        const activityDate = formatDate(detail.onDate);
+        const activityId = activity.id;
+        const activityTitle = activity.title;
+        const activityDate = formatDate(activity.onDate);
         const activityTime = formatTime(item.timeStart);
 
-        // Data for our endpoint. activityId, activityTime, activitydate and activityTitle are used for mail.
+        // Data for our endpoint.
+        // activityId, activityTime, activitydate and activityTitle are used for mail.
         const data = {
             activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
             activityId, activityTitle, activityDate, activityTime
@@ -770,20 +768,16 @@ import {
         await fetchWpRest(
             url, fetchInit, msgContainer
         ).then(() => {
-            // TODO: if ! 200 addError
-
             addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
             form.querySelector('button').disabled = true;
 
-            // Close the message after 5 sec.
-            return new Promise((resolve, _) => {
-                    setTimeout(() => { clearMessages(msgContainer); return resolve(); }, 5000);
-            })
+            // Return a promise that returns resolved after 5 seconds.
+            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
         }).catch((_) => {
-            console.log('catched');
-            // TODO: addError
-            // No op. We had an error making a reservation. We still want to continue, maybe an other one
-            // succeeds.
+            // An exception occured, we already have shown the error.
+            form.querySelector('button').disabled = true;
+
+            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
         });
     }
 
