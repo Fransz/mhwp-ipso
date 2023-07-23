@@ -116,22 +116,6 @@ import {
      * Top level function.
      *
      * @returns {void}
-    async function main () {
-        // Clear the listContainer.
-        const listContainer = document.querySelector('#mhwp-ipso-list-container');
-        const items = Array.from(listContainer.querySelectorAll('li'));
-        items.map((n) => n.remove());
-
-        // Get all activities from our wp; property data; Sort them;
-        let activities = await getActivities(listContainer);
-        activities = activities.data;
-        activities.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-
-        processActivities(activities, listContainer)
-
-        // Clean up message.
-        return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
-    }
      */
     async function main () {
         // Clear the listContainer.
@@ -144,11 +128,11 @@ import {
             const acts = collapseActivities(json.data);
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
 
-            // Show each activity, add an eventhandler for showing details on each.
+            // Show each activity, add an event handler for showing details on each.
             displayActivities(acts, listContainer);
         });
 
-        // Clean up message.
+        // Clean up fetch message.
         return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
     }
 
@@ -178,12 +162,12 @@ import {
 
     /**
      * Collapse the same activities on the same day.
-     * Create an object with all activityIds as key and as value an object with all dates for that activity as key
-     * and as value an array of all those activities on that day.
+     * Create an object with all activityIds as key and as value: an object with all dates for that activity as key
+     * and as value: an array of all those activities on that day.
      * Then collect all activities into a single array again.
      *
      * @param activities
-     * @returns {{activityID: *, onDate: *, mentors: *, title: *, items: *, extraInfo: *}[]}
+     * @returns {{activityID: *, onDate: *, mentors: *, title: *, items: [], extraInfo: *}[]}
      */
     function collapseActivities (activities) {
         let groups = activities.reduce( groupById, {} );
@@ -192,10 +176,10 @@ import {
         return Object.keys(groups).flatMap( ak => Object.keys(groups[ak]).map( dk => collect(groups[ak][dk])));
 
         function groupById(acc, cur) {
-            return groupBy( cur.activityID, acc, cur);
+            return groupBy(cur.activityID, acc, cur);
         }
         function groupByDate(acc,cur) {
-            return groupBy( cur.onDate, acc, cur);
+            return groupBy(cur.onDate, acc, cur);
         }
         function groupBy (key, acc, cur) {
             const grp = acc[key] ?? [];
@@ -221,9 +205,10 @@ import {
     }
 
     /**
-     * For all activities display a card, add a eventhandler for viewing the activities details to each card.
+     * For all activities display a card.
+     * Add an event handler for viewing the activities details to each card's button.
      *
-     * @param activities
+     * @param activities All activitues.
      * @param listContainer Where to add the activity element.
      */
     function displayActivities (activities, listContainer) {
@@ -233,7 +218,7 @@ import {
             const element = template.cloneNode(true);
 
             const date = formatDate(new Date(activity.onDate));
-            const times = activity.items.map( i => formatTime (new Date(i.timeStart))).join('; ');
+            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join('; ');
 
             element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
             element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
@@ -243,9 +228,11 @@ import {
              * click handler for read more buttons.
              * Get the activities details and show them in a popup, or display a message if the activity is sold out.
              */
-            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
+            async function readMore(e) {
                 addMessage('Gevens ophalen, dit kan even duren', element);
+
                 const detail = await processActivity(activity, element);
+
                 if (detail.items.length === 0) {
                     clearMessages(element);
                     addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
@@ -253,8 +240,19 @@ import {
                 } else {
                     displayActivity(detail, element);
                 }
-
-            });
+            }
+            element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', readMore);
+            // element.querySelector('.mhwp-ipso-show-detail').addEventListener('click', async (e) => {
+            //     addMessage('Gevens ophalen, dit kan even duren', element);
+            //     const detail = await processActivity(activity, element);
+            //     if (detail.items.length === 0) {
+            //         clearMessages(element);
+            //         addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+            //         setTimeout(() => clearMessages(element), 5000);
+            //     } else {
+            //         displayActivity(detail, element);
+            //     }
+            // });
             listContainer.append(element);
         });
     }
@@ -268,6 +266,7 @@ import {
      */
     async function processActivity (activity, msgContainer) {
         const { data: detail } = await fetchDetail(activity, msgContainer);
+
         // For all items, fetch the nr of participants in parallel.
         const items = await Promise.all( activity.items.map( item => {
                 return fetchParticipants(item.calendarId, msgContainer).then( r => {
@@ -279,15 +278,14 @@ import {
 
         detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-
         detail.onDate = activity.onDate;
 
         return detail;
     }
 
     /**
-     * Display an activity in a modal popup, using the template we served from the wp block;
-     * Prepare the form.
+     * Display an activity in a modal popup.
+     * Use the html we got from our wp block.
      *
      * @param activity Current activity
      * @param cardElement DOM node of the card element of the activity
@@ -309,13 +307,15 @@ import {
     }
 
     /**
-     * Display the modal popup. Define eventhandlers for closing it again.
+     * Display the modal popup.
+     * Define event handlers for closing it again. Prepare the reservation form if shown.
      *
      * @param activity
      * @param cardElement
      * @returns {HTMLElement}
      */
     function displayModalBox(activity, cardElement) {
+        // Add an overlay.
         const overlay = document.createElement('div')
         overlay.id = "mhwp-ipso-box-overlay";
         document.body.append(overlay);
@@ -324,9 +324,12 @@ import {
 
         const box = document.getElementById('mhwp-ipso-modal-box');
         const innerBox = document.getElementById('mhwp-ipso-box-inner');
+
+        // Event handlers.
         box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox);
         box.addEventListener('click', closeBoxFromOverlay);
 
+        // A different reservation button? The form?
         if(! activity.reservationUrl) {
             box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'none';
         } else {
@@ -351,6 +354,10 @@ import {
             function submitHandler (form, event) {
                 makeReservation(activity, form, box, event).then(() => closeBox(null));
             }
+            function invalidHandler () {
+                // TODO: We want an error message here, this shouldn't happen though.
+                console.log( 'invalid' );
+            }
 
             $jq(form).validate({
                 rules: {
@@ -359,13 +366,11 @@ import {
                         "normalizer": v => v.trim()
                     }
                 },
-                submitHandler,
-                "invalidHandler": function () {
-                    // TODO: We want an error message here.
-                    console.log( 'invalid' );
-                }
+                submitHandler, invalidHandler
             })
         }
+
+        return box;
 
         /**
          * Handler for the escape key.
@@ -380,6 +385,7 @@ import {
 
         /**
          * Handler for clicks on the overlay.
+         *
          * @param e
          */
         function closeBoxFromOverlay(e) {
@@ -389,7 +395,9 @@ import {
         }
 
         /**
-         * Handler for closing the popup. Remove the html we appended, remove eventlisteners.
+         * Handler for closing the popup.
+         * Remove the html we appended, remove event listeners.
+         *
          * @param e
          */
         function closeBox(e) {
@@ -409,13 +417,12 @@ import {
             overlay.remove();
 
             const form = box.querySelector('form');
-            if(form) {
-                form.reset();
-            }
+            if(form) form.reset();
 
             box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
             box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
             box.querySelector('#mhwp-ipso-box-form button').disabled = false;
+
             const button = box.querySelector('#mhwp-ipso-box-directbutton button')
             button.removeEventListener('click', redirectReservation);
 
@@ -423,18 +430,17 @@ import {
         }
 
         /**
-         * Handler for clicking on a reservatin button with a redirect.
+         * Handler for clicking on a reservation button with a redirect.
          * @param e
          */
         function redirectReservation(e) {
             window.location = activity.reservationUrl;
         }
-
-        return box;
     }
 
     /**
      * Generate html for the choose time checkbox, or a hidden input if there is only one time available.
+     *
      * @param items
      * @returns {ChildNode}
      */
@@ -456,170 +462,7 @@ import {
     }
 
     /**
-     * Process the fetched activities.
-     *
-     * @param activities The activities to processs
-     * @param listContainer The container for the calendar list.
-     */
-    // function processActivities(activities, listContainer) {
-    //     // Keep track of the activities date. For date headers.
-    //     let curDate = null;
-    //
-    //     activities.forEach( (activity) => {
-    //         // Add all activities, with or without date separator.
-    //         const node = addActivity(activity, activity.onDate !== curDate, listContainer);
-    //
-    //         // The button which shows the details.
-    //         const button = node.querySelector('button.mhwp-ipso-activity-show-detail')
-    //
-    //         // update the current date.
-    //         curDate = activity.onDate;
-    //
-    //         // The handler for clicks on the button.
-    //         const clickHandler = async () => await fillActivity(activity, node);
-    //         button.addEventListener('click', clickHandler, { once: true });
-    //     })
-    // }
-
-    /**
-     * Add an activity to the dom using our template.
-     *
-     * @param activity json data that describes the activity,
-     * @param newDate Do we want to add a seperator for new date?
-     * @param listContainer The container for the calendar list.
-     * @returns The jQuery object for the added node.
-     */
-    // function addActivity(activity, newDate, listContainer) {
-    //     // Formatters for time/date
-    //     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    //     const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
-    //
-    //     // Add the formatted date and time to the activity,
-    //     const date = new Date(activity.timeStart);
-    //     activity.date = dateFormat(date);
-    //     activity.time = timeFormat(date);
-    //
-    //     // Add a date header if the date changed.
-    //     if (newDate) {
-    //         const dateHeader = createNodeFromHTML(`<li class="mhwp-ipso-list-dateheader">${activity.date}</li>`);
-    //         listContainer.append(dateHeader)
-    //     }
-    //
-    //     // fill the template, append to the DOM
-    //     const node = template(activity);
-    //     listContainer.append(node);
-    //
-    //     return node;
-    // }
-
-    /**
-     * Fill an activity with its details and prepare the reservation button.
-     * If necessary prepare the reservation form.
-     *
-     * @param activity The activity.
-     * @param node The dom node for the activity.
-     */
-    // async function fillActivity(activity, node) {
-    //     // Get the details for the activity. Template strings and properties.
-    //     addMessage("Ophalen van gegevens, dit kan even duren", node);
-    //     const detail = await getDetail(activity, node);
-    //     clearMessages(node);
-    //
-    //     // Enable the reservation button by default.
-    //     const button = node.querySelector('.mhwp-ipso-reservation-button');
-    //     button.disabled = false;
-    //
-    //     // Prepend the details template strings to the detail node
-    //     const {img, title, intro, descr} = detail;
-    //     const detailNode = node.querySelector('.mhwp-ipso-activity-detail');
-    //     detailNode.prepend(img, title, intro, descr);
-    //
-    //
-    //     // properties we process here.
-    //     const { disableReservation, places, reservationUrl} = detail;
-    //
-    //     // Check if we want the reservation button to be hidden.
-    //     if (disableReservation) {
-    //         button.hidden = true;
-    //         return;
-    //     }
-    //
-    //     // Check if the activity was in the past (in days).
-    //     const toDay = (new Date()).setHours(0, 0, 0, 0);
-    //     const date = new Date(activity.timeStart)
-    //     if (date < toDay) {
-    //         button.disabled = true;
-    //         return;
-    //     }
-    //
-    //     // Check if we have a alternative URL for reservations.
-    //     if(reservationUrl) {
-    //         ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
-    //         button.addEventListener('click', (e) => window.location = reservationUrl);
-    //         return;
-    //     }
-    //
-    //     // Check if there are places left.
-    //     if(places <= 0) {
-    //         button.hidden = true;
-    //
-    //         // Don't use addMessage here. The message should be persistent
-    //         const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
-    //         node.querySelector('.mhwp-ipso-activity-detail').append(notice);
-    //         return;
-    //     }
-    //
-    //     // We need the reservation, and extra data for mailing on the server.
-    //     const mailData = {
-    //         'activityId': activity.activityID,
-    //         'activityTitle': activity.title,
-    //         'activityDate': activity.date,
-    //         'activityTime': activity.time,
-    //     }
-    //     prepareForm(detail, mailData, node);
-    // }
-
-    /**
-     * Get the details for an activity, process them. Return a default upon failure.
-     *
-     * @param activity The activity for which to get details.
-     * @param container A container for error messages,
-     * @returns {Promise<{descr: string, img: string, intro: string, reservationUrl: null} | {image: string, intro: string, description: string, reservationUrl: null}>}
-     */
-    // function getDetail(activity, container) {
-    //     return fetchDetail(activity, container).then((json) => {
-    //         const detail = json.data;
-    //         const imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-    //         const reservationUrl = detail.hasOwnProperty('reservationUrl') ? detail.reservationUrl : null;
-    //
-    //         // Places left. If maxRegistrations === 0 there is no limit.
-    //         const places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
-    //
-    //         return {
-    //             img: createNodeFromHTML(`<img src="${imageUrl}" alt="${detail.title}" />`),
-    //             title: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-title">${detail.title}</div>`),
-    //             intro: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-intro">${detail.intro}</div>`),
-    //             descr: createNodeFromHTML(`<div class="mhwp-ipso-activity-detail-description">${detail.description}</div>`),
-    //             places,
-    //             reservationUrl,
-    //             disableReservation: detail.disableReservation
-    //         }
-    //     }).catch((e) => {
-    //         // We had an error fetching the detail. Fill in defaults for the detail. We can still make the reservation.
-    //         return {
-    //             img: "",
-    //             title: "",
-    //             intro: "",
-    //             descr: "",
-    //             places: 0,
-    //             reservationUrl: null,
-    //             disableReservation: false
-    //         }
-    //     });
-    // }
-
-    /**
-     * Make the request for the details, and again if necessary.
+     * Make a request for the details of an activity, and again if necessary.
      *
      * @param activity The activity for which to fetch the detail
      * @param msgContainer The parent for messages.
@@ -667,51 +510,6 @@ import {
         });
     }
 
-    /**
-     * Remove the form if we dont not need it, otherwise add a validation-, and submit handler.
-     *
-     * @param detail The activities data
-     * @param mailData Extra data needed for mailing.
-     * @param container
-     */
-    function prepareForm(detail, mailData) {
-        // Add validation- and submit handlers to the form. The form needs to be a jQuery object.
-    }
-
-    /**
-     * Prepare the form.
-     * This has to be a seperate function (scope), or the activity in the anonymous function will
-     * be bound to the activity of the first definition.
-     *
-     * @param activity
-     * @param form
-     */
-    function makeForm(activity, form, box) {
-        // We don't always have a form.
-        if (! form) return
-
-        // If we had a previous validator remove it.
-        const v = $jq(form).validate();
-        if (v) v.destroy();
-
-        function submitHandler (form, event) {
-            makeReservation(activity, form, event).then(box.close());
-        }
-
-        $jq(form).validate({
-            rules: {
-                phoneNumber: {
-                    phoneNL: true,
-                    "normalizer": v => v.trim()
-                }
-            },
-            submitHandler,
-            "invalidHandler": function () {
-                // TODO: We want an error message here.
-                console.log( 'invalid' );
-            }
-        })
-    }
     /**
      * Make a reservation by accessing our API with the correct parameters.
      * After the request we return a promise that gets resolved after 5 seconds.
