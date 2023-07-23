@@ -11,8 +11,8 @@
 // Todo: We need to refactor this code in the spirit of ipso-list.
 // Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
 
-import '../includes/bootstrap-collapse';
-import '../includes/bootstrap-transition';
+// import '../includes/bootstrap-collapse';
+// import '../includes/bootstrap-transition';
 
 /*
  * Todo add mailData in the ipso button so we can mail with the button also.
