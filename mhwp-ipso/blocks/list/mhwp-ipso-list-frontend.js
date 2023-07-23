@@ -77,7 +77,7 @@ import {
         const [mon, sun] = week(newDay);
 
         const toDay = new Date();
-        if(sun.setHours(0, 0, 0) < toDay.setHours(0, 0, 0)) {
+        if(sun.setHours(0, 0, 0, 0) < toDay.setHours(0, 0, 0, 0)) {
             // We try to go back in time we do not allow that.
             return;
         }

@@ -59,11 +59,15 @@ registerBlockType( metadata, {
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
                         <div className="mhwp-ipso-card-title"></div>
-                        <div className="mhwp-ipso-card-date"></div>
-                        <div className="mhwp-ipso-card-time"></div>
+                        <div className="mhwp-ipso-card-daterow">
+                            <span className="mhwp-ipso-card-date"></span>
+                            <span className="mhwp-ipso-card-time"></span>
+                        </div>
+                        <div className="mhwp-ipso-card-buttonrow">
                         <button className="mhwp-ipso-show-detail" type="button">
                             Lees meer
                         </button>
+                        </div>
                     </li>
                 </template>
 
@@ -142,16 +146,11 @@ registerBlockType( metadata, {
                                 </div>
                             </div>
                             <div id="mhwp-ipso-box-messagerow" className="mhwp-ipso-box-row"></div>
-
                         </div>
                     </div>
                 </div>
 
-                <ul id="mhwp-ipso-week-container">
-                </ul>
-                <ul id="mhwp-ipso-list-container">
-                    <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
-                </ul>
+                <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
                 <ul id="mhwp-ipso-month-container"></ul>
             </div>
         )
