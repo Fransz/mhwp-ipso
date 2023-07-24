@@ -1,8 +1,4 @@
 /**
- * Todo: waarom staat er in ipspo 'invalid date'; (8 mei tajij laura peters;; de inschrijving staat wel in ipso.)
- * Todo: clear reservation form after submission.
- * Todo add mailData in the ipso button so we can mail with the button also.
- * Todo: Als je een detail haatl, kan het zijn dat je 'm al gehaald hebt. Die kan je hergebruiken, maa rvoor soldout status moet je toch de request maken.
  * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
  * Todo drop the globals; back to parameters.
  * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
@@ -33,78 +29,58 @@ import {
     const marikenhuisURL = document.location.origin;
 
     // Current date; set by the next/prev week buttons.
-    let currentDay = null;
-
-    // Days to show in the calendar, a hidden field in our wp block, default 7.
-    // Todo Drop this if we use the week buttons.
-    let nrDays = 7;
+    let currentDay;
 
     /**
      * init globals, attach event handlers.
      */
     function init() {
         // the container for all activities.
-        const listContainer = document.querySelector('#mhwp-ipso-list-container');
+        const monthContainer = document.querySelector('#mhwp-ipso-month-container');
 
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
         $jq.validator.addMethod( "phoneNL", function( value, element ) {
             return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
         }, "Vul een geldig telefoonnummer in." );
 
-        // nr of days, from a hidden field in the wp block.
-        const el = document.getElementById('mhwp-ipso-list-nr-days');
-        nrDays = parseInt(el.value) || 0;
-
         // Initialize the week picker.
         const prevWeek = document.querySelector('#mhwp-ipso-prev-week');
-        prevWeek.addEventListener('click', () =>  handleWeekChange(-7, listContainer) )
+        prevWeek.addEventListener('click', () =>  handleWeekChange(-7, 28));
         const nextWeek = document.querySelector('#mhwp-ipso-next-week');
-        nextWeek.addEventListener('click', () => handleWeekChange(7, listContainer))
+        nextWeek.addEventListener('click', () => handleWeekChange(7, 28));
 
         // Initialize the current day
-        const [mon, sun] = week(new Date());
-        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${formatDate(mon)} - ${formatDate(sun)}`;
-        currentDay = mon;
+        currentDay = new Date();
     }
 
     /**
      * Handle clicks on the next/previous week button
      */
-    function handleWeekChange(nrDays) {
+    function handleWeekChange(shiftDays, nrDays) {
         // Copy day; add; calculate week; display; save.
-        const newDay = new Date(currentDay);
-        newDay.setDate(newDay.getDate() + nrDays);
-        const [mon, sun] = week(newDay);
+        let firstDay = new Date(currentDay);
+        firstDay.setDate(firstDay.getDate() + shiftDays);
 
         const toDay = new Date();
-        if(sun.setHours(0, 0, 0, 0) < toDay.setHours(0, 0, 0, 0)) {
+        if(firstDay.setHours(0, 0, 0, 0) < toDay.setHours(0, 0, 0, 0)) {
             // We try to go back in time we do not allow that.
-            return;
+            firstDay = toDay;
         }
 
-        // Adjust header
-        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${formatDate(mon)} - ${formatDate(sun)}`;
+        console.log(firstDay, nrDays, currentDay);
 
-        // Set our global, display a message
-        currentDay = mon;
+        const lastDay = new Date(firstDay);
+        lastDay.setDate(lastDay.getDate() + nrDays);
+
+        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
         addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
 
-        // Display activities.
-        main();
-    }
+        // Set our global
+        currentDay = new Date(firstDay);
+        console.log(firstDay, lastDay, nrDays, currentDay);
 
-    /** Calculate first and last day of the week in which d falls.
-     * Monday is the first day of our week;
-     *
-     * @param d The day for which we have to calculate the week.
-     * @return Array<Date> The first and last dates of the week.
-     */
-    function week (d) {
-        const first = new Date(d);
-        first.setDate(first.getDate() + ((7 - d.getDay()) % 7) - 6);
-        const last = new Date(first);
-        last.setDate(first.getDate() + 6);
-        return [first, last];
+
+        main(firstDay, nrDays);
     }
 
     /**
@@ -112,19 +88,18 @@ import {
      *
      * @returns {void}
      */
-    async function main () {
-        // Clear the listContainer.
-        const listContainer = document.querySelector('#mhwp-ipso-month-container');
-        const items = Array.from(listContainer.querySelectorAll('li'));
+    async function main (date, nrDays) {
+        const monthContainer = document.querySelector('#mhwp-ipso-month-container');
+        const items = Array.from(monthContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
         // Get all activities, collapse, sort and display.
-        await fetchActivities(new Date(), 30, listContainer).then(json => {
+        await fetchActivities(date, nrDays, monthContainer).then(json => {
             const acts = collapseActivities(json.data);
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
 
             // Show each activity, add an event handler for showing details on each.
-            displayActivities(acts, listContainer);
+            displayActivities(acts, monthContainer);
         });
 
         // Clean up fetch message.
@@ -566,5 +541,5 @@ import {
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0);});
+    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0, 28);});
 })();
