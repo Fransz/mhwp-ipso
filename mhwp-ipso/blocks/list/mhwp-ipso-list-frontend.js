@@ -252,14 +252,15 @@ import {
     async function processActivity (activity, msgContainer) {
         const { data: detail } = await fetchDetail(activity, msgContainer);
 
-        // For all items, fetch the nr of participants in parallel.
-        const items = await Promise.all( activity.items.map( item => {
+        // For all items, fetch the number of participants sequentially.
+        const items = await activity.items.reduce((p, item) => {
+            return p.then(acc => {
                 return fetchParticipants(item.calendarId, msgContainer).then( r => {
                     item.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
-                    return item;
+                    return [ ...acc, item];
                 });
             })
-        );
+        }, Promise.resolve([]));
 
         detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
