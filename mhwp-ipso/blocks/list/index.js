@@ -56,6 +56,12 @@ registerBlockType( metadata, {
         return (
             <div { ...blockProps } >
 
+                <div id="mhwp-ipso-list-weekpicker">
+                    <div id="mhwp-ipso-current-week"></div>
+                    <button id="mhwp-ipso-prev-week">week vooruit</button>
+                    <button id="mhwp-ipso-next-week">week achteruit</button>
+                </div>
+
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
                         <div className="mhwp-ipso-card-title"></div>
@@ -71,12 +77,6 @@ registerBlockType( metadata, {
                     </li>
                 </template>
 
-
-                <div id="mhwp-ipso-list-weekpicker">
-                    <div id="mhwp-ipso-current-week">21 januari- 28 januari</div>
-                    <button id="mhwp-ipso-prev-week">vorige week</button>
-                    <button id="mhwp-ipso-next-week">volgende week</button>
-                </div>
                 <div id="mhwp-ipso-box-container">
                     <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                         <div id="mhwp-ipso-box-inner" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
