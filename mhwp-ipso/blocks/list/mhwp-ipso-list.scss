@@ -1,111 +1,58 @@
-// Front end styles.
+.wp-block-mhwp-ipso-list{
+  width: 100%;
+  margin: 35px auto 0px auto;
+  line-height: 1.8rem;
+  background-color: #fff;
 
-.fade {
-  opacity: 0;
-  transition: opacity .15s linear;
-  &.in {
-    opacity: 1;
-  }
-}
-
-.collapse {
-  display: none;
-
-  &.in      { display: block; }
-  tr.collapse.in    { display: table-row; }
-  tbody.collapse.in { display: table-row-group; }
-}
-
-.collapsing {
-  position: relative;
-  height: 0;
-  overflow: hidden;
-  transition-property: height, visibility;
-  transition-duration: 350ms;
-  transition-timing-function: ease;
-}
-
-div#mhwp-ipso-list-container {
-  .list-group-item-light {
-    background-color: #d3d3d3;
-  }
-  .list-group-item-dark {
-    background-color: #fefefe;
+  button {
+    margin-bottom: 25px;
+    background-color: #e24219;
+    margin-top: 5px;
+    padding: 5px 10px;
   }
 
-  img {
-    height:100px;
-  }
-  div.reserveer {
-    label {
-      display:inline-block;
-    }
-    .required {
-      color:red;
-    }
-
-    .error {
-      color:red;
-    }
-
-    input.error {
-      color: black;
-      border: 1px solid red;
-    }
+  h3.message, h3.error {
+    display: block;
+    font-size:16px;
+    font-weight: 600;
+    color:#e24219;
   }
 
-  div.message {
-    border:2px solid green;
-    padding:1em 1em;
-    h3 {
-      color: green;
+  ul#mhwp-ipso-month-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width:100%;
+
+    li.mhwp-ipso-month-card {
+      flex: 1 1 30%;
+
+      display:flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      border:1px solid #e24219;
+      border-radius: 5px;
+      padding:0.5em 1em;
+      margin:1em 10px;
+      list-style-type: none;
+
+
+      .mhwp-ipso-card-title{
+        font-size:18px;
+        font-weight: 600;
+        color:#e24219;
+      }
+
+      .mhwp-ipso-card-date, .mhwp-ipso-card-time {
+        font-size:16px;
+        font-weight: 400;
+      }
+
+      .mhwp-ipso-card-date {
+        padding-right:1em;
+      }
     }
-  }
-
-  div.error {
-    border:2px solid red;
-    padding:1em 1em;
-    h3 {
-      color: red;
-    }
-  }
-}
-
-ul#mhwp-ipso-month-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  width:100%;
-
-  li.mhwp-ipso-month-card {
-    flex: 1 1 30%;
-
-    display:flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    border:1px solid #e24219;
-    border-radius: 5px;
-    padding:0.5em 1em;
-    margin:1em 10px;
-    list-style-type: none;
-
-
-    .mhwp-ipso-card-title{
-      font-size:18px;
-      font-weight: 600;
-      color:#e24219;
-    }
-
-    .mhwp-ipso-card-date, .mhwp-ipso-card-time {
-      font-size:16px;
-      font-weight: 400;
-    }
-
-    .mhwp-ipso-card-date {
-      padding-right:1em;
-    }
-  ;
   }
 }
 
@@ -175,8 +122,8 @@ div#mhwp-ipso-box-inner {
     &#mhwp-ipso-box-daterow {
       margin-bottom:15px;
       justify-content: start;
-      font-size:16px;
-      font-weight: 600;
+      font-size:18px;
+      font-weight: 400;
     }
 
     hr {
@@ -202,7 +149,7 @@ div#mhwp-ipso-box-inner {
           height:100px;
         }
         #mhwp-ipso-box-intro {
-          font-size:16px;
+          font-size:22px;
           font-weight: 600;
           text-align:left;
           padding-left: 20px;
@@ -211,6 +158,9 @@ div#mhwp-ipso-box-inner {
       }
 
       div#mhwp-ipso-box-description {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1.5;
         text-align: left;
         padding:0 15px;
       }
@@ -218,14 +168,52 @@ div#mhwp-ipso-box-inner {
       &#mhwp-ipso-box-contentcolumn {
         width:80%;
       }
-      form span#mhwp-ipso-res-itemslabel {
-        padding: 0 10px 0 0;
+
+      &#mhwp-ipso-box-formcolumn {
+        .required {
+          color:red;
+        }
+
+        .error {
+          color:red;
+        }
+
+
+        input, select, textarea {
+          background-color: #f8f8f8;
+          border: 1px solid #ddd;
+          font-size: 18px;
+          font-weight: 400;
+          padding: 5px 10px;
+          width: 100%;
+        }
+
+        input.error {
+          color: black;
+          border: 1px solid red;
+        }
+
+        fieldset {
+            padding: .35em .75em .625em;
+            border: 0 #aeaeae solid!important;
+
+          span#mhwp-ipso-res-itemslabel {
+            padding: 0 10px 0 0;
+          }
+          input.mhwp-ipso-res-itemchoice {
+            width:auto;
+            padding: 0 5px;
+          }
+          label.mhwp-ipso-res-itemlabel {
+            padding: 0 10px 0 3px;
+          }
+        }
       }
-      form input.mhwp-ipso-res-itemchoice {
-        padding: 0 5px;
-      }
-      form label.mhwp-ipso-res-itemlabel {
-        padding: 0 10px 0 3px;
+    }
+
+    &#mhwp-ipso-box-messagerow {
+      h3.message {
+        font-size: 22px;
       }
     }
   }

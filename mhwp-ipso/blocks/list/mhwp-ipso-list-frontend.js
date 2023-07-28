@@ -199,6 +199,8 @@ import {
              * Get the activities details and show them in a popup, or display a message if the activity is sold out.
              */
             async function readMore(e) {
+                clearErrors(element);
+                clearMessages(element);
                 addMessage('Gevens ophalen, dit kan even duren', element);
 
                 const detail = await processActivity(activity, element);

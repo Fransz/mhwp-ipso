@@ -127,6 +127,8 @@ function fetchWpRest (url, init, errorContainer, throw_429=true) {
             if ('' === message) {
                 message = 'Er gaat iets mis, probeer het later nog eens';
             }
+            clearErrors(errorContainer);
+            clearMessages(errorContainer);
             addError(message, errorContainer);
 
             // retrow the error. Users of this call decide what should happen.
