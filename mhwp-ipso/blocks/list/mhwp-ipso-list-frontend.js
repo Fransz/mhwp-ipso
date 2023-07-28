@@ -16,6 +16,7 @@ import {
     , createNodeFromHTML
     , formatDate
     , formatTime
+    , localeISOString
 } from "../includes/mhwp-lib";
 
 (function () {
@@ -67,8 +68,6 @@ import {
             firstDay = toDay;
         }
 
-        console.log(firstDay, nrDays, currentDay);
-
         const lastDay = new Date(firstDay);
         lastDay.setDate(lastDay.getDate() + nrDays);
 
@@ -77,8 +76,6 @@ import {
 
         // Set our global
         currentDay = new Date(firstDay);
-        console.log(firstDay, lastDay, nrDays, currentDay);
-
 
         main(firstDay, nrDays);
     }
@@ -118,11 +115,11 @@ import {
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-        const from = d.toISOString().slice(0, -14);
+        const from = localeISOString(d);
         url.searchParams.append('from', from);
 
         d.setDate(d.getDate() + nr - 1);
-        const till = d.toISOString().slice(0, -14);
+        const till = localeISOString(d);
         url.searchParams.append('till', till);
 
         clearErrors(msgContainer);

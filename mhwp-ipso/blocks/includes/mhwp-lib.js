@@ -217,6 +217,18 @@ function formatDate(datetime) {
     return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
 }
 
+/**
+ * Helper for getting an ISO8601 date string in the locale timezone.
+ * @see https://stackoverflow.com/questions/10830357
+ *
+ * @param d
+ * @returns {string}
+ */
+function localeISOString(d) {
+   const offset = (new Date()).getTimezoneOffset() * 60000;
+   return (new Date(d.valueOf() - offset)).toISOString().slice(0, -14);
+}
+
 export {
     fetchWpRest
     , wait
@@ -228,4 +240,5 @@ export {
     , createNodeFromHTML
     , formatTime
     , formatDate
+    , localeISOString
 };
