@@ -45,10 +45,13 @@ import {
         }, "Vul een geldig telefoonnummer in." );
 
         // Initialize the week picker.
-        const prevWeek = document.querySelector('#mhwp-ipso-prev-week');
-        prevWeek.addEventListener('click', () =>  handleWeekChange(-7, 28));
-        const nextWeek = document.querySelector('#mhwp-ipso-next-week');
-        nextWeek.addEventListener('click', () => handleWeekChange(7, 28));
+        document.querySelectorAll('.mhwp-ipso-week-previous').forEach( btn => {
+            btn.addEventListener('click', () =>  handleWeekChange(-7, 28))
+        });
+
+        document.querySelectorAll('#mhwp-ipso-week-next').forEach( btn => {
+            btn.addEventListener('click', (_) => handleWeekChange(7, 28))
+        });
 
         // Initialize the current day
         currentDay = new Date();
@@ -71,8 +74,7 @@ import {
         const lastDay = new Date(firstDay);
         lastDay.setDate(lastDay.getDate() + nrDays);
 
-        document.querySelector('#mhwp-ipso-current-week').innerHTML = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
-        addMessage('Ophalen van gegevens, dit kan even duren', document.querySelector('#mhwp-ipso-list-weekpicker'));
+        document.querySelector('#mhwp-ipso-week-current').innerHTML = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
 
         // Set our global
         currentDay = new Date(firstDay);
@@ -90,6 +92,9 @@ import {
         const items = Array.from(monthContainer.querySelectorAll('li'));
         items.map((n) => n.remove());
 
+        const msgContainer = document.querySelector('#mhwp-ipso-message-top');
+        addMessage('Gegevens ophalen. Dit kan even duren', msgContainer);
+
         // Get all activities, collapse, sort and display.
         await fetchActivities(date, nrDays, monthContainer).then(json => {
             const acts = collapseActivities(json.data);
@@ -99,8 +104,7 @@ import {
             displayActivities(acts, monthContainer);
         });
 
-        // Clean up fetch message.
-        return clearMessages(document.querySelector('#mhwp-ipso-list-weekpicker'));
+        return clearMessages(msgContainer);
     }
 
     /**
@@ -185,7 +189,7 @@ import {
             const element = template.cloneNode(true);
 
             const date = formatDate(new Date(activity.onDate));
-            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(';&nbsp;');
+            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
 
             element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
             element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
