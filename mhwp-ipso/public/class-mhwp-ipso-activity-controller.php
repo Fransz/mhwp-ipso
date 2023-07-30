@@ -64,10 +64,20 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 * Check permissions for getting the list of activities.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true True if the request has access to get_items, WP_Error object otherwise.
+	 * @return bool|int True if the request has access to get_items, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ): bool {
-		return true;
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_REQUEST['_wpnonce'];
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		} else {
+			return false;
+		}
+
+		return wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 
 	/**
@@ -90,13 +100,23 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check permissions for getting the list of activities.
+	 * Check permissions for getting an activity detail.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true True if the request has access to get_items, WP_Error object otherwise.
+	 * @return bool|int True if the request has access to get_items, WP_Error object otherwise.
 	 */
 	public function get_item_permissions_check( $request ): bool {
-		return true;
+		if ( isset( $_REQUEST['_wpnonce'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_REQUEST['_wpnonce'];
+		} elseif ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		} else {
+			return false;
+		}
+
+		return wp_verify_nonce( $nonce, 'wp_rest' );
 	}
 
 	/**
@@ -151,15 +171,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			}
 			// phpcs:enable
 		}
-
-		// Make another request for the participants' data.
-		$data = array(
-			'activityId' => $calendar_id,
-		);
-
-		$participants_resp = $client->get_participants( $data );
-		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$activity_resp->data->nrParticipants = count( $participants_resp->data );
 
 		return new WP_REST_Response( $activity_resp, 200 );
 	}
