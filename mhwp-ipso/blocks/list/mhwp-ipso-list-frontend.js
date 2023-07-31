@@ -51,12 +51,10 @@ import {
 
         // Initialize the week picker.
         document.querySelectorAll('.mhwp-ipso-week-previous').forEach( btn => {
-            // btn.addEventListener('click', () =>  handleWeekChange(-7, 28))
             btn.addEventListener('click', () =>  calendar(-7))
         });
 
         document.querySelectorAll('.mhwp-ipso-week-next').forEach( btn => {
-            // btn.addEventListener('click', (_) => handleWeekChange(7, 28))
             btn.addEventListener('click', () =>  calendar(7))
         });
 
@@ -74,34 +72,6 @@ import {
         state.lastFetched = new Date(state.firstFetched);
         state.lastFetched.setHours(0, 0, 0, 0);
         state.lastFetched.setDate(state.lastFetched.getDate() - 1);
-
-        currentDay = new Date();
-    }
-
-    /**
-     * Handle clicks on the next/previous week button
-     */
-    function handleWeekChange(shiftDays, nrDays) {
-        // Copy day; add; calculate week; display; save.
-        let firstDay = new Date(currentDay);
-        firstDay.setDate(firstDay.getDate() + shiftDays);
-
-        const toDay = new Date();
-        if(firstDay.setHours(0, 0, 0, 0) < toDay.setHours(0, 0, 0, 0)) {
-            // We try to go back in time we do not allow that.
-            firstDay = toDay;
-        }
-
-        const lastDay = new Date(firstDay);
-        lastDay.setDate(lastDay.getDate() + nrDays);
-
-        document.querySelector('#mhwp-ipso-week-current').innerHTML = `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
-
-        // Set our global
-        currentDay = new Date(firstDay);
-
-        // calendar(state, 7);
-        main(firstDay, nrDays);
     }
 
     /**
@@ -120,11 +90,13 @@ import {
 
         if(state.firstDay < toDay) {
             state.firstDay = toDay;
-            // We do not need to do anything if the first day is in the past.
-            return;
         }
 
-        fetchCalendar(monthContainer).then((_) => {
+        const msgContainer = document.querySelector('#mhwp-ipso-message-top');
+        addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
+
+        fetchCalendar(msgContainer).then((_) => {
+            clearMessages(msgContainer);
             displayCalendar(monthContainer);
         });
     }
@@ -136,65 +108,6 @@ import {
      * @returns {Promise<void>}
      */
     async function fetchCalendar(errContainer) {
-        const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
-
-        /**
-         * fetch the activities from the wp server.
-         * @param from first date to fetch;
-         * @param till last day to fetch
-         * @param msgContainer Container for messages and errors.
-         * @returns {Promise<*>}
-         */
-        function fetchActivities(from, till, msgContainer) {
-            const url = new URL( marikenhuisURL );
-            url.pathname = "wp-json/mhwp-ipso/v1/activity";
-
-            url.searchParams.append('from', localeISOString(from));
-
-            url.searchParams.append('till', localeISOString(till));
-
-            clearErrors(msgContainer);
-            clearMessages(msgContainer);
-            return fetchWpRest(url, {}, msgContainer);
-        }
-
-        function  createActivityElement(activity) {
-            const element = template.cloneNode(true);
-
-            const date = formatDate(new Date(activity.onDate));
-            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
-
-            element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
-            element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
-            element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
-
-            element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
-
-            activity.element = element;
-            return activity;
-
-            /**
-             * click handler for read more buttons.
-             * Get the activities details and show them in a popup, or display a message if the activity is sold out.
-             */
-            async function readMore(e) {
-                clearErrors(element);
-                clearMessages(element);
-                addMessage('Gevens ophalen, dit kan even duren', element);
-
-                const detail = await processActivity(activity, element);
-
-                if (detail.items.length === 0) {
-                    clearMessages(element);
-                    addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-                    setTimeout(() => clearMessages(element), 5000);
-                } else {
-                    displayActivity(detail, element);
-                }
-            }
-
-        }
-
         if (state.firstDay < state.firstFetched) {
             const from = new Date(state.firstDay);
             const till = new Date(state.firstFetched)
@@ -229,63 +142,17 @@ import {
     }
 
     function displayCalendar(container) {
+        document.querySelector('#mhwp-ipso-week-current').innerHTML =
+            `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
+        state.activities.forEach((a) => {
+            a.element.remove();
+        })
         state.activities.forEach((a) => {
             const actDate = new Date(a.onDate);
-            if(actDate < state.firstDay || actDate > state.lastDay) {
-                a.element.remove();
-            } else {
+            if(actDate >= state.firstDay && actDate <= state.lastDay) {
                 container.append(a.element);
             }
         })
-    }
-
-    /**
-     * Top level function.
-     *
-     * @returns {void}
-     */
-    async function main (date, nrDays) {
-        const monthContainer = document.querySelector('#mhwp-ipso-month-container');
-        const items = Array.from(monthContainer.querySelectorAll('li'));
-        items.map((n) => n.remove());
-
-        const msgContainer = document.querySelector('#mhwp-ipso-message-top');
-        addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
-
-        // Get all activities, collapse, sort and display.
-        await fetchActivities(date, nrDays, monthContainer).then(json => {
-            const acts = collapseActivities(json.data);
-            acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-
-            // Show each activity, add an event handler for showing details on each.
-            displayActivities(acts, monthContainer);
-        });
-
-        return clearMessages(msgContainer);
-    }
-
-    /**
-     * Fetch activities.
-     *
-     * @param d startDate.
-     * @param nr number of days.
-     * @param msgContainer container for messages.
-     * @returns Object The json representation of the activities.
-     */
-    async function fetchActivities(d, nr, msgContainer) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = "wp-json/mhwp-ipso/v1/activity";
-
-        const from = localeISOString(d);
-        url.searchParams.append('from', from);
-
-        d.setDate(d.getDate() + nr - 1);
-        const till = localeISOString(d);
-        url.searchParams.append('till', till);
-
-        clearErrors(msgContainer);
-        clearMessages(msgContainer);
-        return await fetchWpRest(url, {}, msgContainer);
     }
 
     /**
@@ -333,48 +200,65 @@ import {
     }
 
     /**
-     * For all activities display a card.
-     * Add an event handler for viewing the activities details to each card's button.
-     *
-     * @param activities All activitues.
-     * @param listContainer Where to add the activity element.
+     * fetch the activities from the wp server.
+     * @param from first date to fetch;
+     * @param till last day to fetch
+     * @param msgContainer Container for messages and errors.
+     * @returns {Promise<*>}
      */
-    function displayActivities (activities, listContainer) {
+    function fetchActivities(from, till, msgContainer) {
+        const url = new URL( marikenhuisURL );
+        url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+        url.searchParams.append('from', localeISOString(from));
+        url.searchParams.append('till', localeISOString(till));
+
+        return fetchWpRest(url, {}, msgContainer);
+    }
+
+    /**
+     * Create an element for an activity.
+     *
+     * @param activity
+     * @returns {*}
+     */
+    function  createActivityElement(activity) {
         const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
 
-        activities.forEach( activity => {
-            const element = template.cloneNode(true);
+        const element = template.cloneNode(true);
 
-            const date = formatDate(new Date(activity.onDate));
-            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        const date = formatDate(new Date(activity.onDate));
+        const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
 
-            element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
-            element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
-            element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
+        element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
+        element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
+        element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
-            element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
-            listContainer.append(element);
+        element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
 
-            /**
-             * click handler for read more buttons.
-             * Get the activities details and show them in a popup, or display a message if the activity is sold out.
-             */
-            async function readMore(e) {
-                clearErrors(element);
+        activity.element = element;
+        return activity;
+
+        /**
+         * click handler for read more buttons.
+         * Get the activities details and show them in a popup, or display a message if the activity is sold out.
+         */
+        async function readMore(e) {
+            clearErrors(element);
+            clearMessages(element);
+            addMessage('Gevens ophalen, dit kan even duren', element);
+
+            const detail = await processActivity(activity, element);
+
+            if (detail.items.length === 0) {
                 clearMessages(element);
-                addMessage('Gevens ophalen, dit kan even duren', element);
-
-                const detail = await processActivity(activity, element);
-
-                if (detail.items.length === 0) {
-                    clearMessages(element);
-                    addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-                    setTimeout(() => clearMessages(element), 5000);
-                } else {
-                    displayActivity(detail, element);
-                }
+                addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+                setTimeout(() => clearMessages(element), 5000);
+            } else {
+                displayActivity(detail, element);
             }
-        });
+        }
+
     }
 
     /**
