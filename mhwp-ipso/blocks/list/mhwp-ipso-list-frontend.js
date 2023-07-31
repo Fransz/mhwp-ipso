@@ -61,11 +61,17 @@ import {
         });
 
         state.firstDay = new Date();
+        state.firstDay.setHours(0, 0, 0, 0);
+
         state.lastDay = new Date()
+        state.lastDay.setHours(0, 0, 0, 0);
         state.lastDay.setDate(state.lastDay.getDate() + 28 - 1);
 
         state.firstFetched = new Date(state.firstDay);
+        state.firstFetched.setHours(0, 0, 0, 0);
+
         state.lastFetched = new Date(state.firstFetched);
+        state.lastFetched.setHours(0, 0, 0, 0);
         state.lastFetched.setDate(state.lastFetched.getDate() - 1);
 
         currentDay = new Date();
@@ -120,6 +126,7 @@ import {
      * @returns {Promise<void>}
      */
     async function fetchCalendar(errContainer) {
+        const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
 
         /**
          * fetch the activities from the wp server.
@@ -141,46 +148,7 @@ import {
             return fetchWpRest(url, {}, msgContainer);
         }
 
-        if (state.firstDay < state.firstFetched) {
-            const from = new Date(state.firstDay);
-            const till = new Date(state.firstFetched)
-            till.setDate(state.firstFetched.getDate() - 1);
-
-            state.firstFetched = from;
-
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-
-                state.activities.unshift(...acts);
-            });
-
-        }
-        if (state.lastDay > state.lastFetched) {
-            const till = new Date(state.lastDay);
-            const from = new Date(state.lastFetched);
-            from.setDate(state.lastFetched.getDate() + 1);
-
-            state.lastFetched = till;
-
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-
-                state.activities.push(...acts);
-            });
-        }
-    }
-
-    function displayCalendar(container) {
-        displayActivities(state.activities, container);
-        return;
-
-        const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
-
-
-
-        activities.forEach( activity => {
+        function  createActivityElement(activity) {
             const element = template.cloneNode(true);
 
             const date = formatDate(new Date(activity.onDate));
@@ -191,7 +159,9 @@ import {
             element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
 
             element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
-            listContainer.append(element);
+
+            activity.element = element;
+            return activity;
 
             /**
              * click handler for read more buttons.
@@ -212,7 +182,51 @@ import {
                     displayActivity(detail, element);
                 }
             }
-        });
+
+        }
+
+        if (state.firstDay < state.firstFetched) {
+            const from = new Date(state.firstDay);
+            const till = new Date(state.firstFetched)
+            till.setDate(state.firstFetched.getDate() - 1);
+
+            state.firstFetched = from;
+
+            return fetchActivities(from, till, errContainer).then(json => {
+                const acts = collapseActivities(json.data);
+                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+                acts.map(a => createActivityElement(a));
+
+                state.activities.unshift(...acts);
+            });
+
+        }
+        if (state.lastDay > state.lastFetched) {
+            const till = new Date(state.lastDay);
+            const from = new Date(state.lastFetched);
+            from.setDate(state.lastFetched.getDate() + 1);
+
+            state.lastFetched = till;
+
+            return fetchActivities(from, till, errContainer).then(json => {
+                const acts = collapseActivities(json.data);
+                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+                acts.map(a => createActivityElement(a));
+
+                state.activities.push(...acts);
+            });
+        }
+    }
+
+    function displayCalendar(container) {
+        state.activities.forEach((a) => {
+            const actDate = new Date(a.onDate);
+            if(actDate < state.firstDay || actDate > state.lastDay) {
+                a.element.remove();
+            } else {
+                container.append(a.element);
+            }
+        })
     }
 
     /**

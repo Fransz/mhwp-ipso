@@ -154,8 +154,8 @@ registerBlockType( metadata, {
                 <ul id="mhwp-ipso-month-container"></ul>
 
                 <div id="mhwp-ipso-week-pickerbottom" className="mhwp-ipso-week-picker">
-                    <button className="mhwp-ipso-week-next">vooruit</button>
                     <button className="mhwp-ipso-week-previous">achteruit</button>
+                    <button className="mhwp-ipso-week-next">vooruit</button>
                 </div>
 
             </div>
