@@ -57,9 +57,9 @@ registerBlockType( metadata, {
             <div { ...blockProps } >
 
                 <div id="mhwp-ipso-week-pickertop" className="mhwp-ipso-week-picker">
-                    <button className="mhwp-ipso-week-next">vooruit</button>
-                    <div id="mhwp-ipso-week-current">week</div>
                     <button className="mhwp-ipso-week-previous">achteruit</button>
+                    <div id="mhwp-ipso-week-current">week</div>
+                    <button className="mhwp-ipso-week-next">vooruit</button>
                 </div>
                 <div id="mhwp-ipso-message-top"></div>
 

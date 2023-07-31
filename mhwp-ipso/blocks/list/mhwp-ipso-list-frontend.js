@@ -32,13 +32,18 @@ import {
     // Current date; set by the next/prev week buttons.
     let currentDay;
 
+    const state = {
+        activities: [],
+        firstDay: new Date(),
+        lastDay: new Date(),
+        firstFetched: null,
+        lastFetched: null
+    }
+
     /**
      * init globals, attach event handlers.
      */
     function init() {
-        // the container for all activities.
-        const monthContainer = document.querySelector('#mhwp-ipso-month-container');
-
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
         $jq.validator.addMethod( "phoneNL", function( value, element ) {
             return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
@@ -46,14 +51,23 @@ import {
 
         // Initialize the week picker.
         document.querySelectorAll('.mhwp-ipso-week-previous').forEach( btn => {
-            btn.addEventListener('click', () =>  handleWeekChange(-7, 28))
+            // btn.addEventListener('click', () =>  handleWeekChange(-7, 28))
+            btn.addEventListener('click', () =>  calendar(-7))
         });
 
-        document.querySelectorAll('#mhwp-ipso-week-next').forEach( btn => {
-            btn.addEventListener('click', (_) => handleWeekChange(7, 28))
+        document.querySelectorAll('.mhwp-ipso-week-next').forEach( btn => {
+            // btn.addEventListener('click', (_) => handleWeekChange(7, 28))
+            btn.addEventListener('click', () =>  calendar(7))
         });
 
-        // Initialize the current day
+        state.firstDay = new Date();
+        state.lastDay = new Date()
+        state.lastDay.setDate(state.lastDay.getDate() + 28 - 1);
+
+        state.firstFetched = new Date(state.firstDay);
+        state.lastFetched = new Date(state.firstFetched);
+        state.lastFetched.setDate(state.lastFetched.getDate() - 1);
+
         currentDay = new Date();
     }
 
@@ -79,7 +93,97 @@ import {
         // Set our global
         currentDay = new Date(firstDay);
 
+        // calendar(state, 7);
         main(firstDay, nrDays);
+    }
+
+    async function calendar(shiftDays) {
+        const monthContainer = document.querySelector('#mhwp-ipso-month-container');
+
+        state.firstDay.setDate(state.firstDay.getDate() + shiftDays);
+        state.lastDay.setDate(state.lastDay.getDate() + shiftDays);
+
+        await fetchCalendar(shiftDays, monthContainer).then(() => {
+            return displayCalendar(monthContainer);
+        });
+    }
+
+    async function fetchCalendar(shiftDays, errContainer) {
+        if (state.firstDay < state.firstFetched) {
+            const from = new Date(state.firstDay);
+            const till = new Date(state.firstFetched)
+            till.setDate(state.firstFetched.getDate() - 1);
+
+            state.firstFetched = from;
+
+            const fetched = await fetchActivities2(from, till, errContainer).then(json => {
+                const acts = collapseActivities(json.data);
+                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+
+                return acts
+            });
+
+            state.activities.unshift(...fetched);
+        }
+        if (state.lastDay > state.lastFetched) {
+            const till = new Date(state.lastDay);
+            const from = new Date(state.lastFetched);
+            from.setDate(state.lastFetched.getDate() + 1);
+
+            state.lastFetched = till;
+
+            const fetched = await fetchActivities2(from, till, errContainer).then(json => {
+                const acts = collapseActivities(json.data);
+                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+
+                return acts
+            });
+
+            state.activities.push(...fetched);
+        }
+    }
+
+    function displayCalendar(container) {
+        displayActivities(state.activities, container);
+        return;
+
+        const template = document.getElementById('mhwp-ipso-month-card').content.firstElementChild;
+
+
+
+        activities.forEach( activity => {
+            const element = template.cloneNode(true);
+
+            const date = formatDate(new Date(activity.onDate));
+            const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+
+            element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
+            element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
+            element.querySelector('.mhwp-ipso-card-time').innerHTML = times;
+
+            element.querySelector('.mhwp-ipso-card-more').addEventListener('click', readMore);
+            listContainer.append(element);
+
+            /**
+             * click handler for read more buttons.
+             * Get the activities details and show them in a popup, or display a message if the activity is sold out.
+             */
+            async function readMore(e) {
+                clearErrors(element);
+                clearMessages(element);
+                addMessage('Gevens ophalen, dit kan even duren', element);
+
+                const detail = await processActivity(activity, element);
+
+                if (detail.items.length === 0) {
+                    clearMessages(element);
+                    addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+                    setTimeout(() => clearMessages(element), 5000);
+                } else {
+                    displayActivity(detail, element);
+                }
+            }
+        });
     }
 
     /**
@@ -93,7 +197,7 @@ import {
         items.map((n) => n.remove());
 
         const msgContainer = document.querySelector('#mhwp-ipso-message-top');
-        addMessage('Gegevens ophalen. Dit kan even duren', msgContainer);
+        addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
 
         // Get all activities, collapse, sort and display.
         await fetchActivities(date, nrDays, monthContainer).then(json => {
@@ -125,6 +229,19 @@ import {
         d.setDate(d.getDate() + nr - 1);
         const till = localeISOString(d);
         url.searchParams.append('till', till);
+
+        clearErrors(msgContainer);
+        clearMessages(msgContainer);
+        return await fetchWpRest(url, {}, msgContainer);
+    }
+
+    async function fetchActivities2(from, till, msgContainer) {
+        const url = new URL( marikenhuisURL );
+        url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+        url.searchParams.append('from', localeISOString(from));
+
+        url.searchParams.append('till', localeISOString(till));
 
         clearErrors(msgContainer);
         clearMessages(msgContainer);
@@ -544,5 +661,6 @@ import {
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0, 28);});
+    // document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0, 28);});
+    document.addEventListener('DOMContentLoaded', () => { init(); calendar(0);});
 })();
