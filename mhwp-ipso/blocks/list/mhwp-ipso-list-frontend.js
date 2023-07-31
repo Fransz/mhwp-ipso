@@ -97,18 +97,50 @@ import {
         main(firstDay, nrDays);
     }
 
-    async function calendar(shiftDays) {
+    /**
+     * Fetch and display the calendar, adjusting the state with shift days.
+     *
+     * @param shiftDays
+     */
+    function calendar(shiftDays) {
         const monthContainer = document.querySelector('#mhwp-ipso-month-container');
 
         state.firstDay.setDate(state.firstDay.getDate() + shiftDays);
         state.lastDay.setDate(state.lastDay.getDate() + shiftDays);
 
-        await fetchCalendar(shiftDays, monthContainer).then(() => {
-            return displayCalendar(monthContainer);
+        fetchCalendar(monthContainer).then((_) => {
+            displayCalendar(monthContainer);
         });
     }
 
-    async function fetchCalendar(shiftDays, errContainer) {
+    /**
+     * Fetch the activities as required by our state's first- and lastDay properties.
+     *
+     * @param errContainer  Where to display errors.
+     * @returns {Promise<void>}
+     */
+    async function fetchCalendar(errContainer) {
+
+        /**
+         * fetch the activities from the wp server.
+         * @param from first date to fetch;
+         * @param till last day to fetch
+         * @param msgContainer Container for messages and errors.
+         * @returns {Promise<*>}
+         */
+        function fetchActivities(from, till, msgContainer) {
+            const url = new URL( marikenhuisURL );
+            url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+            url.searchParams.append('from', localeISOString(from));
+
+            url.searchParams.append('till', localeISOString(till));
+
+            clearErrors(msgContainer);
+            clearMessages(msgContainer);
+            return fetchWpRest(url, {}, msgContainer);
+        }
+
         if (state.firstDay < state.firstFetched) {
             const from = new Date(state.firstDay);
             const till = new Date(state.firstFetched)
@@ -116,14 +148,13 @@ import {
 
             state.firstFetched = from;
 
-            const fetched = await fetchActivities2(from, till, errContainer).then(json => {
+            return fetchActivities(from, till, errContainer).then(json => {
                 const acts = collapseActivities(json.data);
                 acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
 
-                return acts
+                state.activities.unshift(...acts);
             });
 
-            state.activities.unshift(...fetched);
         }
         if (state.lastDay > state.lastFetched) {
             const till = new Date(state.lastDay);
@@ -132,14 +163,12 @@ import {
 
             state.lastFetched = till;
 
-            const fetched = await fetchActivities2(from, till, errContainer).then(json => {
+            return fetchActivities(from, till, errContainer).then(json => {
                 const acts = collapseActivities(json.data);
                 acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
 
-                return acts
+                state.activities.push(...acts);
             });
-
-            state.activities.push(...fetched);
         }
     }
 
@@ -229,19 +258,6 @@ import {
         d.setDate(d.getDate() + nr - 1);
         const till = localeISOString(d);
         url.searchParams.append('till', till);
-
-        clearErrors(msgContainer);
-        clearMessages(msgContainer);
-        return await fetchWpRest(url, {}, msgContainer);
-    }
-
-    async function fetchActivities2(from, till, msgContainer) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = "wp-json/mhwp-ipso/v1/activity";
-
-        url.searchParams.append('from', localeISOString(from));
-
-        url.searchParams.append('till', localeISOString(till));
 
         clearErrors(msgContainer);
         clearMessages(msgContainer);
