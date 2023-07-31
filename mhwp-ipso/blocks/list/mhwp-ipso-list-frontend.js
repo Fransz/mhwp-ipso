@@ -60,6 +60,7 @@ import {
             btn.addEventListener('click', () =>  calendar(7))
         });
 
+        // Initialize state such that calender(0) shows 28 days, starting today.
         state.firstDay = new Date();
         state.firstDay.setHours(0, 0, 0, 0);
 
@@ -113,6 +114,15 @@ import {
 
         state.firstDay.setDate(state.firstDay.getDate() + shiftDays);
         state.lastDay.setDate(state.lastDay.getDate() + shiftDays);
+
+        const toDay = new Date();
+        toDay.setHours(0,0,0,0);
+
+        if(state.firstDay < toDay) {
+            state.firstDay = toDay;
+            // We do not need to do anything if the first day is in the past.
+            return;
+        }
 
         fetchCalendar(monthContainer).then((_) => {
             displayCalendar(monthContainer);
