@@ -82,6 +82,8 @@ import {
     function calendar(shiftDays) {
         const monthContainer = document.querySelector('#mhwp-ipso-month-container');
 
+        const prevFirstDay = new Date(state.firstDay);
+
         state.firstDay.setDate(state.firstDay.getDate() + shiftDays);
         state.lastDay.setDate(state.lastDay.getDate() + shiftDays);
 
@@ -97,7 +99,7 @@ import {
 
         fetchCalendar(msgContainer).then((_) => {
             clearMessages(msgContainer);
-            displayCalendar(monthContainer);
+            displayCalendar(prevFirstDay, monthContainer);
         });
     }
 
@@ -141,18 +143,44 @@ import {
         }
     }
 
-    function displayCalendar(container) {
+    /**
+     * Display the activities.
+     *
+     * @param prevFirstDay start date for our previous display.
+     * @param container element where to append thje acitivities.
+     */
+    function displayCalendar(prevFirstDay, container) {
         document.querySelector('#mhwp-ipso-week-current').innerHTML =
             `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
-        state.activities.forEach((a) => {
-            a.element.remove();
-        })
-        state.activities.forEach((a) => {
-            const actDate = new Date(a.onDate);
-            if(actDate >= state.firstDay && actDate <= state.lastDay) {
-                container.append(a.element);
-            }
-        })
+
+        // We browsed forward.
+        if (prevFirstDay < state.firstDay) {
+            // Remove no longer visible activities.
+            state.activities.filter((a) => {
+                const d = new Date(a.onDate);
+                return a.element.parentElement != null && d < state.firstDay;
+            }).forEach((a) => a.element.remove());
+
+            // Add activities that became visible.
+            state.activities.filter((a) => {
+                const d = new Date(a.onDate);
+                return a.element.parentElement == null && d >= state.firstDay && d <= state.lastDay;
+            }).forEach((a) => container.append(a.element));
+        }
+        // We browsed backward.
+        if (prevFirstDay >= state.firstDay) {
+            // Remove no longer visible activities.
+            state.activities.filter((a) => {
+                const d = new Date(a.onDate);
+                return a.element.parentElement != null && d > state.lastDay;
+            }).forEach((a) => a.element.remove());
+
+            // Add activities that became visible.
+            state.activities.filter((a) => {
+                const d = new Date(a.onDate);
+                return a.element.parentElement == null && d >= state.firstDay && d <= state.lastDay;
+            }).reverse().forEach((a) => container.prepend(a.element));
+        }
     }
 
     /**
