@@ -90,8 +90,13 @@ import {
         const toDay = new Date();
         toDay.setHours(0,0,0,0);
 
+        // We tried to browse into the past.
         if(state.firstDay < toDay) {
             state.firstDay = toDay;
+
+            state.lastDay = new Date(toDay);
+            state.lastDay.setHours(0, 0, 0, 0);
+            state.lastDay.setDate(state.lastDay.getDate() + 28 - 1);
         }
 
         const msgContainer = document.querySelector('#mhwp-ipso-message-top');
@@ -150,8 +155,9 @@ import {
      * @param container element where to append thje acitivities.
      */
     function displayCalendar(prevFirstDay, container) {
-        document.querySelector('#mhwp-ipso-week-current').innerHTML =
-            `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
+        document.querySelectorAll('.mhwp-ipso-week-current').forEach((e) => {
+            e.innerHTML = `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
+        });
 
         // We browsed forward.
         if (prevFirstDay < state.firstDay) {
