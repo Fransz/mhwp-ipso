@@ -18,11 +18,13 @@
     color:#e24219;
   }
 
-  div#mhwp-ipso-message-top h3.message,
-  div#mhwp-ipso-message-top h3.error {
-    padding:10px 0;
-    font-size:18px;
-    font-weight: 600;
+  div#mhwp-ipso-message-top {
+    margin:10px auto;
+    min-height:2em;
+    h3.message, h3.error {
+      font-size:18px;
+      font-weight: 600;
+    }
   }
 
   div.mhwp-ipso-week-picker {

@@ -276,7 +276,7 @@ import {
             clearMessages(element);
             addMessage('Gevens ophalen, dit kan even duren', element);
 
-            const detail = await processActivity(activity, element);
+            const detail = await fetchActivityDetails(activity, element);
 
             if (detail.items.length === 0) {
                 clearMessages(element);
@@ -296,7 +296,7 @@ import {
      * @param msgContainer
      * @returns {Promise<{detail}>} All information for an activity.
      */
-    async function processActivity (activity, msgContainer) {
+    async function fetchActivityDetails (activity, msgContainer) {
         const { data: detail } = await fetchDetail(activity, msgContainer);
 
         // For all items, fetch the number of participants sequentially.
