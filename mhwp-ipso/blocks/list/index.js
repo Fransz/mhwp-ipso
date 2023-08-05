@@ -30,8 +30,97 @@ registerBlockType( metadata, {
                     <div className="mhwp-ipso-week-current"></div>
                     <button className="mhwp-ipso-week-next">vooruit</button>
                 </div>
+
                 <div id="mhwp-ipso-message-top"></div>
 
+                <div id="mhwp-ipso-filters">
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
+                               name="filter" value="buitenactiviteit"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
+                            Buitenactiviteit
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
+                               name="filter" value="lichaamsgericht"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
+                            Lichaamsgericht
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
+                               name="filter" value="ontspanning"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
+                            Ontspanning
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
+                               name="filter" value="lotgenotencontact"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
+                            Lotgenotencontact
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
+                               name="filter" value="buitenactiviteit"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
+                            Buitenactiviteit
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
+                               name="filter" value="lichaamsgericht"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
+                            Lichaamsgericht
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
+                               name="filter" value="ontspanning"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
+                            Ontspanning
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
+                               name="filter" value="lotgenotencontact"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
+                            Lotgenotencontact
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
+                               name="filter" value="buitenactiviteit"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
+                            Buitenactiviteit
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
+                               name="filter" value="lichaamsgericht"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
+                            Lichaamsgericht
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
+                               name="filter" value="ontspanning"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
+                            Ontspanning
+                        </label>
+                    </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
+                               name="filter" value="lotgenotencontact"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
+                            Lotgenotencontact
+                        </label>
+                    </div>
+                </div>
+
+                <ul id="mhwp-ipso-month-container"></ul>
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
                         <div className="mhwp-ipso-card-title"></div>
@@ -46,7 +135,6 @@ registerBlockType( metadata, {
                         </div>
                     </li>
                 </template>
-                <div id="mhwp-ipso-box-container"></div>
 
                 <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                     <div id="mhwp-ipso-box-inner" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
@@ -118,9 +206,6 @@ registerBlockType( metadata, {
                         <div id="mhwp-ipso-box-messagerow" className="mhwp-ipso-box-row"></div>
                     </div>
                 </div>
-
-                <input id="mhwp-ipso-list-nr-days" type="hidden" value={attributes.nr_days}/>
-                <ul id="mhwp-ipso-month-container"></ul>
 
                 <div id="mhwp-ipso-week-pickerbottom" className="mhwp-ipso-week-picker">
                     <button className="mhwp-ipso-week-previous">achteruit</button>
