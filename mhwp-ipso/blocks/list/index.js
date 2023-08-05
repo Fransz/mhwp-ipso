@@ -9,7 +9,7 @@ import{ InspectorControls, useBlockProps } from '@wordpress/block-editor';
 
 registerBlockType( metadata, {
     icon: icon(),
-    edit: ( props ) => {
+    edit: () => {
         const blockProps = useBlockProps();
 
         return (
@@ -20,7 +20,7 @@ registerBlockType( metadata, {
             </div>
         )
     },
-    save: ({attributes}) => {
+    save: () => {
         const blockProps = useBlockProps.save();
         return (
             <div { ...blockProps } >
@@ -63,59 +63,17 @@ registerBlockType( metadata, {
                         </label>
                     </div>
                     <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
-                               name="filter" value="buitenactiviteit"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
-                            Buitenactiviteit
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-evenement"
+                               name="filter" value="evenement"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-evenement">
+                            Evenement
                         </label>
                     </div>
                     <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
-                               name="filter" value="lichaamsgericht"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
-                            Lichaamsgericht
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
-                               name="filter" value="ontspanning"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
-                            Ontspanning
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
-                               name="filter" value="lotgenotencontact"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
-                            Lotgenotencontact
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
-                               name="filter" value="buitenactiviteit"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
-                            Buitenactiviteit
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
-                               name="filter" value="lichaamsgericht"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
-                            Lichaamsgericht
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
-                               name="filter" value="ontspanning"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
-                            Ontspanning
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
-                               name="filter" value="lotgenotencontact"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
-                            Lotgenotencontact
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-themaavond"
+                               name="filter" value="themaavond"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-themaavond">
+                            Thema-avond
                         </label>
                     </div>
                 </div>
