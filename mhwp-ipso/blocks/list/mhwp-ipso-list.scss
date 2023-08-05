@@ -1,72 +1,275 @@
-// Front end styles.
-
-.fade {
-  opacity: 0;
-  transition: opacity .15s linear;
-  &.in {
-    opacity: 1;
+.wp-block-mhwp-ipso-list #mhwp-ipso-list-backend {
+  h4 {
+    padding:1em 0.5em;
+    width:auto;
+    border: 1px solid #e24219;
+    color: #e24219;
   }
 }
 
-.collapse {
-  display: none;
+.wp-block-mhwp-ipso-list{
+  width: 100%;
+  margin: 35px auto 0 auto;
+  line-height: 1.8rem;
 
-  &.in      { display: block; }
-  tr.collapse.in    { display: table-row; }
-  tbody.collapse.in { display: table-row-group; }
+  button {
+    margin-bottom: 25px;
+    background-color: #e24219;
+    margin-top: 5px;
+    padding: 5px 10px;
+  }
+
+  h3.message, h3.error {
+    text-align:center;
+    display: block;
+    font-size:16px;
+    font-weight: 600;
+    color:#e24219;
+  }
+
+  div#mhwp-ipso-message-top {
+    margin:10px auto;
+    min-height:2em;
+    h3.message, h3.error {
+      font-size:18px;
+      font-weight: 600;
+    }
+  }
+
+  div.mhwp-ipso-week-picker {
+    display:flex;
+    justify-content: space-between;
+    align-items:baseline;
+
+    padding:10px 20px;
+    background-color: #fff;
+
+    button.mhwp-ipso-week-next, button.mhwp-ipso-week-previous {
+      margin:10px 25px;
+    }
+
+    div.mhwp-ipso-week-current {
+      flex: 1 1 60%;
+      text-align:center;
+      font-size:18px;
+      font-weight: 600;
+    }
+  }
+
+  ul#mhwp-ipso-month-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width:100%;
+
+    margin: 25px auto;
+    background-color: #fff;
+
+    li.mhwp-ipso-month-card {
+      flex: 1 1 0;
+
+      display:flex;
+      flex-direction: column;
+
+      border:1px solid #e24219;
+      border-radius: 5px;
+      padding:0.5em 1em;
+      margin:1em 10px;
+      list-style-type: none;
+
+      .mhwp-ipso-card-title{
+        margin-bottom:auto;
+        font-size:18px;
+        font-weight: 600;
+        color:#e24219;
+      }
+
+      .mhwp-ipso-card-date, .mhwp-ipso-card-time {
+        font-size:16px;
+        font-weight: 400;
+      }
+
+      .mhwp-ipso-card-date {
+        padding-right:0.5em;
+      }
+    }
+  }
 }
 
-.collapsing {
-  position: relative;
-  height: 0;
-  overflow: hidden;
-  transition-property: height, visibility;
-  transition-duration: 350ms;
-  transition-timing-function: ease;
+div#mhwp-ipso-box-overlay {
+  position:fixed;
+  width: 100%;
+  height: 100%;
+  top:0;
+  left:0;
+  z-index:0;
+  background-color: black;
+  opacity: 0.5;
 }
 
-div#mhwp-ipso-list-container {
-  .list-group-item-light {
-    background-color: #d3d3d3;
-  }
-  .list-group-item-dark {
-    background-color: #fefefe;
-  }
+div#mhwp-ipso-modal-box {
+  position:fixed;
+  top:160px;
+  left:0;
+  width:100%;
 
-  img {
-    height:100px;
-  }
-  div.reserveer {
-    label {
-      display:inline-block;
-    }
-    .required {
-      color:red;
-    }
+  display:none;
+  align-items:center;
+  justify-content:center; ;
 
-    .error {
-      color:red;
-    }
+  z-index:1;
 
-    input.error {
-      color: black;
-      border: 1px solid red;
-    }
+  &[open] {
+    display:flex;
   }
 
-  div.message {
-    border:2px solid green;
-    padding:1em 1em;
-    h3 {
-      color: green;
+  div#mhwp-ipso-box-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    max-width:800px;
+
+    border-radius: 0.5em;
+    padding:0 32px;
+    margin:0 auto;
+
+    background-color: white;
+
+    overflow: auto;
+    height:80vh;
+
+    div.mhwp-ipso-box-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      width:100%;
+
+      &#mhwp-ipso-box-titlerow {
+        justify-content: space-between;
+        margin:10px 0 10px 0;
+
+        #mhwp-ipso-box-title {
+          font-size:24px;
+          font-weight: 800;
+          color:#e24219;
+        }
+      }
+
+      &#mhwp-ipso-box-daterow {
+        margin-bottom:15px;
+        justify-content: start;
+        font-size:18px;
+        font-weight: 400;
+      }
+
+      hr {
+        color: #e24219;
+        width:100%;
+        height:2px;
+        margin:0 0 10px 0;
+      }
+
+      div.mhwp-ipso-box-column {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: stretch;
+
+        div#mhwp-ipso-box-introrow {
+          align-items: flex-start;
+          justify-content: flex-start;
+          margin-bottom:15px;
+          padding:0 15px;
+
+          #mhwp-ipso-box-image {
+            height:100px;
+          }
+          #mhwp-ipso-box-intro {
+            font-size:22px;
+            font-weight: 600;
+            text-align:left;
+            padding-left: 20px;
+            padding-right: 40px;
+          }
+        }
+
+        div#mhwp-ipso-box-description {
+          font-size: 18px;
+          font-weight: 400;
+          line-height: 1.5;
+          text-align: left;
+          padding:0 15px;
+        }
+
+        &#mhwp-ipso-box-contentcolumn {
+          width:80%;
+        }
+
+        &#mhwp-ipso-box-formcolumn {
+          .required {
+            color:red;
+          }
+
+          .error {
+            color:red;
+          }
+
+
+          input, select, textarea {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            font-size: 18px;
+            font-weight: 400;
+            padding: 5px 10px;
+            width: 100%;
+          }
+
+          input.error {
+            color: black;
+            border: 1px solid red;
+          }
+
+          fieldset {
+            padding: .35em .75em .625em;
+            border: 0 #aeaeae solid!important;
+
+            span#mhwp-ipso-res-itemslabel {
+              padding: 0 10px 0 0;
+            }
+            input.mhwp-ipso-res-itemchoice {
+              width:auto;
+              padding: 0 5px;
+            }
+            label.mhwp-ipso-res-itemlabel {
+              padding: 0 10px 0 3px;
+            }
+          }
+        }
+      }
+
+      &#mhwp-ipso-box-messagerow {
+        h3.message {
+          font-size: 22px;
+        }
+      }
     }
   }
+}
 
-  div.error {
-    border:2px solid red;
-    padding:1em 1em;
-    h3 {
-      color: red;
+@media only screen and (max-width: 680px){
+  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner div#mhwp-ipso-box-contentrow {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  div.mhwp-ipso-week-picker {
+    flex-wrap: wrap;
+
+    div.mhwp-ipso-week-current {
+      order: 1;
+      margin:0 auto;
     }
   }
 }

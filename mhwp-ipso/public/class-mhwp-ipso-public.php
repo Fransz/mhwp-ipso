@@ -8,6 +8,7 @@
  */
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-reservation-controller.php';
 require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-activity-controller.php';
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-mhwp-ipso-participants-controller.php';
 
 /**
  * The public-facing functionality of the plugin.
@@ -66,5 +67,7 @@ class MHWP_IPSO_Public {
 		$reservation_controller->register_routes();
 		$activity_controller = new MHWP_IPSO_Activity_Controller();
 		$activity_controller->register_routes();
+		$participants_controller = new MHWP_IPSO_Participants_Controller();
+		$participants_controller->register_routes();
 	}
 }

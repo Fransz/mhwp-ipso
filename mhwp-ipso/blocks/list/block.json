@@ -11,14 +11,5 @@
   },
   "style": "file:../dist/list/mhwp-ipso-list.css",
   "editorScript": "file:../dist/list/mhwp-ipso-list.js",
-  "viewScript": "file:../dist/list/mhwp-ipso-list-frontend.js",
-  "attributes": {
-    "nr_days": {
-      "type": "string",
-      "default": 10,
-      "source": "attribute",
-      "selector": "input#mhwp-ipso-list-nr-days",
-      "attribute": "value"
-    }
-  }
+  "viewScript": "file:../dist/list/mhwp-ipso-list-frontend.js"
 }

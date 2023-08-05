@@ -8,7 +8,7 @@
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeReservation(detail, mailData, form, event) {
+async function makeButtonReservation(detail, mailData, form, event) {
     event.preventDefault();
 
     // The URL for making the reservation
@@ -127,6 +127,8 @@ function fetchWpRest (url, init, errorContainer, throw_429=true) {
             if ('' === message) {
                 message = 'Er gaat iets mis, probeer het later nog eens';
             }
+            clearErrors(errorContainer);
+            clearMessages(errorContainer);
             addError(message, errorContainer);
 
             // retrow the error. Users of this call decide what should happen.
@@ -149,10 +151,10 @@ function wait(duration) {
 }
 
 /**
- * Helper fpor creating Nodes from a HTML string.
+ * Helper for creating Nodes from a HTML string.
  *
  * @link https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
- * @param str The HTML string
+ * @param htmlString The HTML string
  */
 function createNodeFromHTML(htmlString) {
     const div = document.createElement('div');
@@ -195,4 +197,50 @@ function clearMessages(container) {
     clearNodes('message', container);
 }
 
-export {fetchWpRest, wait, addError, addMessage, clearErrors, clearMessages, makeReservation, createNodeFromHTML};
+/**
+ * Helper for formating dates.
+ *
+ * @param datetime
+ * @returns {string}
+ */
+function formatTime(datetime) {
+    const timeFormat = new Intl.DateTimeFormat('nl-NL', {hour: 'numeric', minute: 'numeric'}).format;
+    return timeFormat(new Date(datetime)).replace(':', '.');
+}
+
+/**
+ * Helper for formating times.
+ *
+ * @param datetime
+ * @returns {string}
+ */
+function formatDate(datetime) {
+    const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
+    return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
+}
+
+/**
+ * Helper for getting an ISO8601 date string in the locale timezone.
+ * @see https://stackoverflow.com/questions/10830357
+ *
+ * @param d
+ * @returns {string}
+ */
+function localeISOString(d) {
+   const offset = (new Date()).getTimezoneOffset() * 60000;
+   return (new Date(d.valueOf() - offset)).toISOString().slice(0, -14);
+}
+
+export {
+    fetchWpRest
+    , wait
+    , addError
+    , addMessage
+    , clearErrors
+    , clearMessages
+    , makeButtonReservation
+    , createNodeFromHTML
+    , formatTime
+    , formatDate
+    , localeISOString
+};
