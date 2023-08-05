@@ -83,6 +83,11 @@ class MHWP_IPSO_Participants_Controller extends WP_REST_Controller {
 		$client            = new MHWP_IPSO_Client();
 		$participants_resp = $client->get_participants( $data );
 
+		// If we could not correctly make the request, bail out.
+		if ( is_wp_error( $participants_resp ) || 200 !== $participants_resp->mhwp_ipso_code ) {
+			return new WP_REST_Response( $participants_resp, 200 );
+		}
+
 		$nr_participants         = count( $participants_resp->data );
 		$participants_resp->data = (object) array(
 			'nrParticipants' => $nr_participants,

@@ -1,3 +1,12 @@
+.wp-block-mhwp-ipso-list #mhwp-ipso-list-backend {
+  h4 {
+    padding:1em 0.5em;
+    width:auto;
+    border: 1px solid #e24219;
+    color: #e24219;
+  }
+}
+
 .wp-block-mhwp-ipso-list{
   width: 100%;
   margin: 35px auto 0 auto;
@@ -18,10 +27,13 @@
     color:#e24219;
   }
 
-  div#mhwp-ipso-message-top h3.message,
-  div#mhwp-ipso-message-top h3.error {
-    font-size:18px;
-    font-weight: 600;
+  div#mhwp-ipso-message-top {
+    margin:10px auto;
+    min-height:2em;
+    h3.message, h3.error {
+      font-size:18px;
+      font-weight: 600;
+    }
   }
 
   div.mhwp-ipso-week-picker {
@@ -36,7 +48,7 @@
       margin:10px 25px;
     }
 
-    div#mhwp-ipso-week-current {
+    div.mhwp-ipso-week-current {
       flex: 1 1 60%;
       text-align:center;
       font-size:18px;
@@ -58,7 +70,6 @@
 
       display:flex;
       flex-direction: column;
-      justify-content: space-between;
 
       border:1px solid #e24219;
       border-radius: 5px;
@@ -67,6 +78,7 @@
       list-style-type: none;
 
       .mhwp-ipso-card-title{
+        margin-bottom:auto;
         font-size:18px;
         font-weight: 600;
         color:#e24219;
@@ -243,13 +255,21 @@ div#mhwp-ipso-modal-box {
         }
       }
     }
-
   }
 }
 
-@media only screen and (max-width: 520px){
-  div#mhwp-ipso-box-inner div#mhwp-ipso-box-contentrow {
+@media only screen and (max-width: 680px){
+  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner div#mhwp-ipso-box-contentrow {
     flex-direction: column;
     justify-content: flex-start;
+  }
+
+  div.mhwp-ipso-week-picker {
+    flex-wrap: wrap;
+
+    div.mhwp-ipso-week-current {
+      order: 1;
+      margin:0 auto;
+    }
   }
 }
