@@ -1,6 +1,12 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.8.2
+- We have a month calendar now. Detais are shown in a popup.
+- Activities with the same id on the same day have only one entry in the calendar now.
+- Added an endpoint for querying the nr of participants for an agenda item.
+- Dropped the bootstrap dependency for the calendar list.
+
 release 0.8.1
 - We have titles for activities in the mail-mappings and url-mappings panels in the backend.
 - We can hide the reservation buttons in the calendar for activities.
