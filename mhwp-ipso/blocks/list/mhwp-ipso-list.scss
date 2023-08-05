@@ -102,6 +102,10 @@
       margin:1em 10px;
       list-style-type: none;
 
+      &.filtered {
+        display:none;
+      }
+
       .mhwp-ipso-card-title{
         margin-bottom:auto;
         font-size:18px;

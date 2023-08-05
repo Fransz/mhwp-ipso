@@ -29,11 +29,9 @@ import {
     // An alias for our origin.
     const marikenhuisURL = document.location.origin;
 
-    // Current date; set by the next/prev week buttons.
-    let currentDay;
-
     const state = {
         activities: [],
+        filters: [ 'buitenactiviteit'],
         firstDay: new Date(),
         lastDay: new Date(),
         firstFetched: null,
@@ -114,7 +112,7 @@ import {
      * @param errContainer  Where to display errors.
      * @returns {Promise<void>}
      */
-    async function fetchCalendar(errContainer) {
+    function fetchCalendar(errContainer) {
         if (state.firstDay < state.firstFetched) {
             const from = new Date(state.firstDay);
             const till = new Date(state.firstFetched)
@@ -122,11 +120,7 @@ import {
 
             state.firstFetched = from;
 
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-                acts.map(a => createActivityElement(a));
-
+            return fetchActivities(from, till, errContainer).then(acts => {
                 state.activities.unshift(...acts);
             });
 
@@ -138,11 +132,7 @@ import {
 
             state.lastFetched = till;
 
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-                acts.map(a => createActivityElement(a));
-
+            return fetchActivities(from, till, errContainer).then(acts => {
                 state.activities.push(...acts);
             });
         }
@@ -158,6 +148,17 @@ import {
         document.querySelectorAll('.mhwp-ipso-week-current').forEach((e) => {
             e.innerHTML = `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
         });
+
+        // Filter.
+        state.activities.forEach((a) => {
+            // Does some checkbox filter match some activity filter.
+            const filter = state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+            if (filter) {
+                a.element.classList.remove('filtered');
+            } else {
+                a.element.classList.add('filtered');
+            }
+        })
 
         // We browsed forward.
         if (prevFirstDay < state.firstDay) {
@@ -234,20 +235,31 @@ import {
     }
 
     /**
-     * fetch the activities from the wp server.
-     * @param from first date to fetch;
-     * @param till last day to fetch
-     * @param msgContainer Container for messages and errors.
-     * @returns {Promise<*>}
+     * Fetch the activities from the server, collapse, sort, add an element and  filter.
+     * @param from
+     * @param till
+     * @param msgContainer
+     * @returns {Promise<{activityID: *, onDate: *, mentors: *, title: *, items: [], extraInfo: *}[]>}
      */
     function fetchActivities(from, till, msgContainer) {
-        const url = new URL( marikenhuisURL );
+        const url = new URL(marikenhuisURL);
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
         url.searchParams.append('from', localeISOString(from));
         url.searchParams.append('till', localeISOString(till));
 
-        return fetchWpRest(url, {}, msgContainer);
+        return fetchWpRest(url, {}, msgContainer).then((json) => {
+
+            // Collapse, sort, create a dom element, process filters.
+            const acts = collapseActivities(json.data);
+            acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+            acts.forEach(a => createActivityElement(a));
+            acts.forEach(a => {
+                a.filters = a.extraInfo.split(';').map(s => s.toLowerCase());
+            })
+
+            return acts;
+        });
     }
 
     /**
