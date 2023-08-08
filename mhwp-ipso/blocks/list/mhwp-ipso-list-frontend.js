@@ -1,12 +1,3 @@
-/**
- * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
- * Todo drop the globals; back to parameters.
- * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
- * Todo week buttons 5 sec buiten gebruik.
- * Todo classname mhwp-ipso-reservation-button;
- * Todo detail template;
- * Todo ticket bij IPSO over filters;
- */
 import {
     fetchWpRest
     , wait
