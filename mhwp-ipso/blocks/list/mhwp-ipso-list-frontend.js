@@ -136,6 +136,8 @@ import {
                 state.activities.push(...acts);
             });
         }
+
+        return Promise.resolve();
     }
 
     /**
