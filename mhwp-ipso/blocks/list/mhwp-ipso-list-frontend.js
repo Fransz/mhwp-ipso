@@ -22,7 +22,7 @@ import {
 
     const state = {
         activities: [],
-        filters: [ 'buitenactiviteit'],
+        filters: [],
         firstDay: new Date(),
         lastDay: new Date(),
         firstFetched: null,
@@ -47,11 +47,17 @@ import {
             btn.addEventListener('click', () =>  calendar(7))
         });
 
+        // initialize the filter checkboxes.
+        document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
+            cb.addEventListener('click', changeStateFilters );
+        });
+
+
         // Initialize state such that calender(0) shows 28 days, starting today.
         state.firstDay = new Date();
         state.firstDay.setHours(0, 0, 0, 0);
 
-        state.lastDay = new Date()
+        state.lastDay = new Date(state.firstDay);
         state.lastDay.setHours(0, 0, 0, 0);
         state.lastDay.setDate(state.lastDay.getDate() + 28 - 1);
 
@@ -61,6 +67,24 @@ import {
         state.lastFetched = new Date(state.firstFetched);
         state.lastFetched.setHours(0, 0, 0, 0);
         state.lastFetched.setDate(state.lastFetched.getDate() - 1);
+    }
+
+    /**
+     * Event handler for the filter checkboxes.
+     * Add or delete a filter string, all lowercase, only [a-zA-Z0-9_]
+     *
+     * @param e the event.
+     * @return void
+     */
+    function changeStateFilters(e) {
+        const f = e.currentTarget.value.toLowerCase().replaceAll(/\W/g, '');
+        const idx = state.filters.indexOf(f);
+        if (idx === -1) {
+            state.filters.push(f);
+        } else {
+            state.filters.splice(idx, 1);
+        }
+        calendar(0);
     }
 
     /**
@@ -79,7 +103,7 @@ import {
         const toDay = new Date();
         toDay.setHours(0,0,0,0);
 
-        // We tried to browse into the past.
+        // We tried to browse into the past, reset first and lastDay
         if(state.firstDay < toDay) {
             state.firstDay = toDay;
 
@@ -142,11 +166,12 @@ import {
             e.innerHTML = `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
         });
 
-        // Filter.
+        // Filter. Does some checkbox filter match some activity filter.
         state.activities.forEach((a) => {
-            // Does some checkbox filter match some activity filter.
-            const filter = state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
-            if (filter) {
+            const show = state.filters.length === 0 || a.filters.length === 0 ||
+                state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+
+            if (show) {
                 a.element.classList.remove('filtered');
             } else {
                 a.element.classList.add('filtered');
@@ -248,7 +273,7 @@ import {
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
             acts.forEach(a => createActivityElement(a));
             acts.forEach(a => {
-                a.filters = a.extraInfo.split(';').map(s => s.toLowerCase());
+                a.filters = a.extraInfo.split(';').map(s => s.toLowerCase().replaceAll(/\W/g, ''));
             })
 
             return acts;

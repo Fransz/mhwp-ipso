@@ -76,6 +76,13 @@ registerBlockType( metadata, {
                             Thema-avond
                         </label>
                     </div>
+                    <div>
+                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-creatief"
+                               name="filter" value="creatief"/>
+                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-creatief">
+                            Creatief
+                        </label>
+                    </div>
                 </div>
 
                 <ul id="mhwp-ipso-month-container"></ul>
