@@ -168,8 +168,7 @@ import {
 
         // Filter. Does some checkbox filter match some activity filter.
         state.activities.forEach((a) => {
-            const show = state.filters.length === 0 || a.filters.length === 0 ||
-                state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+            const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
 
             if (show) {
                 a.element.classList.remove('filtered');
@@ -273,7 +272,7 @@ import {
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
             acts.forEach(a => createActivityElement(a));
             acts.forEach(a => {
-                a.filters = a.extraInfo.split(';').map(s => s.toLowerCase().replaceAll(/\W/g, ''));
+                a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
             })
 
             return acts;
