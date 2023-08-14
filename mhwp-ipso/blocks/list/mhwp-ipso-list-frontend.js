@@ -316,7 +316,7 @@ import {
             if (detail.items.length === 0) {
                 clearMessages(element);
                 addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-                setTimeout(() => clearMessages(element), 5000);
+                setTimeout(() => clearMessages(element), 4000);
             } else {
                 displayActivity(detail, element);
             }
@@ -635,15 +635,19 @@ import {
             url, fetchInit, msgContainer
         ).then(() => {
             addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
+            msgContainer.scrollIntoView();
             form.querySelector('button').disabled = true;
 
-            // Return a promise that returns resolved after 5 seconds.
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 4 seconds.
+            // After that the box is closed.
+            return wait(4000);
         }).catch((_) => {
             // An exception occured, we already have shown the error.
             form.querySelector('button').disabled = true;
 
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 5 seconds.
+            // After that the box is closed.
+            return wait(4000);
         });
     }
 

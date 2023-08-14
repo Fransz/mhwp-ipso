@@ -177,7 +177,6 @@ registerBlockType( metadata, {
                     <div className="mhwp-ipso-week-current"></div>
                     <button className="mhwp-ipso-week-next">vooruit</button>
                 </div>
-
             </div>
         )
     }

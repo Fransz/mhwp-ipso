@@ -288,9 +288,17 @@ div#mhwp-ipso-modal-box {
 }
 
 @media only screen and (max-width: 680px){
-  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner div#mhwp-ipso-box-contentrow {
-    flex-direction: column;
-    justify-content: flex-start;
+  div#mhwp-ipso-modal-box {
+    top:0px;
+
+    div#mhwp-ipso-box-inner {
+      height:100vh;
+
+      div#mhwp-ipso-box-contentrow {
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+    }
   }
 
   div.mhwp-ipso-week-picker {
