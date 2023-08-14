@@ -33,6 +33,7 @@ registerBlockType( metadata, {
 
                 <div id="mhwp-ipso-message-top"></div>
 
+                { /* For now, we dont have filters.
                 <div id="mhwp-ipso-filters">
                     <div>
                         <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
@@ -84,6 +85,7 @@ registerBlockType( metadata, {
                         </label>
                     </div>
                 </div>
+                */ }
 
                 <ul id="mhwp-ipso-month-container"></ul>
                 <template id="mhwp-ipso-month-card">

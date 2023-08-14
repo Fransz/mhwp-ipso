@@ -22,11 +22,12 @@ import {
 
     const state = {
         activities: [],
-        filters: [],
         firstDay: new Date(),
         lastDay: new Date(),
         firstFetched: null,
         lastFetched: null
+        // For now we dont have filters.
+        // filters: [],
     }
 
     /**
@@ -48,9 +49,10 @@ import {
         });
 
         // initialize the filter checkboxes.
-        document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
-            cb.addEventListener('click', changeStateFilters );
-        });
+        // For now, we don't have filtering.
+        // document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
+        //     cb.addEventListener('click', changeStateFilters );
+        // });
 
 
         // Initialize state such that calender(0) shows 28 days, starting today.
@@ -167,15 +169,16 @@ import {
         });
 
         // Filter. Does some checkbox filter match some activity filter.
-        state.activities.forEach((a) => {
-            const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
-
-            if (show) {
-                a.element.classList.remove('filtered');
-            } else {
-                a.element.classList.add('filtered');
-            }
-        })
+        // For now, we do not filter.
+        // state.activities.forEach((a) => {
+        //     const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+        //
+        //     if (show) {
+        //         a.element.classList.remove('filtered');
+        //     } else {
+        //         a.element.classList.add('filtered');
+        //     }
+        // })
 
         // We browsed forward.
         if (prevFirstDay < state.firstDay) {
