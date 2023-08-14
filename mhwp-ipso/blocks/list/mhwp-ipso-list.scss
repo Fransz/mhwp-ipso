@@ -91,7 +91,7 @@
     background-color: #fff;
 
     li.mhwp-ipso-month-card {
-      flex: 1 1 0;
+      flex: 1 1 25%;
 
       display:flex;
       flex-direction: column;
@@ -274,6 +274,10 @@ div#mhwp-ipso-modal-box {
             label.mhwp-ipso-res-itemlabel {
               padding: 0 10px 0 3px;
             }
+          }
+
+          button {
+            margin: .35em .75em .625em;
           }
         }
       }

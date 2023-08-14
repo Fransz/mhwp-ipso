@@ -291,7 +291,9 @@ import {
         const element = template.cloneNode(true);
 
         const date = formatDate(new Date(activity.onDate));
-        const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        // For now, we don't display the times in the cards.
+        // const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        const times = '';
 
         element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
         element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
