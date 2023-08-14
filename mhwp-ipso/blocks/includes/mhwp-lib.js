@@ -173,7 +173,6 @@ function addNode( message, className, container) {
     const html = `<div class="${className}-container"><h3 class="message">${message}</h3></div>`;
     const node = createNodeFromHTML(html);
     container.append(node);
-
 }
 function addError( message, container ) {
     addNode( message, 'error', container);

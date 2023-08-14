@@ -22,11 +22,12 @@ import {
 
     const state = {
         activities: [],
-        filters: [],
         firstDay: new Date(),
         lastDay: new Date(),
         firstFetched: null,
         lastFetched: null
+        // For now we dont have filters.
+        // filters: [],
     }
 
     /**
@@ -48,9 +49,10 @@ import {
         });
 
         // initialize the filter checkboxes.
-        document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
-            cb.addEventListener('click', changeStateFilters );
-        });
+        // For now, we don't have filtering.
+        // document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
+        //     cb.addEventListener('click', changeStateFilters );
+        // });
 
 
         // Initialize state such that calender(0) shows 28 days, starting today.
@@ -167,15 +169,16 @@ import {
         });
 
         // Filter. Does some checkbox filter match some activity filter.
-        state.activities.forEach((a) => {
-            const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
-
-            if (show) {
-                a.element.classList.remove('filtered');
-            } else {
-                a.element.classList.add('filtered');
-            }
-        })
+        // For now, we do not filter.
+        // state.activities.forEach((a) => {
+        //     const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+        //
+        //     if (show) {
+        //         a.element.classList.remove('filtered');
+        //     } else {
+        //         a.element.classList.add('filtered');
+        //     }
+        // })
 
         // We browsed forward.
         if (prevFirstDay < state.firstDay) {
@@ -291,7 +294,9 @@ import {
         const element = template.cloneNode(true);
 
         const date = formatDate(new Date(activity.onDate));
-        const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        // For now, we don't display the times in the cards.
+        // const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        const times = '';
 
         element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
         element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
@@ -316,7 +321,7 @@ import {
             if (detail.items.length === 0) {
                 clearMessages(element);
                 addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-                setTimeout(() => clearMessages(element), 5000);
+                setTimeout(() => clearMessages(element), 4000);
             } else {
                 displayActivity(detail, element);
             }
@@ -635,15 +640,19 @@ import {
             url, fetchInit, msgContainer
         ).then(() => {
             addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
+            msgContainer.scrollIntoView();
             form.querySelector('button').disabled = true;
 
-            // Return a promise that returns resolved after 5 seconds.
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 4 seconds.
+            // After that the box is closed.
+            return wait(4000);
         }).catch((_) => {
             // An exception occured, we already have shown the error.
             form.querySelector('button').disabled = true;
 
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 5 seconds.
+            // After that the box is closed.
+            return wait(4000);
         });
     }
 
