@@ -1,12 +1,3 @@
-/**
- * Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
- * Todo drop the globals; back to parameters.
- * Todo We add the activity id to the form as a hidden field; The function should get it from the activity?
- * Todo week buttons 5 sec buiten gebruik.
- * Todo classname mhwp-ipso-reservation-button;
- * Todo detail template;
- * Todo ticket bij IPSO over filters;
- */
 import {
     fetchWpRest
     , wait
@@ -29,15 +20,14 @@ import {
     // An alias for our origin.
     const marikenhuisURL = document.location.origin;
 
-    // Current date; set by the next/prev week buttons.
-    let currentDay;
-
     const state = {
         activities: [],
         firstDay: new Date(),
         lastDay: new Date(),
         firstFetched: null,
         lastFetched: null
+        // For now we dont have filters.
+        // filters: [],
     }
 
     /**
@@ -58,11 +48,18 @@ import {
             btn.addEventListener('click', () =>  calendar(7))
         });
 
+        // initialize the filter checkboxes.
+        // For now, we don't have filtering.
+        // document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
+        //     cb.addEventListener('click', changeStateFilters );
+        // });
+
+
         // Initialize state such that calender(0) shows 28 days, starting today.
         state.firstDay = new Date();
         state.firstDay.setHours(0, 0, 0, 0);
 
-        state.lastDay = new Date()
+        state.lastDay = new Date(state.firstDay);
         state.lastDay.setHours(0, 0, 0, 0);
         state.lastDay.setDate(state.lastDay.getDate() + 28 - 1);
 
@@ -72,6 +69,24 @@ import {
         state.lastFetched = new Date(state.firstFetched);
         state.lastFetched.setHours(0, 0, 0, 0);
         state.lastFetched.setDate(state.lastFetched.getDate() - 1);
+    }
+
+    /**
+     * Event handler for the filter checkboxes.
+     * Add or delete a filter string, all lowercase, only [a-zA-Z0-9_]
+     *
+     * @param e the event.
+     * @return void
+     */
+    function changeStateFilters(e) {
+        const f = e.currentTarget.value.toLowerCase().replaceAll(/\W/g, '');
+        const idx = state.filters.indexOf(f);
+        if (idx === -1) {
+            state.filters.push(f);
+        } else {
+            state.filters.splice(idx, 1);
+        }
+        calendar(0);
     }
 
     /**
@@ -90,7 +105,7 @@ import {
         const toDay = new Date();
         toDay.setHours(0,0,0,0);
 
-        // We tried to browse into the past.
+        // We tried to browse into the past, reset first and lastDay
         if(state.firstDay < toDay) {
             state.firstDay = toDay;
 
@@ -114,7 +129,7 @@ import {
      * @param errContainer  Where to display errors.
      * @returns {Promise<void>}
      */
-    async function fetchCalendar(errContainer) {
+    function fetchCalendar(errContainer) {
         if (state.firstDay < state.firstFetched) {
             const from = new Date(state.firstDay);
             const till = new Date(state.firstFetched)
@@ -122,11 +137,7 @@ import {
 
             state.firstFetched = from;
 
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-                acts.map(a => createActivityElement(a));
-
+            return fetchActivities(from, till, errContainer).then(acts => {
                 state.activities.unshift(...acts);
             });
 
@@ -138,14 +149,12 @@ import {
 
             state.lastFetched = till;
 
-            return fetchActivities(from, till, errContainer).then(json => {
-                const acts = collapseActivities(json.data);
-                acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-                acts.map(a => createActivityElement(a));
-
+            return fetchActivities(from, till, errContainer).then(acts => {
                 state.activities.push(...acts);
             });
         }
+
+        return Promise.resolve();
     }
 
     /**
@@ -158,6 +167,18 @@ import {
         document.querySelectorAll('.mhwp-ipso-week-current').forEach((e) => {
             e.innerHTML = `${formatDate(state.firstDay)} - ${formatDate(state.lastDay)}`;
         });
+
+        // Filter. Does some checkbox filter match some activity filter.
+        // For now, we do not filter.
+        // state.activities.forEach((a) => {
+        //     const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
+        //
+        //     if (show) {
+        //         a.element.classList.remove('filtered');
+        //     } else {
+        //         a.element.classList.add('filtered');
+        //     }
+        // })
 
         // We browsed forward.
         if (prevFirstDay < state.firstDay) {
@@ -234,20 +255,31 @@ import {
     }
 
     /**
-     * fetch the activities from the wp server.
-     * @param from first date to fetch;
-     * @param till last day to fetch
-     * @param msgContainer Container for messages and errors.
-     * @returns {Promise<*>}
+     * Fetch the activities from the server, collapse, sort, add an element and  filter.
+     * @param from
+     * @param till
+     * @param msgContainer
+     * @returns {Promise<{activityID: *, onDate: *, mentors: *, title: *, items: [], extraInfo: *}[]>}
      */
     function fetchActivities(from, till, msgContainer) {
-        const url = new URL( marikenhuisURL );
+        const url = new URL(marikenhuisURL);
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
         url.searchParams.append('from', localeISOString(from));
         url.searchParams.append('till', localeISOString(till));
 
-        return fetchWpRest(url, {}, msgContainer);
+        return fetchWpRest(url, {}, msgContainer).then((json) => {
+
+            // Collapse, sort, create a dom element, process filters.
+            const acts = collapseActivities(json.data);
+            acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+            acts.forEach(a => createActivityElement(a));
+            acts.forEach(a => {
+                a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
+            })
+
+            return acts;
+        });
     }
 
     /**
@@ -262,7 +294,9 @@ import {
         const element = template.cloneNode(true);
 
         const date = formatDate(new Date(activity.onDate));
-        const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        // For now, we don't display the times in the cards.
+        // const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
+        const times = '';
 
         element.querySelector('.mhwp-ipso-card-title').innerHTML = activity.title;
         element.querySelector('.mhwp-ipso-card-date').innerHTML = date;
@@ -287,7 +321,7 @@ import {
             if (detail.items.length === 0) {
                 clearMessages(element);
                 addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
-                setTimeout(() => clearMessages(element), 5000);
+                setTimeout(() => clearMessages(element), 4000);
             } else {
                 displayActivity(detail, element);
             }
@@ -606,15 +640,19 @@ import {
             url, fetchInit, msgContainer
         ).then(() => {
             addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
+            msgContainer.scrollIntoView();
             form.querySelector('button').disabled = true;
 
-            // Return a promise that returns resolved after 5 seconds.
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 4 seconds.
+            // After that the box is closed.
+            return wait(4000);
         }).catch((_) => {
             // An exception occured, we already have shown the error.
             form.querySelector('button').disabled = true;
 
-            return new Promise((resolve, _) => setTimeout(() => resolve(null), 5000))
+            // Return a promise that resolves after 5 seconds.
+            // After that the box is closed.
+            return wait(4000);
         });
     }
 

@@ -27,15 +27,6 @@
     color:#e24219;
   }
 
-  div#mhwp-ipso-message-top {
-    margin:10px auto;
-    min-height:2em;
-    h3.message, h3.error {
-      font-size:18px;
-      font-weight: 600;
-    }
-  }
-
   div.mhwp-ipso-week-picker {
     display:flex;
     justify-content: space-between;
@@ -56,6 +47,42 @@
     }
   }
 
+  div#mhwp-ipso-message-top {
+    margin:10px auto;
+    min-height:2em;
+    h3.message, h3.error {
+      font-size:18px;
+      font-weight: 600;
+    }
+  }
+
+  /* For now, we dont have filters.
+  div#mhwp-ipso-filters {
+    margin: 5px auto;
+    padding: 5px 10px;
+    background-color: white;
+
+    display: flex;
+    flex-flow: row wrap;
+
+    div {
+      flex:0 1 25%;
+      white-space: pre;
+
+      input {
+        accent-color:#e24219;
+      }
+
+      label {
+        font-size:16px;
+        font-weight: 400;
+        margin-left: 5px;
+      }
+
+    }
+  }
+   */
+
   ul#mhwp-ipso-month-container {
     display: flex;
     flex-wrap: wrap;
@@ -66,7 +93,7 @@
     background-color: #fff;
 
     li.mhwp-ipso-month-card {
-      flex: 1 1 0;
+      flex: 1 1 25%;
 
       display:flex;
       flex-direction: column;
@@ -76,6 +103,12 @@
       padding:0.5em 1em;
       margin:1em 10px;
       list-style-type: none;
+
+      /* For now, we dont have filters.
+      &.filtered {
+        display:none;
+      }
+       */
 
       .mhwp-ipso-card-title{
         margin-bottom:auto;
@@ -246,6 +279,10 @@ div#mhwp-ipso-modal-box {
               padding: 0 10px 0 3px;
             }
           }
+
+          button {
+            margin: .35em .75em .625em;
+          }
         }
       }
 
@@ -259,9 +296,17 @@ div#mhwp-ipso-modal-box {
 }
 
 @media only screen and (max-width: 680px){
-  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner div#mhwp-ipso-box-contentrow {
-    flex-direction: column;
-    justify-content: flex-start;
+  div#mhwp-ipso-modal-box {
+    top:0px;
+
+    div#mhwp-ipso-box-inner {
+      height:100vh;
+
+      div#mhwp-ipso-box-contentrow {
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+    }
   }
 
   div.mhwp-ipso-week-picker {

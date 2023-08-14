@@ -1,6 +1,10 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.8.3
+- We have checkboxes and filter functionality. Disabled though, pending Tambien bux fixes.
+- Better resonsive display of the modal popup.
+
 release 0.8.2
 - We have a month calendar now. Detais are shown in a popup.
 - Activities with the same id on the same day have only one entry in the calendar now.
