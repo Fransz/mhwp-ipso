@@ -77,7 +77,8 @@ import {
      *
      * @param e the event.
      * @return void
-     */
+        // For now, we do not filter.
+
     function changeStateFilters(e) {
         const f = e.currentTarget.value.toLowerCase().replaceAll(/\W/g, '');
         const idx = state.filters.indexOf(f);
@@ -88,6 +89,7 @@ import {
         }
         calendar(0);
     }
+     */
 
     /**
      * Fetch and display the calendar, adjusting the state with shift days.
@@ -274,9 +276,10 @@ import {
             const acts = collapseActivities(json.data);
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
             acts.forEach(a => createActivityElement(a));
-            acts.forEach(a => {
-                a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
-            })
+            // For now we are not filtering
+            // acts.forEach(a => {
+            //     a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
+            // })
 
             return acts;
         });
