@@ -17,9 +17,83 @@
 /*
  * Todo add mailData in the ipso button so we can mail with the button also.
  */
-import {addError, clearErrors, clearMessages, fetchWpRest, makeButtonReservation, wait, createNodeFromHTML} from "../includes/mhwp-lib";
+import {
+    addMessage,
+    addError,
+    clearErrors,
+    clearMessages,
+    fetchWpRest,
+    makeButtonReservation,
+    wait,
+    createNodeFromHTML,
+    localeISOString
+} from "../includes/mhwp-lib";
 
-(function() {
+(function () {
+
+    // jQuery.
+    const $jq = jQuery.noConflict();
+
+    // An alias for our origin.
+    const marikenhuisURL = document.location.origin;
+
+    // Nr of days to fetch
+    const nrToFetch = 28;
+
+    // Nr of activities to show in the popup
+    const nrToShow = 6;
+
+    function init() {
+        // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
+        $jq.validator.addMethod("phoneNL", function (value, element) {
+            return this.optional(element) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test(value);
+        }, "Vul een geldig telefoonnummer in.");
+    }
+
+    function button() {
+        const msgContainer = document.querySelector('#mhwp-ipso-message');
+        addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
+
+        fetchButton(msgContainer).then((_) => {
+            clearMessages(msgContainer);
+            displayButton();
+        });
+    }
+
+    function fetchButton(msgContainer) {
+        const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value );
+        if (Number.isNaN(id)) {
+            addMessage('Ongeldige knop', msgContainer);
+            setTimeout(() => clearMessages(msgContainer), 4000);
+            return;
+        }
+
+        const url = new URL( marikenhuisURL );
+        url.pathname = "wp-json/mhwp-ipso/v1/activity";
+
+        let d = new Date();
+        url.searchParams.append('from', localeISOString(d));
+        d = d.setDate(d.getDate() + nrToFetch);
+        url.searchParams.append('till', localeISOString(d));
+
+        return fetchWpRest(url, {}, msgContainer).then(({data: acts}) => {
+            // Collapse, sort, create a dom element, process filters.
+            // acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
+            // acts.filter( a => a.activityID === id )
+            // acts.forEach(a => createActivityElement(a));
+
+            return acts;
+        });
+
+
+    }
+
+    // Run init and handleWeekChange on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => { init(); button();});
+})();
+
+
+function foo() {
     const $jq = jQuery.noConflict();
 
     const marikenhuisURL = document.location.origin;
@@ -201,5 +275,4 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeButtonReservation
         });
     }
 
-    document.addEventListener('DOMContentLoaded', getActivities);
-})();
+};
