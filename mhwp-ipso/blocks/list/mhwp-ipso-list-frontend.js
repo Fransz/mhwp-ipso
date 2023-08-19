@@ -541,7 +541,6 @@ import {
         const url = new URL( marikenhuisURL );
         url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
         url.searchParams.append('activityId', activity.activityID);
-        url.searchParams.append('calendarId', activity.id);
 
         return fetchWpRest(url, {}, msgContainer, false).then((json) => {
             // Upon a 429 error (Too many requests), We try again.

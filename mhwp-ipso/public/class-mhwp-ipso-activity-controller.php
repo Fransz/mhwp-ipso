@@ -133,7 +133,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 	 */
 	public function get_item( $request ): WP_REST_Response {
 		$activity_id = $request->get_param( 'activityId' );
-		$calendar_id = $request->get_param( 'calendarId' );
 
 		$data = array(
 			'activityID' => $activity_id,
@@ -219,10 +218,6 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 			'title'      => 'activity',
 			'type'       => 'object',
 			'properties' => array(
-				'calendarId' => array(
-					'description' => esc_html__( 'The id of the activity in the calendar', 'mhwp-ipso' ),
-					'type'        => 'string',
-				),
 				'activityId' => array(
 					'description' => esc_html__( 'The id of the activity type', 'mhwp-ipso' ),
 					'type'        => 'string',
