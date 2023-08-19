@@ -210,12 +210,17 @@ function formatTime(datetime) {
 /**
  * Helper for formating times.
  *
- * @param datetime
+ * @param datetime The datetime string to format
+ * @param replace Do we want to replace spaces by the &nbsp; entity.
  * @returns {string}
  */
-function formatDate(datetime) {
+function formatDate(datetime, replace=true) {
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
+    if (replace) {
+        return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
+    } else {
+        return dateFormat(new Date(datetime));
+    }
 }
 
 /**
