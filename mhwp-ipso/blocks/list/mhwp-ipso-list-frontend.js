@@ -518,19 +518,15 @@ import {
      * @returns {ChildNode}
      */
     function itemsCheckbox(items) {
-        if (items.length === 1) {
-            items = `<input type="hidden" id="mhwp-ipso-res-item" name="calendarId" value="${items[0].calendarId}" />`;
-        } else if (items.length > 1) {
-            items = items.map( (item, idx) => {
-                const time = formatTime(new Date(item.timeStart));
-                return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
+        items = items.map( (item, idx) => {
+            const time = formatTime(new Date(item.timeStart));
+            return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
                             name="calendarId" value="${item.calendarId}"/>` +
-                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`;
-            });
+                `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`;
+        });
 
-            items[0] = items[0].replace('type="radio"', 'type="radio" checked');
-            items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
-        }
+        items[0] = items[0].replace('type="radio"', 'type="radio" checked');
+        items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
         return createNodeFromHTML(items);
     }
 
@@ -605,12 +601,8 @@ import {
 
         // Get the item corresponding to the hidden input or selected radiobutton.
         let calendarId;
-        if(form.querySelector('#mhwp-ipso-res-item')) {
-           calendarId = parseInt(form.querySelector('#mhwp-ipso-res-item').value);
-        } else {
-            calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
-        }
-        const item = activity.items.filter(item => item.calendarId === calendarId)[0];
+        calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
+        const item = activity.items.filter(i => i.calendarId === calendarId)[0];
 
         const activityCalendarId = item.calendarId.toString();
         const firstName = form.querySelector('input[name="firstName"]').value;
