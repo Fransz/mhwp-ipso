@@ -494,7 +494,7 @@ import {
 
             box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
             box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
-            box.querySelector('#mhwp-ipso-box-form button').disabled = false;
+            box.querySelector('#mhwp-ipso-box-form button').style.display = 'block';
 
             const button = box.querySelector('#mhwp-ipso-box-directbutton button')
             button.removeEventListener('click', redirectReservation);
@@ -641,14 +641,14 @@ import {
         ).then(() => {
             addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
             msgContainer.scrollIntoView();
-            form.querySelector('button').disabled = true;
+            form.querySelector('button').style.display = 'none';
 
             // Return a promise that resolves after 4 seconds.
             // After that the box is closed.
             return wait(4000);
         }).catch((_) => {
             // An exception occured, we already have shown the error.
-            form.querySelector('button').disabled = true;
+            form.querySelector('button').style.display = 'none';
 
             // Return a promise that resolves after 5 seconds.
             // After that the box is closed.
