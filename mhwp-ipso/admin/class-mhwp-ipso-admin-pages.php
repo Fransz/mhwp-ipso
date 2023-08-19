@@ -150,7 +150,7 @@ class MHWP_IPSO_Admin_Pages {
 
 		// The date parameter, used for displaying activities.
 		if ( isset( $_POST['date'] ) ) {
-			if ( ! check_admin_referer( 'mhwp_ipso_activities-options' ) ) {
+			if ( ! check_admin_referer( 'wp_rest' ) ) {
 				die( 'Security issues!' );
 			}
 			$date  = sanitize_text_field( wp_unslash( $_POST['date'] ) );
