@@ -1,4 +1,51 @@
 /**
+ * Make a request for the details of an activity, and again if necessary.
+ *
+ * @param activity The activity for which to fetch the detail
+ * @param msgContainer The parent for messages.
+ * @returns {Promise<any>}
+ */
+async function fetchDetail(activity, msgContainer) {
+    const url = new URL( document.location.origin );
+    url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
+    url.searchParams.append('activityId', activity.activityID);
+
+    return fetchWpRest(url, {}, msgContainer, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(1000).then(() => {
+                return fetchWpRest(url, {}, msgContainer, true);
+            });
+        }
+        return json;
+    });
+}
+
+/**
+ * Make the request for the nr of participants, and again if necessary.
+ *
+ * @param calendarId The calendarId of the activity.
+ * @param msgContainer The parent for messages.
+ * @returns {Promise<any>}
+ */
+function fetchParticipants(calendarId, msgContainer) {
+    const url = new URL( document.location.origin );
+    url.pathname = 'wp-json/mhwp-ipso/v1/participants';
+    url.searchParams.append('calendarId', calendarId);
+
+    return fetchWpRest(url, {}, msgContainer, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(1000).then(() => {
+                return fetchWpRest(url, {}, msgContainer, true);
+            });
+        }
+        return json;
+    });
+}
+/**
  * Make a reservation by accessing our API.
  * Submit callback for the validator api
  *
@@ -12,8 +59,7 @@ async function makeButtonReservation(detail, mailData, form, event) {
     event.preventDefault();
 
     // The URL for making the reservation
-    const marikenhuisURL = document.location.origin;
-    const url = new URL( marikenhuisURL );
+    const url = new URL( document.location.origin );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
     const formContainer = form.parentNode;
@@ -247,4 +293,5 @@ export {
     , formatTime
     , formatDate
     , localeISOString
-};
+    , fetchDetail
+    , fetchParticipants};
