@@ -18,24 +18,23 @@
  * Todo add mailData in the ipso button so we can mail with the button also.
  */
 import {
-    addMessage,
-    addError,
-    clearErrors,
-    clearMessages,
-    fetchWpRest,
-    makeButtonReservation,
-    wait,
-    createNodeFromHTML,
-    localeISOString
+    addMessage
+    , addError
+    , clearErrors
+    , clearMessages
+    , fetchWpRest
+    , makeButtonReservation
+    , wait
+    , createNodeFromHTML
+    , localeISOString
+    , fetchDetail
+    , fetchParticipants
 } from "../includes/mhwp-lib";
 
 (function () {
 
     // jQuery.
     const $jq = jQuery.noConflict();
-
-    // An alias for our origin.
-    const marikenhuisURL = document.location.origin;
 
     // Nr of days to fetch
     const daysToFetch = 28;
@@ -54,9 +53,9 @@ import {
         const msgContainer = document.querySelector('#mhwp-ipso-message');
         addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
 
-        fetchButton(msgContainer).then((_) => {
+        fetchButton(msgContainer).then((as) => {
             clearMessages(msgContainer);
-            displayButton();
+            displayButton(as, msgContainer);
         });
     }
 
@@ -68,7 +67,7 @@ import {
             return;
         }
 
-        const url = new URL( marikenhuisURL );
+        const url = new URL( document.location.origin );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
         const from = new Date();
@@ -76,15 +75,70 @@ import {
         const till = from.setDate(from.getDate() + daysToFetch);
         url.searchParams.append('till', localeISOString(till));
 
-        return fetchWpRest(url, {}, msgContainer).then(({data: acts}) => {
-            // sort, filter and trunctate.
-            acts.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
-            acts = acts.filter( a => a.activityID === id );
-            if (acts.length > actsToShow) acts.length = actsToShow;
-            return acts;
+        return fetchWpRest(url, {}, msgContainer).then(({data: as}) => {
+            // sort, filter and truncate.
+            as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+            as = as.filter( a => a.activityID === id );
+
+            if (as.length > actsToShow) as.length = actsToShow;
+            return as;
         });
+    }
 
+    /**
+     * Prepare the button.
+     *
+     * @param as The activities.
+     */
+    function displayButton(as, msgContainer) {
+        const button = document.querySelector('#mhwp-ipso-button-more');
+        button.addEventListener('click', readMore);
 
+        /**
+         * click handler for read more buttons.
+         * Get the activities details and show them in a popup, or display a message if the activity is sold out.
+         *
+         * @param e The event..
+         */
+        async function readMore(e) {
+            clearErrors(msgContainer);
+            clearMessages(msgContainer);
+            addMessage('Gevens ophalen, dit kan even duren', msgContainer);
+
+            const detail = await fetchActivityDetails(as, msgContainer);
+
+            if (detail.items.length === 0) {
+                clearMessages(element);
+                addMessage('De activiteit is vol, u kunt niet meer reserveren.', msgContainer);
+                setTimeout(() => clearMessages(msgContainer), 4000);
+            } else {
+                // displayActivity(detail, msgContainer);
+            }
+        }
+
+    }
+
+    /**
+     * Fetch details for the activity ID, and nrParticipants for all activities
+     */
+    async function fetchActivityDetails(as, msgContainer) {
+        const { data: detail } = await fetchDetail(as[0], msgContainer);
+
+        // For all activities, fetch the number of participants sequentially.
+        const items = await as.reduce((p, act) => {
+            return p.then(acc => {
+                return fetchParticipants(act.id, msgContainer).then( r => {
+                    act.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
+                    return [ ...acc, act];
+                });
+            })
+        }, Promise.resolve([]));
+
+        detail.items = items.filter( i => i.places > 0);
+        detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
+        // detail.onDate = activity.onDate;
+
+        return detail;
     }
 
     // Run init and handleWeekChange on DOMContentLoaded
@@ -94,8 +148,6 @@ import {
 
 function foo() {
     const $jq = jQuery.noConflict();
-
-    const marikenhuisURL = document.location.origin;
 
     // Dutch phone numbers have 10 digits (or 11 and start with +31).
     $jq.validator.addMethod( "phoneNL", function( value, element ) {
@@ -108,7 +160,7 @@ function foo() {
      * Fetch all wanted activities and their details. For each create some HTML.
      */
     async function getActivities() {
-        const url = new URL( marikenhuisURL );
+        const url = new URL( document.location.origin );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
         const container = document.querySelector('#mhwp-ipso-button-container');
@@ -246,32 +298,4 @@ function foo() {
             })
         }
     }
-
-    /**
-     * Actually make the request for the details, and again if necessary.
-     *
-     * @param activity The activity for which to fetch the detail
-     * @param container The parent for messages.
-     * @returns {Promise<any>}
-     */
-    async function fetchDetail(activity, container) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
-        url.searchParams.append('activityId', activity.activityID);
-        url.searchParams.append('calendarId', activity.id);
-
-        clearErrors(container);
-        clearMessages(container);
-        return fetchWpRest(url, {}, container, false).then((json) => {
-            // Upon a 429 error (Too many requests), We try again.
-            if ( json.mhwp_ipso_code === 429) {
-                console.log('Error 429, retrying');
-                return wait(1000).then(() => {
-                    return fetchWpRest(url, {}, container, true);
-                });
-            }
-            return json;
-        });
-    }
-
-};
+}
