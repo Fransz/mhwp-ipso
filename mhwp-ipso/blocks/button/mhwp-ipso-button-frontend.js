@@ -38,10 +38,10 @@ import {
     const marikenhuisURL = document.location.origin;
 
     // Nr of days to fetch
-    const nrToFetch = 28;
+    const daysToFetch = 28;
 
     // Nr of activities to show in the popup
-    const nrToShow = 6;
+    const actsToShow = 6;
 
     function init() {
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
@@ -71,17 +71,16 @@ import {
         const url = new URL( marikenhuisURL );
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-        let d = new Date();
-        url.searchParams.append('from', localeISOString(d));
-        d = d.setDate(d.getDate() + nrToFetch);
-        url.searchParams.append('till', localeISOString(d));
+        const from = new Date();
+        url.searchParams.append('from', localeISOString(from));
+        const till = from.setDate(from.getDate() + daysToFetch);
+        url.searchParams.append('till', localeISOString(till));
 
         return fetchWpRest(url, {}, msgContainer).then(({data: acts}) => {
-            // Collapse, sort, create a dom element, process filters.
-            // acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
-            // acts.filter( a => a.activityID === id )
-            // acts.forEach(a => createActivityElement(a));
-
+            // sort, filter and trunctate.
+            acts.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+            acts = acts.filter( a => a.activityID === id );
+            if (acts.length > actsToShow) acts.length = actsToShow;
             return acts;
         });
 
