@@ -30,6 +30,7 @@ import {
     , fetchDetail
     , fetchParticipants
 } from "../includes/mhwp-lib";
+import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
 (function () {
 
@@ -51,11 +52,15 @@ import {
 
     function button() {
         const msgContainer = document.querySelector('#mhwp-ipso-message');
-        addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
 
         fetchButton(msgContainer).then((as) => {
-            clearMessages(msgContainer);
-            displayButton(as, msgContainer);
+            // Only display the button if there are activities.
+            if(as.length !== 0) {
+                clearMessages(msgContainer);
+                displayButton(as, msgContainer);
+            } else {
+                console.log('Er zijn in de aankomende periode geen activiteiten.');
+            }
         });
     }
 
@@ -92,6 +97,7 @@ import {
      */
     function displayButton(as, msgContainer) {
         const button = document.querySelector('#mhwp-ipso-button-more');
+        button.style.display = 'block';
         button.addEventListener('click', readMore);
 
         /**
@@ -106,12 +112,14 @@ import {
             addMessage('Gevens ophalen, dit kan even duren', msgContainer);
 
             const detail = await fetchActivityDetails(as, msgContainer);
+            console.log(detail);
 
             if (detail.items.length === 0) {
-                clearMessages(element);
-                addMessage('De activiteit is vol, u kunt niet meer reserveren.', msgContainer);
+                clearMessages(msgContainer);
+                addMessage('Er zijn helaas voorlopig geen vrije plaatsen.', msgContainer);
                 setTimeout(() => clearMessages(msgContainer), 4000);
             } else {
+                clearMessages(msgContainer);
                 // displayActivity(detail, msgContainer);
             }
         }
@@ -135,8 +143,8 @@ import {
         }, Promise.resolve([]));
 
         detail.items = items.filter( i => i.places > 0);
+        detail.items = [];
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
-        // detail.onDate = activity.onDate;
 
         return detail;
     }

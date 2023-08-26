@@ -1,4 +1,26 @@
+.wp-block-mhwp-ipso-button {
+  button {
+    margin-bottom: 25px;
+    background-color: #e24219;
+    margin-top: 5px;
+    padding: 5px 10px;
+  }
+
+  h3.message, h3.error {
+    text-align: center;
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #e24219;
+  }
+
+  #mhwp-ipso-button-more {
+    display:none;
+  }
+}
+
 // Front end styles.
+/*
 div#mhwp-ipso-list-container {
   .list-group-item-light {
     background-color: #d3d3d3;
@@ -44,3 +66,4 @@ div#mhwp-ipso-list-container {
     }
   }
 }
+ */
