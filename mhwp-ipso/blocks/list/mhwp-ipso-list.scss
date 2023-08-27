@@ -211,19 +211,19 @@ div#mhwp-ipso-modal-box {
         justify-content: stretch;
 
         div#mhwp-ipso-box-introrow {
-          align-items: flex-start;
-          justify-content: flex-start;
+          display: block;
           margin-bottom:15px;
           padding:0 15px;
 
           #mhwp-ipso-box-image {
+            float:left;
+            margin-right:1em;
             height:100px;
           }
           #mhwp-ipso-box-intro {
             font-size:22px;
             font-weight: 600;
             text-align:left;
-            padding-left: 20px;
             padding-right: 40px;
           }
         }
