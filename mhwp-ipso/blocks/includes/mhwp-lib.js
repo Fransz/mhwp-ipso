@@ -126,6 +126,73 @@ async function makeButtonReservation(detail, mailData, form, event) {
     });
 }
 
+/**
+ * Make a reservation by accessing our API with the correct parameters.
+ * After the request we return a promise that gets resolved after 5 seconds.
+ *
+ * @param activity The activity.
+ * @param form The form  that is submitted.
+ * @param box The modal box which contains the form.
+ * @param event The submit event.
+ * @returns {Promise<void>}
+ */
+async function makeReservation(activity, form, box, event) {
+    event.preventDefault();
+
+    // The URL for making the reservation
+    const url = new URL( document.location.origin );
+    url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+
+    const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
+
+    // Get the item corresponding to the hidden input or selected radiobutton.
+    let calendarId;
+    calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
+    const item = activity.items.filter(i => i.calendarId === calendarId)[0];
+
+    const activityCalendarId = item.calendarId.toString();
+    const firstName = form.querySelector('input[name="firstName"]').value;
+    const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
+    const lastName = form.querySelector('input[name="lastName"]').value;
+    const email = form.querySelector('input[name="email"]').value;
+    let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
+    phoneNumber = phoneNumber === "" ? null : phoneNumber;
+
+    const activityId = activity.id;
+    const activityTitle = activity.title;
+    const activityDate = formatDate(activity.onDate, false);
+    const activityTime = formatTime(item.timeStart);
+
+    // Data for our endpoint.
+    // activityId, activityTime, activitydate and activityTitle are used for mail.
+    const data = {
+        activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
+        activityId, activityTitle, activityDate, activityTime
+    };
+
+    const fetchInit = {
+        method: 'POST',
+        body: JSON.stringify( data )
+    }
+    await fetchWpRest(
+        url, fetchInit, msgContainer
+    ).then(() => {
+        addMessage('Er is een plaats voor je gereserveerd; Je ontvangt een email', msgContainer)
+        msgContainer.scrollIntoView();
+        form.querySelector('button').style.display = 'none';
+
+        // Return a promise that resolves after 4 seconds.
+        // After that the box is closed.
+        return wait(4000);
+    }).catch((_) => {
+        // An exception occured, we already have shown the error.
+        form.querySelector('button').style.display = 'none';
+
+        // Return a promise that resolves after 5 seconds.
+        // After that the box is closed.
+        return wait(4000);
+    });
+}
 
 /**
  * Helper method for accessing the rest api in our wordPress installation.
@@ -289,7 +356,7 @@ export {
     , addMessage
     , clearErrors
     , clearMessages
-    , makeButtonReservation
+    , makeReservation
     , createNodeFromHTML
     , formatTime
     , formatDate
