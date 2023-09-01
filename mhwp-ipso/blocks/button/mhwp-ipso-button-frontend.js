@@ -77,7 +77,7 @@ import {
      * @returns {Promise<{activityID: *, onDate: *, mentors: *, title, items: *[], extraInfo: *}>}
      */
     function fetchButton(msgContainer) {
-        const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value );
+        const id = parseInt(document.querySelector('#mhwp-ipso-button-activityid') ?. value );
         if (Number.isNaN(id)) {
             addMessage('Ongeldige knop', msgContainer);
             setTimeout(() => clearMessages(msgContainer), 4000);

@@ -32,28 +32,10 @@ registerBlockType( metadata, {
                         <p>{ __( 'Configureer de ipso knop hier.', 'mhwp-ipso' ) }</p>
                     </PanelRow>
 
-                    <DatePicker
-                        label={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
-                        help={ __( 'De datum van de activiteit', 'mhwp-ipso' ) }
-                        onChange={ (  new_value  ) => {
-                            setAttributes({activity_date: new_value})
-                        }}
-                        currentDate={ attributes.activity_date }
-                    />
-
-                    <TextControl
-                        value={ attributes.activity_title }
-                        label={ __( 'De naam van de activiteit', 'mhwp-ipso' ) }
-                        help={ __( 'De naam van de activiteit, precies zo als in het IPSO systeem', 'mhwp-ipso' ) }
-                        onChange={ (new_value) => {
-                            setAttributes({activity_title: new_value})
-                        }}
-                    />
-
                     <TextControl
                         value={ attributes.activity_id }
-                        label={ __( 'De agenda id van de activiteit', 'mhwp-ipso' ) }
-                        help={ __( 'De agenda id van de activiteit, precies zo als in het IPSO system', 'mhwp-ipso' ) }
+                        label={ __( 'De id van de activiteit', 'mhwp-ipso' ) }
+                        help={ __( 'De id van de activiteit (actvityId) uit het IPSO system', 'mhwp-ipso' ) }
                         onChange={ (  new_value  ) => {
                             if (/^\d*$/.test(new_value)) {
                                 setAttributes({activity_id: new_value})
@@ -64,57 +46,23 @@ registerBlockType( metadata, {
             </InspectorControls>,
 
             <div { ...blockProps } >
-                <h4>IPSO agenda knop</h4>
-                <ul className="list-unstyled">
-                    <li>
-                        <span>{ __( 'Datum', 'mhwp-ipso' ) }: </span>
-                        <span>{ formatDate(attributes.activity_date) }</span>
-                    </li>
-                    <li>
-                        <span>{ __( 'Id', 'mhwp-ipso' ) }: </span>
-                        <span>{ attributes.activity_id }</span>
-                    </li>
-                    <li>
-                        <span>{ __( 'Title', 'mhwp-ipso' ) }: </span>
-                        <span>{ attributes.activity_title }</span>
-                    </li>
-                </ul>
+                <div id="mhwp-ipso-backend">
+                    <h4>IPSO agenda knop</h4>
+                    <h4 id="mhwp-ipso-backend-activityid">
+                        { __( 'Activiteit Id', 'mhwp-ipso' ) }:&nbsp;{ attributes.activity_id }
+                    </h4>
+                </div>
             </div>
         ]
     },
     save: ({attributes}) => {
         const blockProps = useBlockProps.save();
 
-        const dateInput = (activity_date) => {
-            if (activity_date) {
-                return <input type="hidden" name="activity-date" id="mhwp-activity-date"
-                              value={activity_date} />
-            } else {
-                return null;
-            }
-        }
-        const idInput = (activity_id) => {
-            if (activity_id !== '' && activity_id !== '0') {
-                return <input type="hidden" name="activity-id" id="mhwp-activity-id" value={activity_id}/>
-            } else {
-                return null;
-            }
-        }
-        const titleInput = (activity_title) => {
-            if (activity_title) {
-                return <input type="hidden" name="activity-title" id="mhwp-activity-title" value={activity_title} />
-            } else {
-                return null;
-            }
-        }
-
         return (
             <div { ...blockProps } >
 
 
-                {dateInput(attributes.activity_date)}
-                {idInput(attributes.activity_id)}
-                {titleInput(attributes.activity_title)}
+                <input type="hidden" name="activity-id" id="mhwp-ipso-button-activityid" value={attributes.activity_id}/>
 
                 <div id={"mhwp-ipso-button"}>
                     <button id="mhwp-ipso-button-more" type="button">

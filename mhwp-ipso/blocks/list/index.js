@@ -14,7 +14,7 @@ registerBlockType( metadata, {
 
         return (
             <div { ...blockProps } >
-                <div id="mhwp-ipso-list-backend">
+                <div id="mhwp-ipso-backend">
                     <h4>IPSO agenda lijst</h4>
                 </div>
             </div>

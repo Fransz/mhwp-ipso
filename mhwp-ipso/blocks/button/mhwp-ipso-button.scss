@@ -1,3 +1,17 @@
+.wp-block-mhwp-ipso-button #mhwp-ipso-backend {
+  display: flex;
+  justify-content: space-around;
+
+  border: 1px solid #e24219;
+
+  h4 {
+    margin:0;
+    padding:1em 0.5em;
+    width:auto;
+    color: #e24219;
+  }
+}
+
 .wp-block-mhwp-ipso-button {
   button {
     margin-bottom: 25px;
