@@ -32,6 +32,7 @@ import {
     , fetchDetail
     , fetchParticipants
 } from "../includes/mhwp-lib";
+import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
 (function () {
 
@@ -61,12 +62,13 @@ import {
         const msgContainer = document.querySelector('#mhwp-ipso-button-message');
 
         fetchButton(msgContainer).then((activity) => {
-            // Only display the button if there are activities.
-            if(activity.items.length !== 0) {
+            // Only display the button if we found activities with free places.
+            if(activity.activityID && activity.items.length !== 0) {
                 clearMessages(msgContainer);
                 displayButton(activity, msgContainer);
             } else {
-                console.log('Er zijn in de aankomende periode geen activiteiten.');
+                addMessage('Er zijn in de aankomende periode geen activiteiten.', msgContainer);
+                setTimeout(() => clearMessages(msgContainer), 4000);
             }
         });
     }
@@ -113,11 +115,11 @@ import {
             return { calendarId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
         });
         return {
-            activityID: acts[0].activityID,
-            title: acts[0].title,
-            extraInfo: acts[0].extraInfo,
-            mentors: acts[0].mentors,
-            onDate: acts[0].onDate,
+            activityID: acts[0]?.activityID,
+            title: acts[0]?.title,
+            extraInfo: acts[0]?.extraInfo,
+            mentors: acts[0]?.mentors,
+            onDate: acts[0]?.onDate,
             items
         }
     }
