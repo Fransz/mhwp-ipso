@@ -30,7 +30,6 @@ import {
     , fetchDetail
     , fetchParticipants
 } from "../includes/mhwp-lib";
-import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
 (function () {
 
@@ -53,11 +52,11 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
     function button() {
         const msgContainer = document.querySelector('#mhwp-ipso-message');
 
-        fetchButton(msgContainer).then((as) => {
+        fetchButton(msgContainer).then((activity) => {
             // Only display the button if there are activities.
-            if(as.length !== 0) {
+            if(activity.items.length !== 0) {
                 clearMessages(msgContainer);
-                displayButton(as, msgContainer);
+                displayButton(activity, msgContainer);
             } else {
                 console.log('Er zijn in de aankomende periode geen activiteiten.');
             }
@@ -81,21 +80,42 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
         url.searchParams.append('till', localeISOString(till));
 
         return fetchWpRest(url, {}, msgContainer).then(({data: as}) => {
-            // sort, filter and truncate.
+            // sort, filter, truncate and collapse.
             as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
             as = as.filter( a => a.activityID === id );
 
             if (as.length > actsToShow) as.length = actsToShow;
-            return as;
+            return collapse(as);
         });
+    }
+
+    /**
+     * collapse all calendar details for the activities in an array items.
+     *
+     * @param acts
+     * @returns {{activityID: *, onDate: *, mentors: *, title, items: [*], extraInfo: *}}
+     */
+    function collapse(acts) {
+        const items = acts.map( a => {
+            return { calendarId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
+        });
+        return {
+            activityID: acts[0].activityID,
+            title: acts[0].title,
+            extraInfo: acts[0].extraInfo,
+            mentors: acts[0].mentors,
+            onDate: acts[0].onDate,
+            items
+        }
     }
 
     /**
      * Prepare the button.
      *
-     * @param as The activities.
+     * @param activity The activity.
+     * @param msgContainer The html element used for showing messages
      */
-    function displayButton(as, msgContainer) {
+    function displayButton(activity, msgContainer) {
         const button = document.querySelector('#mhwp-ipso-button-more');
         button.style.display = 'block';
         button.addEventListener('click', readMore);
@@ -111,8 +131,7 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
             clearMessages(msgContainer);
             addMessage('Gevens ophalen, dit kan even duren', msgContainer);
 
-            const detail = await fetchActivityDetails(as, msgContainer);
-            console.log(detail);
+            const detail = await fetchActivityDetails(activity, msgContainer);
 
             if (detail.items.length === 0) {
                 clearMessages(msgContainer);
@@ -128,22 +147,25 @@ import {msg} from "@babel/core/lib/config/validation/option-assertions";
 
     /**
      * Fetch details for the activity ID, and nrParticipants for all activities
+     *
+     * @param activity The activity for which we want to fetch the details.
+     * @param msgContainer The html element for messages.
+     * @returns {Promise<{mainImage}|*>}
      */
-    async function fetchActivityDetails(as, msgContainer) {
-        const { data: detail } = await fetchDetail(as[0], msgContainer);
+    async function fetchActivityDetails(activity, msgContainer) {
+        const { data: detail } = await fetchDetail(activity, msgContainer);
 
         // For all activities, fetch the number of participants sequentially.
-        const items = await as.reduce((p, act) => {
+        const items = await activity.items.reduce((p, act) => {
             return p.then(acc => {
-                return fetchParticipants(act.id, msgContainer).then( r => {
+                return fetchParticipants(act.calendarId, msgContainer).then( r => {
                     act.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
-                    return [ ...acc, act];
+                    return [...acc, act];
                 });
             })
         }, Promise.resolve([]));
 
         detail.items = items.filter( i => i.places > 0);
-        detail.items = [];
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
 
         return detail;

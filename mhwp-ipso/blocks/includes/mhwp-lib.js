@@ -45,6 +45,7 @@ function fetchParticipants(calendarId, msgContainer) {
         return json;
     });
 }
+
 /**
  * Make a reservation by accessing our API.
  * Submit callback for the validator api
