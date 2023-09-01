@@ -23,6 +23,8 @@ import {
     , clearErrors
     , clearMessages
     , fetchWpRest
+    , formatDate
+    , formatTime
     , makeButtonReservation
     , wait
     , createNodeFromHTML
@@ -42,6 +44,9 @@ import {
     // Nr of activities to show in the popup
     const actsToShow = 6;
 
+    /**
+     * Init globals.
+     */
     function init() {
         // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
         $jq.validator.addMethod("phoneNL", function (value, element) {
@@ -49,8 +54,11 @@ import {
         }, "Vul een geldig telefoonnummer in.");
     }
 
+    /**
+     * Fetch and display the button.
+     */
     function button() {
-        const msgContainer = document.querySelector('#mhwp-ipso-message');
+        const msgContainer = document.querySelector('#mhwp-ipso-button-message');
 
         fetchButton(msgContainer).then((activity) => {
             // Only display the button if there are activities.
@@ -63,12 +71,17 @@ import {
         });
     }
 
+    /**
+     * Fetch all activities given by nrDays; filter by the activityId parameter. sort collapse.
+     * @param msgContainer
+     * @returns {Promise<{activityID: *, onDate: *, mentors: *, title, items: *[], extraInfo: *}>}
+     */
     function fetchButton(msgContainer) {
         const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value );
         if (Number.isNaN(id)) {
             addMessage('Ongeldige knop', msgContainer);
             setTimeout(() => clearMessages(msgContainer), 4000);
-            return;
+            return Promise.reject();
         }
 
         const url = new URL( document.location.origin );
@@ -90,7 +103,7 @@ import {
     }
 
     /**
-     * collapse all calendar details for the activities in an array items.
+     * collapse all calendar details for the activities in an array `items`.
      *
      * @param acts
      * @returns {{activityID: *, onDate: *, mentors: *, title, items: [*], extraInfo: *}}
@@ -139,7 +152,7 @@ import {
                 setTimeout(() => clearMessages(msgContainer), 4000);
             } else {
                 clearMessages(msgContainer);
-                // displayActivity(detail, msgContainer);
+                displayActivity(detail, msgContainer);
             }
         }
 
@@ -156,19 +169,162 @@ import {
         const { data: detail } = await fetchDetail(activity, msgContainer);
 
         // For all activities, fetch the number of participants sequentially.
-        const items = await activity.items.reduce((p, act) => {
+        const items = await activity.items.reduce((p, item) => {
             return p.then(acc => {
-                return fetchParticipants(act.calendarId, msgContainer).then( r => {
-                    act.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
-                    return [...acc, act];
+                return fetchParticipants(item.calendarId, msgContainer).then( r => {
+                    item.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
+                    return [...acc, item];
                 });
             })
         }, Promise.resolve([]));
 
         detail.items = items.filter( i => i.places > 0);
         detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
+        detail.onDate = activity.onDate;
 
         return detail;
+    }
+
+    /**
+     * Display an activity in a modal popup.
+     * Use the html we got from our wp block.
+     *
+     * @param activity Current activity
+     * @param msgElement DOM node of the card element of the activity
+     */
+    function displayActivity(activity, msgElement) {
+        console.log(activity);
+        const box = displayModalBox(activity, msgElement);
+
+        box.querySelector('#mhwp-ipso-box-title').innerHTML = activity.title;
+
+        box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
+
+        box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
+    }
+
+    /**
+     * Display the modal popup.
+     * Define event handlers for closing it again. Prepare the reservation form if shown.
+     *
+     * @param activity
+     * @param msgElement
+     * @returns {HTMLElement}
+     */
+    function displayModalBox(activity, msgElement) {
+        // Add an overlay.
+        const overlay = document.createElement('div')
+        overlay.id = "mhwp-ipso-box-overlay";
+        document.body.append(overlay);
+        document.body.style.overflow = 'hidden';
+        document.body.addEventListener('keydown', keyHandler)
+
+        const box = document.getElementById('mhwp-ipso-modal-box');
+        const innerBox = document.getElementById('mhwp-ipso-box-inner');
+
+        // Event handlers.
+        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox);
+        box.addEventListener('click', closeBoxFromOverlay);
+
+        box.setAttribute('open', 'true')
+
+        // If we have a form in our popup, prepare it.
+        const form = box.querySelector('#mhwp-ipso-box-form');
+        if(form) {
+            const v = $jq(form).validate();
+            if (v) v.destroy();
+
+            function submitHandler (form, event) {
+                makeReservation(activity, form, box, event).then(() => closeBox(null));
+            }
+            function invalidHandler () {
+                // TODO: We want an error message here, this shouldn't happen though.
+                console.log( 'invalid' );
+            }
+
+            $jq(form).validate({
+                rules: {
+                    phoneNumber: {
+                        phoneNL: true,
+                        "normalizer": v => v.trim()
+                    }
+                },
+                submitHandler, invalidHandler
+            })
+        }
+
+        return box;
+
+        /**
+         * Handler for the escape key.
+         *
+         * @param e
+         */
+        function keyHandler(e) {
+            if (e.key === 'Escape') {
+                closeBox(e);
+            }
+        }
+
+        /**
+         * Handler for clicks on the overlay.
+         *
+         * @param e
+         */
+        function closeBoxFromOverlay(e) {
+            if(! innerBox.contains(e.target)) {
+                closeBox(e);
+            }
+        }
+
+        /**
+         * Handler for closing the popup.
+         * Remove the html we appended, remove event listeners.
+         *
+         * @param e
+         */
+        function closeBox(e) {
+            clearErrors(msgElement);
+            clearMessages(msgElement);
+            clearErrors(box);
+            clearMessages(box);
+
+            document.body.style.overflow = 'visible';
+            box.removeAttribute('open');
+
+            document.body.removeEventListener('keydown', keyHandler);
+            box.querySelector('#mhwp-ipso-box-close').removeEventListener('click', closeBox);
+            box.removeEventListener('click', closeBoxFromOverlay);
+
+            // remove item checkboxes.
+            box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
+            overlay.remove();
+
+            const form = box.querySelector('form');
+            if(form) form.reset();
+
+            if(e) e.stopImmediatePropagation();
+        }
+    }
+
+    /**
+     * Generate html for the choose time checkbox, or a hidden input if there is only one time available.
+     *
+     * @param items
+     * @returns {ChildNode}
+     */
+    function itemsCheckbox(items) {
+        items = items.map( (item, idx) => {
+            const date = formatDate(new Date(item.timeStart));
+            const time = formatTime(new Date(item.timeStart));
+            return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
+                            name="calendarId" value="${item.calendarId}"/>` +
+                `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${date}&nbsp;${time}</label></span>`;
+        });
+
+        items[0] = items[0].replace('type="radio"', 'type="radio" checked');
+        items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
+        return createNodeFromHTML(items);
     }
 
     // Run init and handleWeekChange on DOMContentLoaded

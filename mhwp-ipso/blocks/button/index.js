@@ -110,43 +110,31 @@ registerBlockType( metadata, {
 
         return (
             <div { ...blockProps } >
-                <div id="mhwp-ipso-message"></div>
 
 
                 {dateInput(attributes.activity_date)}
                 {idInput(attributes.activity_id)}
                 {titleInput(attributes.activity_title)}
 
-                <button id="mhwp-ipso-button-more" type="button">
-                    Reserveer
-                </button>
+                <div id={"mhwp-ipso-button"}>
+                    <button id="mhwp-ipso-button-more" type="button">
+                        Reserveer
+                    </button>
+                    <div id="mhwp-ipso-button-message"></div>
+                </div>
 
                 <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                     <div id="mhwp-ipso-box-inner" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">
                         <div id="mhwp-ipso-box-titlerow" className="mhwp-ipso-box-row">
+                            <img id="mhwp-ipso-box-image" src="" alt="" />
                             <div id="mhwp-ipso-box-title"></div>
                             <button id="mhwp-ipso-box-close" aria-label="Close">&times;</button>
-                        </div>
-                        <div id="mhwp-ipso-box-daterow" className="mhwp-ipso-box-row">
-                            <div id="mhwp-ipso-box-date"></div>
-                            <div id="mhwp-ipso-box-items"></div>
                         </div>
                         <div id="mhwp-ipso-box-rulerrow" className="mhwp-ipso-box-row">
                             <hr />
                         </div>
 
                         <div id="mhwp-ipso-box-contentrow" className="mhwp-ipso-box-row">
-                            <div id="mhwp-ipso-box-contentcolumn" className="mhwp-ipso-box-column">
-                                <div id="mhwp-ipso-box-introrow" className="mhwp-ipso-box-row">
-                                    <img id="mhwp-ipso-box-image" src="" alt="" />
-                                    <div id="mhwp-ipso-box-intro"></div>
-                                </div>
-                                <div id="mhwp-ipso-box-description"></div>
-                                <div id="mhwp-ipso-box-directbutton">
-                                    <button className="mhwp-ipso-activity-submit-reservation" type="submit" autocomplete="off">Reserveer</button>
-                                </div>
-                            </div>
-
                             <div id="mhwp-ipso-box-formcolumn" className="mhwp-ipso-box-column">
                                 <form id="mhwp-ipso-box-form">
                                     <fieldset className="mhwp-ipso-res-items">
