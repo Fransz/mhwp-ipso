@@ -322,7 +322,7 @@ import {
 
             if (detail.items.length === 0) {
                 clearMessages(element);
-                addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+                addMessage('De activiteit is vol, je kunt niet meer reserveren.', element);
                 setTimeout(() => clearMessages(element), 4000);
             } else {
                 displayActivity(detail, element);
@@ -583,7 +583,7 @@ import {
         await fetchWpRest(
             url, fetchInit, msgContainer
         ).then(() => {
-            addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
+            addMessage('Er is een plaats voor je gereserveerd; Je ontvangt een email', msgContainer)
             msgContainer.scrollIntoView();
             form.querySelector('button').style.display = 'none';
 

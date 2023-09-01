@@ -270,7 +270,7 @@ function foo() {
             form.remove();
 
             // Don't use addMessage here. The message should be persistent
-            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, je kunt niet meer reserveren.</div>');
             container.querySelector('.mhwp-ipso-reservation-form').append(notice);
 
         } else if(detail.disableReservation) {

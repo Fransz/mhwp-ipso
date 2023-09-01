@@ -105,13 +105,13 @@ async function makeButtonReservation(detail, mailData, form, event) {
             form.remove();
 
             // Don't use addMessage here. The message should be persistent
-            const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>');
+            const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, je kunt niet meer registreren.</div>');
             formContainer.append(notice);
         }
 
         // Close the reservation form, add a message.
         formContainer.classList.remove('in');
-        addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
+        addMessage('Er is een plaats voor je gereserveerd; Je ontvangt een email', container)
 
         // Close the message after 5 sec.
         setTimeout(() => {
