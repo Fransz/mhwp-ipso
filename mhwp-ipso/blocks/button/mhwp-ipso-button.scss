@@ -16,21 +16,21 @@
   #mhwp-ipso-button {
     display: flex;
     align-items: center;
+  }
 
-    #mhwp-ipso-button-more {
-      margin-bottom: 25px;
-      background-color: #e24219;
-      margin-top: 5px;
-      padding: 5px 10px;
-    }
+  button {
+    margin-bottom: 25px;
+    background-color: #e24219;
+    margin-top: 5px;
+    padding: 5px 10px;
+  }
 
-    h3.message, h3.error {
-      margin-left:1em;
-      display: block;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-      color: #e24219;
-    }
+  h3.message, h3.error {
+    margin-left:1em;
+    display: block;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #e24219;
   }
 }
