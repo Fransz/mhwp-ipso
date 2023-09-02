@@ -64,11 +64,10 @@ registerBlockType( metadata, {
 
                 <input type="hidden" name="activity-id" id="mhwp-ipso-button-activityid" value={attributes.activity_id}/>
 
-                <div id={"mhwp-ipso-button"}>
+                <div id="mhwp-ipso-button">
                     <button id="mhwp-ipso-button-more" type="button">
                         Reserveer
                     </button>
-                    <div id="mhwp-ipso-button-message"></div>
                 </div>
 
                 <div id="mhwp-ipso-modal-box" className="mhwp-ipso-modal-box" role="dialog" tabIndex="-1">

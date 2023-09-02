@@ -57,7 +57,7 @@ import {
      * Fetch and display the button.
      */
     function button() {
-        const msgContainer = document.querySelector('#mhwp-ipso-button-message');
+        const msgContainer = document.querySelector('#mhwp-ipso-button');
 
         fetchButton(msgContainer).then((activity) => {
             // Only display the button if we found activities with free places.
@@ -66,7 +66,8 @@ import {
                 displayButton(activity, msgContainer);
             } else {
                 addMessage('Er zijn in de aankomende periode geen activiteiten.', msgContainer);
-                setTimeout(() => clearMessages(msgContainer), 4000);
+                const button = document.querySelector('#mhwp-ipso-button-more');
+                button.style.display = "none";
             }
         });
     }
@@ -130,7 +131,6 @@ import {
      */
     function displayButton(activity, msgContainer) {
         const button = document.querySelector('#mhwp-ipso-button-more');
-        button.style.display = 'block';
         button.addEventListener('click', readMore);
 
         /**
