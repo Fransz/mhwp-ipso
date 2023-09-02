@@ -41,4 +41,18 @@
   #mhwp-ipso-box-title {
     align-self: center;
   }
+
+  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner {
+    max-width: 600px;
+    .mhwp-ipso-res-items div {
+      div {
+        width: 100%;
+      }
+
+      span {
+        display: block;
+        width: 100%;
+      }
+    }
+  }
 }
