@@ -300,6 +300,9 @@ import {
             box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
             overlay.remove();
 
+            // The button was hidden upon reservations.
+            box.querySelector('#mhwp-ipso-box-form button').style.display = 'block';
+
             const form = box.querySelector('form');
             if(form) form.reset();
 
