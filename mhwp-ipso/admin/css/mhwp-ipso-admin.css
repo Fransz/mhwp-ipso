@@ -111,6 +111,7 @@ ul.ui-list li {
   margin-top: 1em;
   height: 1em;
 }
+/* lists on the mappings tabs. */
 ul.ui-list li.ui-list-id {
   flex: 0 0 5%;
 }
@@ -129,6 +130,13 @@ ul.ui-list li.ui-list-dis-res {
 }
 ul.ui-list li.ui-list-buttons {
   flex: 0 0 20%;
+}
+/* List on the activities tab */
+#tab-4 ul.ui-list li {
+  flex: 1 0 10%;
+}
+#tab-4 ul.ui-list li+li {
+  flex: 1 0 10%;
 }
 ul.ui-list li h4 {
   margin-top:1em;
