@@ -17,17 +17,11 @@ class MHWP_IPSO_Activator {
 
 	/**
 	 * Activate the plugin, set defalt option values.
-	 * todo mail: init setting. rename setting
+	 * We keep the mail and url mappings.
 	 */
 	public static function activate() {
-		// Todo: add security checks.
-		// https://wordpress.stackexchange.com/questions/25910/uninstall-activate-deactivate-a-plugin-typical-features-how-to/25979#25979
-
 		add_option( 'mhwp_ipso_live_apikey', '', '', false );
 		add_option( 'mhwp_ipso_test_apikey', '', '', false );
 		add_option( 'mhwp_ipso_is_test', '1', '', false );
-		add_option( 'mhwp_ipso_url_mappings', array(), '', false );
-
 	}
-
 }
