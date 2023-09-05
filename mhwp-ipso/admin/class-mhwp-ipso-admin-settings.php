@@ -615,23 +615,7 @@ class MHWP_IPSO_Admin_Settings {
 			$edit = sanitize_text_field( wp_unslash( $_POST['edit'] ) );
 			$edit = preg_replace( '/[^0-9]/', '', $edit );
 
-			$option = get_option( $args['setting'] );
-
-			// Todo: Remove this if all mappings are arrays.
-			$mappings = array_map(
-				function ( $m ): array {
-					if ( is_array( $m ) ) {
-						return $m;
-					} else {
-						return array(
-							'title'               => '',
-							'url'                 => $m,
-							'disable_reservation' => false,
-						);
-					}
-				},
-				$option
-			);
+			$mappings = get_option( $args['setting'] );
 		}
 
 		if ( 'mhwp_ipso_url_mappings_id' === $id ) {

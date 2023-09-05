@@ -152,13 +152,8 @@ class MHWP_IPSO_Activity_Controller extends WP_REST_Controller {
 
 			if ( isset( $activity_resp->data->id ) && array_key_exists( $activity_resp->data->id, $mappings ) ) {
 				// A mapping exists for this activity. Add an url and/or a bool for disable registration.
-				// Todo drop the else clause when all mappings are arrays.
-				if ( is_array( $mappings[ $activity_resp->data->id ] ) ) {
-					$activity_resp->data->reservationUrl     = $mappings[ $activity_resp->data->id ]['url'];
-					$activity_resp->data->disableReservation = $mappings[ $activity_resp->data->id ]['disable_reservation'];
-				} else {
-					$activity_resp->data->reservationUrl = $mappings[ $activity_resp->data->id ];
-				}
+				$activity_resp->data->reservationUrl     = $mappings[ $activity_resp->data->id ]['url'];
+				$activity_resp->data->disableReservation = $mappings[ $activity_resp->data->id ]['disable_reservation'];
 			}
 
 			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
