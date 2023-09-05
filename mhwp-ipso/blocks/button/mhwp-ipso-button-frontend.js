@@ -1,9 +1,5 @@
-/*
- * Todo add mailData in the ipso button so we can mail with the button also.
- */
 import {
     addMessage
-    , addError
     , clearErrors
     , clearMessages
     , createNodeFromHTML
