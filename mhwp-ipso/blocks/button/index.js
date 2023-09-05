@@ -1,29 +1,21 @@
 import metadata from './block.json'
 
+import icon from './icons';
 import './mhwp-ipso-button.scss';
 
 import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import{ InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
-    DatePicker,
     PanelBody,
     PanelRow,
     TextControl
 } from '@wordpress/components';
 
 registerBlockType( metadata, {
-    icon: 'smiley',
+    icon: icon(),
     edit: ( {attributes, setAttributes} ) => {
         const blockProps = useBlockProps();
-
-        const formatDate = (d) => {
-            if (! d) {
-                return '';
-            }
-            const day = new Date(d);
-            return `${day.getDate()}-${day.getMonth() + 1}-${day.getFullYear()}`
-        }
 
         return [
             <InspectorControls>

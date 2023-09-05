@@ -1,19 +1,3 @@
-// Todo: Buttons should go with the calendarId, not the activity id?
-// No. you'll have two id's in the backend; activityID for redirection/mail; agendaId for buttons.
-// That's confusing.
-
-// Todo: Messages go in the first button on a page.
-// This is not a bug.
-
-// Todo: we can have only one button on a page, but have no way to force that. May be we can have getActivities search first.
-
-// Todo: Buttons shouldn't throw; just display the message and remove the form.
-// Todo: We need to refactor this code in the spirit of ipso-list.
-// Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
-
-// import '../includes/bootstrap-collapse';
-// import '../includes/bootstrap-transition';
-
 /*
  * Todo add mailData in the ipso button so we can mail with the button also.
  */
