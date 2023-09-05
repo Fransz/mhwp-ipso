@@ -1,13 +1,15 @@
 import {
     fetchWpRest
-    , wait
     , addMessage
     , clearErrors
     , clearMessages
     , createNodeFromHTML
     , formatDate
     , formatTime
+    , fetchDetail
+    , fetchParticipants
     , localeISOString
+    , makeReservation
 } from "../includes/mhwp-lib";
 
 (function () {
@@ -16,9 +18,6 @@ import {
      */
     // jQuery.
     const $jq = jQuery.noConflict();
-
-    // An alias for our origin.
-    const marikenhuisURL = document.location.origin;
 
     const state = {
         activities: [],
@@ -77,7 +76,8 @@ import {
      *
      * @param e the event.
      * @return void
-     */
+        // For now, we do not filter.
+
     function changeStateFilters(e) {
         const f = e.currentTarget.value.toLowerCase().replaceAll(/\W/g, '');
         const idx = state.filters.indexOf(f);
@@ -88,6 +88,7 @@ import {
         }
         calendar(0);
     }
+     */
 
     /**
      * Fetch and display the calendar, adjusting the state with shift days.
@@ -262,7 +263,7 @@ import {
      * @returns {Promise<{activityID: *, onDate: *, mentors: *, title: *, items: [], extraInfo: *}[]>}
      */
     function fetchActivities(from, till, msgContainer) {
-        const url = new URL(marikenhuisURL);
+        const url = new URL(document.location.origin);
         url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
         url.searchParams.append('from', localeISOString(from));
@@ -274,9 +275,10 @@ import {
             const acts = collapseActivities(json.data);
             acts.sort((a1, a2) => new Date(a1.items[0].timeStart) - new Date(a2.items[0].timeStart));
             acts.forEach(a => createActivityElement(a));
-            acts.forEach(a => {
-                a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
-            })
+            // For now we are not filtering
+            // acts.forEach(a => {
+            //     a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
+            // })
 
             return acts;
         });
@@ -320,7 +322,7 @@ import {
 
             if (detail.items.length === 0) {
                 clearMessages(element);
-                addMessage('De activiteit is vol, u kunt niet meer reserveren.', element);
+                addMessage('De activiteit is vol, je kunt niet meer reserveren.', element);
                 setTimeout(() => clearMessages(element), 4000);
             } else {
                 displayActivity(detail, element);
@@ -421,6 +423,7 @@ import {
         // If we have a form in our popup, prepare it.
         const form = box.querySelector('#mhwp-ipso-box-form');
         if(form) {
+            // Destory a previous instance of the validator if it exists.
             const v = $jq(form).validate();
             if (v) v.destroy();
 
@@ -432,6 +435,7 @@ import {
                 console.log( 'invalid' );
             }
 
+            // Validate our form
             $jq(form).validate({
                 rules: {
                     phoneNumber: {
@@ -494,7 +498,7 @@ import {
 
             box.querySelector('#mhwp-ipso-box-formcolumn').style.display = 'block';
             box.querySelector('#mhwp-ipso-box-directbutton').style.display = 'block';
-            box.querySelector('#mhwp-ipso-box-form button').disabled = false;
+            box.querySelector('#mhwp-ipso-box-form button').style.display = 'block';
 
             const button = box.querySelector('#mhwp-ipso-box-directbutton button')
             button.removeEventListener('click', redirectReservation);
@@ -518,142 +522,16 @@ import {
      * @returns {ChildNode}
      */
     function itemsCheckbox(items) {
-        if (items.length === 1) {
-            items = `<input type="hidden" id="mhwp-ipso-res-item" name="calendarId" value="${items[0].calendarId}" />`;
-        } else if (items.length > 1) {
-            items = items.map( (item, idx) => {
-                const time = formatTime(new Date(item.timeStart));
-                return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
+        items = items.map( (item, idx) => {
+            const time = formatTime(new Date(item.timeStart));
+            return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
                             name="calendarId" value="${item.calendarId}"/>` +
-                    `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`;
-            });
+                `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`;
+        });
 
-            items[0] = items[0].replace('type="radio"', 'type="radio" checked');
-            items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
-        }
+        items[0] = items[0].replace('type="radio"', 'type="radio" checked');
+        items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
         return createNodeFromHTML(items);
-    }
-
-    /**
-     * Make a request for the details of an activity, and again if necessary.
-     *
-     * @param activity The activity for which to fetch the detail
-     * @param msgContainer The parent for messages.
-     * @returns {Promise<any>}
-     */
-    async function fetchDetail(activity, msgContainer) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
-        url.searchParams.append('activityId', activity.activityID);
-        url.searchParams.append('calendarId', activity.id);
-
-        return fetchWpRest(url, {}, msgContainer, false).then((json) => {
-            // Upon a 429 error (Too many requests), We try again.
-            if ( json.mhwp_ipso_code === 429) {
-                console.log('Error 429, retrying');
-                return wait(1000).then(() => {
-                    return fetchWpRest(url, {}, msgContainer, true);
-                });
-            }
-            return json;
-        });
-    }
-
-    /**
-     * Make the request for the nr of participants, and again if necessary.
-     *
-     * @param calendarId The calendarId of the activity.
-     * @param msgContainer The parent for messages.
-     * @returns {Promise<any>}
-     */
-    function fetchParticipants(calendarId, msgContainer) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = 'wp-json/mhwp-ipso/v1/participants';
-        url.searchParams.append('calendarId', calendarId);
-
-        return fetchWpRest(url, {}, msgContainer, false).then((json) => {
-            // Upon a 429 error (Too many requests), We try again.
-            if ( json.mhwp_ipso_code === 429) {
-                console.log('Error 429, retrying');
-                return wait(1000).then(() => {
-                    return fetchWpRest(url, {}, msgContainer, true);
-                });
-            }
-            return json;
-        });
-    }
-
-    /**
-     * Make a reservation by accessing our API with the correct parameters.
-     * After the request we return a promise that gets resolved after 5 seconds.
-     *
-     * @param activity The activity.
-     * @param form The form  that is submitted.
-     * @param box The modal box whitch contains the form.
-     * @param event The submit event.
-     * @returns {Promise<void>}
-     */
-    async function makeReservation(activity, form, box, event) {
-        event.preventDefault();
-
-        // The URL for making the reservation
-        const marikenhuisURL = document.location.origin;
-        const url = new URL( marikenhuisURL );
-        url.pathname = "wp-json/mhwp-ipso/v1/reservation";
-
-        const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
-
-        // Get the item corresponding to the hidden input or selected radiobutton.
-        let calendarId;
-        if(form.querySelector('#mhwp-ipso-res-item')) {
-           calendarId = parseInt(form.querySelector('#mhwp-ipso-res-item').value);
-        } else {
-            calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
-        }
-        const item = activity.items.filter(item => item.calendarId === calendarId)[0];
-
-        const activityCalendarId = item.calendarId.toString();
-        const firstName = form.querySelector('input[name="firstName"]').value;
-        const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
-        const lastName = form.querySelector('input[name="lastName"]').value;
-        const email = form.querySelector('input[name="email"]').value;
-        let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
-        phoneNumber = phoneNumber === "" ? null : phoneNumber;
-
-        const activityId = activity.id;
-        const activityTitle = activity.title;
-        const activityDate = formatDate(activity.onDate);
-        const activityTime = formatTime(item.timeStart);
-
-        // Data for our endpoint.
-        // activityId, activityTime, activitydate and activityTitle are used for mail.
-        const data = {
-            activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
-            activityId, activityTitle, activityDate, activityTime
-        };
-
-        const fetchInit = {
-            method: 'POST',
-            body: JSON.stringify( data )
-        }
-        await fetchWpRest(
-            url, fetchInit, msgContainer
-        ).then(() => {
-            addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', msgContainer)
-            msgContainer.scrollIntoView();
-            form.querySelector('button').disabled = true;
-
-            // Return a promise that resolves after 4 seconds.
-            // After that the box is closed.
-            return wait(4000);
-        }).catch((_) => {
-            // An exception occured, we already have shown the error.
-            form.querySelector('button').disabled = true;
-
-            // Return a promise that resolves after 5 seconds.
-            // After that the box is closed.
-            return wait(4000);
-        });
     }
 
     // Run init and handleWeekChange on DOMContentLoaded

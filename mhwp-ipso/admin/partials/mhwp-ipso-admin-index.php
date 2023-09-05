@@ -4,7 +4,6 @@
  *
  * @package  MHWP_IPSO
  * @author   Frans Jaspers
- * Todo mail: add the tab.
  */
 
 ?>

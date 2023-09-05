@@ -14,7 +14,7 @@ registerBlockType( metadata, {
 
         return (
             <div { ...blockProps } >
-                <div id="mhwp-ipso-list-backend">
+                <div id="mhwp-ipso-backend">
                     <h4>IPSO agenda lijst</h4>
                 </div>
             </div>
@@ -162,6 +162,10 @@ registerBlockType( metadata, {
                                         <input type="email" id="mhwp-ipso-res-email" name="email" required
                                                placeholder="" />
                                         <span className="validity"></span>
+                                    </fieldset>
+                                    <fieldset className="mhwp-ipso-res-remark">
+                                        <label htmlFor="mhwp-ipso-res-remark">Opmerking</label>
+                                        <textarea id="mhwp-ipso-res-remark" name="remark" placeholder="" />
                                     </fieldset>
                                     {
                                         // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing

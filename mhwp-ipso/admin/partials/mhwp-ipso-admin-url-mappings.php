@@ -34,22 +34,7 @@
 
 <?php
 	// Get the current mappings, write a header.
-	$option = get_option( 'mhwp_ipso_url_mappings', array() );
-
-	// Todo: Remove this if all mappings are arrays.
-	$mappings = array_map(
-		function ( $m ): array {
-			if ( is_array( $m ) ) {
-				return $m;
-			} else {
-				return array(
-					'url'                 => $m,
-					'disable_reservation' => false,
-				);
-			}
-		},
-		$option
-	);
+	$mappings = get_option( 'mhwp_ipso_url_mappings', array() );
 
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
@@ -60,7 +45,7 @@
 	// phpcs:enable
 
 
-	?>
+?>
 
 <?php foreach ( $mappings as $activity_id => $mapping ) : ?>
 		<ul class="ui-list">

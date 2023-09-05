@@ -1,46 +1,94 @@
 /**
- * Make a reservation by accessing our API.
- * Submit callback for the validator api
+ * Make a request for the details of an activity, and again if necessary.
  *
- * @param detail The activity.
- * @param mailData extra data needed for mailing.
+ * @param activity The activity for which to fetch the detail
+ * @param msgContainer The parent for messages.
+ * @returns {Promise<any>}
+ */
+async function fetchDetail(activity, msgContainer) {
+    const url = new URL( document.location.origin );
+    url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
+    url.searchParams.append('activityId', activity.activityID);
+
+    return fetchWpRest(url, {}, msgContainer, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(1000).then(() => {
+                return fetchWpRest(url, {}, msgContainer, true);
+            });
+        }
+        return json;
+    });
+}
+
+/**
+ * Make the request for the nr of participants, and again if necessary.
+ *
+ * @param calendarId The calendarId of the activity.
+ * @param msgContainer The parent for messages.
+ * @returns {Promise<any>}
+ */
+function fetchParticipants(calendarId, msgContainer) {
+    const url = new URL( document.location.origin );
+    url.pathname = 'wp-json/mhwp-ipso/v1/participants';
+    url.searchParams.append('calendarId', calendarId);
+
+    return fetchWpRest(url, {}, msgContainer, false).then((json) => {
+        // Upon a 429 error (Too many requests), We try again.
+        if ( json.mhwp_ipso_code === 429) {
+            console.log('Error 429, retrying');
+            return wait(1000).then(() => {
+                return fetchWpRest(url, {}, msgContainer, true);
+            });
+        }
+        return json;
+    });
+}
+
+/**
+ * Make a reservation by accessing our API with the correct parameters.
+ * After the request we return a promise that gets resolved after 5 seconds.
+ *
+ * @param activity The activity.
  * @param form The form  that is submitted.
+ * @param box The modal box which contains the form.
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeButtonReservation(detail, mailData, form, event) {
+async function makeReservation(activity, form, box, event) {
     event.preventDefault();
 
     // The URL for making the reservation
-    const marikenhuisURL = document.location.origin;
-    const url = new URL( marikenhuisURL );
+    const url = new URL( document.location.origin );
     url.pathname = "wp-json/mhwp-ipso/v1/reservation";
 
-    const formContainer = form.parentNode;
-    const container = formContainer.parentNode;
+    const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
 
-    // Clear messages.
-    clearErrors(formContainer);
-    clearMessages(formContainer);
-    clearErrors(container);
-    clearMessages(container);
+    // Get the item corresponding to the hidden input or selected radiobutton.
+    let calendarId;
+    calendarId = parseInt(form.querySelector('input[name="calendarId"]:checked').value);
+    const item = activity.items.filter(i => i.calendarId === calendarId)[0];
 
-    // Collect all data in an object.
-    const activityCalendarId = form.querySelector('input[name="activityCalendarId"]').value;
+    const activityCalendarId = item.calendarId.toString();
     const firstName = form.querySelector('input[name="firstName"]').value;
     const lastNamePrefix = form.querySelector('input[name="lastNamePrefix"]').value;
     const lastName = form.querySelector('input[name="lastName"]').value;
     const email = form.querySelector('input[name="email"]').value;
     let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
     phoneNumber = phoneNumber === "" ? null : phoneNumber;
-    const activityId = mailData.activityId;
-    const activityTitle = mailData.activityTitle;
-    const activityDate = mailData.activityDate;
-    const activityTime = mailData.activityTime;
+    const remark = form.querySelector('textarea[name="remark"]').value;
 
+    const activityId = activity.id;
+    const activityTitle = activity.title;
+    const activityDate = formatDate(activity.onDate, false);
+    const activityTime = formatTime(item.timeStart);
+
+    // Data for our endpoint.
+    // activityId, activityTime, activitydate, activityTitle and remark are used for mail.
     const data = {
         activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
-        activityId, activityTitle, activityDate, activityTime
+        activityId, activityTitle, activityDate, activityTime, remark
     };
 
     const fetchInit = {
@@ -48,37 +96,24 @@ async function makeButtonReservation(detail, mailData, form, event) {
         body: JSON.stringify( data )
     }
     await fetchWpRest(
-        url, fetchInit, container
+        url, fetchInit, msgContainer
     ).then(() => {
-        // TODO: if ! 200 addError
+        addMessage('Er is een plaats voor je gereserveerd; Je ontvangt een email', msgContainer)
+        msgContainer.scrollIntoView();
+        form.querySelector('button').style.display = 'none';
 
-        // We made a successful reservation; Check to see if we can make another.
-        detail.places -= 1;
-        if (detail.places <= 0) {
-            // Reservations are no more possible.Remove the form, add a notice.
-            form.remove();
-
-            // Don't use addMessage here. The message should be persistent
-            const notice = createNodeFromHTML('<div class="mhwp-ipso-reservation-soldout">De activiteit is vol, u kunt niet meer registreren.</div>');
-            formContainer.append(notice);
-        }
-
-        // Close the reservation form, add a message.
-        formContainer.classList.remove('in');
-        addMessage('Er is een plaats voor u gereserveerd; U ontvangt een email', container)
-
-        // Close the message after 5 sec.
-        setTimeout(() => {
-            clearMessages(container);
-        }, 5000);
+        // Return a promise that resolves after 4 seconds.
+        // After that the box is closed.
+        return wait(4000);
     }).catch((_) => {
-        console.log('catched');
-        // TODO: addError
-        // No op. We had an error making a reservation. We still want to continue, maybe an other one
-        // succeeds.
+        // An exception occured, we already have shown the error.
+        form.querySelector('button').style.display = 'none';
+
+        // Return a promise that resolves after 5 seconds.
+        // After that the box is closed.
+        return wait(4000);
     });
 }
-
 
 /**
  * Helper method for accessing the rest api in our wordPress installation.
@@ -210,12 +245,17 @@ function formatTime(datetime) {
 /**
  * Helper for formating times.
  *
- * @param datetime
+ * @param datetime The datetime string to format
+ * @param replace Do we want to replace spaces by the &nbsp; entity.
  * @returns {string}
  */
-function formatDate(datetime) {
+function formatDate(datetime, replace=true) {
     const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-    return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
+    if (replace) {
+        return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
+    } else {
+        return dateFormat(new Date(datetime));
+    }
 }
 
 /**
@@ -237,9 +277,10 @@ export {
     , addMessage
     , clearErrors
     , clearMessages
-    , makeButtonReservation
+    , makeReservation
     , createNodeFromHTML
     , formatTime
     , formatDate
     , localeISOString
-};
+    , fetchDetail
+    , fetchParticipants};
