@@ -1,6 +1,12 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.9.0
+- Reimplemented the 'Agenda knop': popup, 28 days ahead, max 6 activities.
+- Comment field in the popup.
+- Always a time in the popup.
+- Bug fixes.
+
 release 0.8.3
 - We have checkboxes and filter functionality. Disabled though, pending Tambien bux fixes.
 - Better resonsive display of the modal popup.

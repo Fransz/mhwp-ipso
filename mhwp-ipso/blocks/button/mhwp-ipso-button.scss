@@ -1,46 +1,58 @@
-// Front end styles.
-div#mhwp-ipso-list-container {
-  .list-group-item-light {
-    background-color: #d3d3d3;
-  }
-  .list-group-item-dark {
-    background-color: #fefefe;
+.wp-block-mhwp-ipso-button {
+  #mhwp-ipso-backend {
+    display: flex;
+    justify-content: space-around;
+
+    border: 1px solid #e24219;
+
+    h4 {
+      margin:0;
+      padding:1em 0.5em;
+      width:auto;
+      color: #e24219;
+    }
   }
 
-  img {
+  #mhwp-ipso-button {
+    display: flex;
+    align-items: center;
+  }
+
+  button {
+    margin-bottom: 25px;
+    background-color: #e24219;
+    margin-top: 5px;
+    padding: 5px 10px;
+  }
+
+  h3.message, h3.error {
+    margin-left:1em;
+    display: block;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #e24219;
+  }
+
+  #mhwp-ipso-box-image {
+    margin-right:1em;
     height:100px;
   }
-  div.reserveer {
-    label {
-      display:inline-block;
-    }
-    .required {
-      color:red;
-    }
-
-    .error {
-      color:red;
-    }
-
-    input.error {
-      color: black;
-      border: 1px solid red;
-    }
+  #mhwp-ipso-box-title {
+    align-self: center;
   }
 
-  div.message {
-    border:2px solid green;
-    padding:1em 1em;
-    h3 {
-      color: green;
-    }
-  }
+  div#mhwp-ipso-modal-box div#mhwp-ipso-box-inner {
+    max-width: 600px;
+    .mhwp-ipso-res-items div {
+      div {
+        width: 100%;
+      }
 
-  div.error {
-    border:2px solid red;
-    padding:1em 1em;
-    h3 {
-      color: red;
+      span {
+        display: block;
+        width: 100%;
+      }
     }
   }
 }

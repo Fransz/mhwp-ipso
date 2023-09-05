@@ -1,162 +1,227 @@
-// Todo: Buttons should go with the calendarId, not the activity id?
-// No. you'll have two id's in the backend; activityID for redirection/mail; agendaId for buttons.
-// That's confusing.
+import {
+    addMessage
+    , clearErrors
+    , clearMessages
+    , createNodeFromHTML
+    , fetchWpRest
+    , fetchDetail
+    , fetchParticipants
+    , formatDate
+    , formatTime
+    , localeISOString
+    , makeReservation
+} from "../includes/mhwp-lib";
 
-// Todo: Messages go in the first button on a page.
-// This is not a bug.
+(function () {
 
-// Todo: we can have only one button on a page, but have no way to force that. May be we can have getActivities search first.
-
-// Todo: Buttons shouldn't throw; just display the message and remove the form.
-// Todo: We need to refactor this code in the spirit of ipso-list.
-// Todo: the calendarId is passed to the form as a hidden input, it should be gotten from the extended detail in submitForm?
-
-// import '../includes/bootstrap-collapse';
-// import '../includes/bootstrap-transition';
-
-/*
- * Todo add mailData in the ipso button so we can mail with the button also.
- */
-import {addError, clearErrors, clearMessages, fetchWpRest, makeButtonReservation, wait, createNodeFromHTML} from "../includes/mhwp-lib";
-
-(function() {
+    // jQuery.
     const $jq = jQuery.noConflict();
 
-    const marikenhuisURL = document.location.origin;
+    // Nr of days to fetch
+    const daysToFetch = 28;
 
-    // Dutch phone numbers have 10 digits (or 11 and start with +31).
-    $jq.validator.addMethod( "phoneNL", function( value, element ) {
-        return this.optional( element ) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test( value );
-    }, "Vul een geldig telefoonnummer in." );
-
+    // Nr of activities to show in the popup
+    const actsToShow = 6;
 
     /**
-     * Main function called upon onDOMContentLoaded.
-     * Fetch all wanted activities and their details. For each create some HTML.
+     * Init globals.
      */
-    async function getActivities() {
-        const url = new URL( marikenhuisURL );
-        url.pathname = "wp-json/mhwp-ipso/v1/activity";
-
-        const container = document.querySelector('#mhwp-ipso-button-container');
-
-        // Three parameters from the wp block;
-        const dateField = document.querySelector('#mhwp-activity-date').value;
-        const id = parseInt(document.querySelector('#mhwp-activity-id') ?. value || "");
-        // todo Check if the value exists. we need a default here.
-        const title = document.querySelector('#mhwp-activity-title').value;
-
-        // Check the parameters.
-        if ( ! dateField || (! id && ! title)) {
-            addError('Ongeldig formulier. Reserveren is niet mogelijk', container);
-            throw new Error('MHWP error invalid form - incorrect parameters.');
-        }
-
-        // Add the date parameter to the query string.
-        let d = new Date(dateField);
-        d = d.toISOString().slice(0, -14);
-        url.searchParams.append('from', d);
-        url.searchParams.append('till', d);
-
-        // Fetch the activities.
-        const activities = await fetchWpRest(url, {}, container);
-
-        // form and hidden input for the activityCalendarid
-        const form = container.querySelector('form');
-        const input = form.querySelector('input[name=activityCalendarId]');
-
-        // filter activities on id or name, we should be left with exactly one.
-        let filtered = [];
-        if ( id ) {
-            filtered = activities.data.filter((act) => act.id === parseInt(id) )
-        } else {
-            filtered = activities.data.filter((act) =>
-                act.title.replace(/\W+/g, '').toLowerCase() === title.replace(/\W+/g, '').toLowerCase()
-            )
-        }
-        if ( filtered.length !== 1 ) {
-            addError('Geen activiteit gevonden. Reserveren is niet mogelijk', container);
-            form.remove();
-            throw new Error('MHWP error invalid form - no activities found.');
-        }
-        const activity = filtered[0];
-
-
-        // add the calendarId to the form
-        input.value = activity.id;
-
-        // Prepare date and time for the mail; Dont euse date here.
-        const dateFormat = new Intl.DateTimeFormat(undefined, {month: 'long', day: 'numeric', weekday: 'long'}).format;
-        const timeFormat = new Intl.DateTimeFormat(undefined, {hour: 'numeric', minute: 'numeric'}).format;
-        const date = new Date(activity.timeStart);
-
-        activity.date = dateFormat(date);
-        activity.time = timeFormat(date);
-
-        // We need the reservation, and extra data for mailing on the server.
-        // We added properties date and time to the activity already.
-        const mailData = {
-            'activityId': activity.activityID,
-            'activityTitle': activity.title,
-            'activityDate': activity.date,
-            'activityTime': activity.time,
-        }
-
-        // Check if the activity ws in the past (in days)
-        const toDay = (new Date()).setHours(0, 0, 0, 0);
-        if (date < toDay) {
-            // If so we cannot make a reservation, remove button and form. We are done.
-            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
-            const form = container.querySelector('form');
-            button.remove();
-            form.remove();
-            return;
-        }
-
-
-        await prepareForm(activity, mailData, container);
+    function init() {
+        // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
+        $jq.validator.addMethod("phoneNL", function (value, element) {
+            return this.optional(element) || /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test(value);
+        }, "Vul een geldig telefoonnummer in.");
     }
 
     /**
-     * prepare the form belonging to this button.
-     *
-     * @param activity The activity for which to fetch the details and create the form.
-     * @param mailData Extra data needed for mailing.
-     * @param container The form belonging to this button.
+     * Fetch and display the button.
      */
-    async function prepareForm(activity, mailData, container) {
-        const form = container.querySelector('form');
+    function button() {
+        const msgContainer = document.querySelector('#mhwp-ipso-button');
 
-        const { data: detail } = await fetchDetail(activity, container);
+        fetchButton(msgContainer).then((activity) => {
+            // Only display the button if we found activities with free places.
+            if(activity.activityID && activity.items.length !== 0) {
+                clearMessages(msgContainer);
+                displayButton(activity, msgContainer);
+            } else {
+                addMessage('Er zijn in de aankomende periode geen activiteiten.', msgContainer);
+                const button = document.querySelector('#mhwp-ipso-button-more');
+                button.style.display = "none";
+            }
+        });
+    }
 
-        // Places left. If maxRegistrations === 0 there is no limit.
-        detail.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - detail.nrParticipants;
+    /**
+     * Fetch all activities given by nrDays; filter by the activityId parameter. sort collapse.
+     * @param msgContainer
+     * @returns {Promise<{activityID: *, onDate: *, mentors: *, title, items: *[], extraInfo: *}>}
+     */
+    function fetchButton(msgContainer) {
+        const id = parseInt(document.querySelector('#mhwp-ipso-button-activityid') ?. value );
+        if (Number.isNaN(id)) {
+            addMessage('Ongeldige knop', msgContainer);
+            setTimeout(() => clearMessages(msgContainer), 4000);
+            return Promise.reject();
+        }
 
-        if(detail.places <= 0) {
-            // Reservations are not possible.Remove the form, add a notice.
-            form.remove();
+        const url = new URL( document.location.origin );
+        url.pathname = "wp-json/mhwp-ipso/v1/activity";
 
-            // Don't use addMessage here. The message should be persistent
-            const notice = createNodeFromHTML('<div class="mhwp-ipso-activity-detail-soldout">De activiteit is vol, u kunt niet meer reserveren.</div>');
-            container.querySelector('.mhwp-ipso-reservation-form').append(notice);
+        const from = new Date();
+        url.searchParams.append('from', localeISOString(from));
+        const till = from.setDate(from.getDate() + daysToFetch);
+        url.searchParams.append('till', localeISOString(till));
 
-        } else if(detail.disableReservation) {
-            // we want to hide the button for this activity ID.
-            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
-            button.hidden = true;
-            form.remove();
+        return fetchWpRest(url, {}, msgContainer).then(({data: as}) => {
+            // sort, filter, truncate and collapse.
+            as.sort((a1, a2) => new Date(a1.timeStart) - new Date(a2.timeStart));
+            as = as.filter( a => a.activityID === id );
 
-        } else if(detail.reservationUrl) {
-            // there is an alternative URL. Prepare the button to redirect. Remove the form.
-            const button = container.querySelector("button.mhwp-ipso-reservation-show-reservation");
-            ['data-toggle', 'data-target', 'aria-expanded', 'aria-controls'].map((attr) => button.removeAttribute(attr));
-            button.addEventListener('click', (e) => window.location = detail.reservationUrl );
+            if (as.length > actsToShow) as.length = actsToShow;
+            return collapse(as);
+        });
+    }
 
-            form.remove();
+    /**
+     * collapse all calendar details for the activities in an array `items`.
+     *
+     * @param acts
+     * @returns {{activityID: *, onDate: *, mentors: *, title, items: [*], extraInfo: *}}
+     */
+    function collapse(acts) {
+        const items = acts.map( a => {
+            return { calendarId: a.id, timeOpen: a.timeOpen, timeStart: a.timeStart, timeEnd: a.timeEnd };
+        });
+        return {
+            activityID: acts[0]?.activityID,
+            title: acts[0]?.title,
+            extraInfo: acts[0]?.extraInfo,
+            mentors: acts[0]?.mentors,
+            onDate: acts[0]?.onDate,
+            items
+        }
+    }
 
-        } else {
+    /**
+     * Prepare the button.
+     *
+     * @param activity The activity.
+     * @param msgContainer The html element used for showing messages
+     */
+    function displayButton(activity, msgContainer) {
+        const button = document.querySelector('#mhwp-ipso-button-more');
+        button.addEventListener('click', readMore);
 
-            // Add validation- and submit handlers to the form.
+        /**
+         * click handler for read more buttons.
+         * Get the activities details and show them in a popup, or display a message if the activity is sold out.
+         *
+         * @param e The event..
+         */
+        async function readMore(e) {
+            clearErrors(msgContainer);
+            clearMessages(msgContainer);
+            addMessage('Gevens ophalen, dit kan even duren', msgContainer);
+
+            const detail = await fetchActivityDetails(activity, msgContainer);
+
+            if (detail.items.length === 0) {
+                clearMessages(msgContainer);
+                addMessage('Er zijn helaas voorlopig geen vrije plaatsen.', msgContainer);
+                setTimeout(() => clearMessages(msgContainer), 4000);
+            } else {
+                clearMessages(msgContainer);
+                displayActivity(detail, msgContainer);
+            }
+        }
+
+    }
+
+    /**
+     * Fetch details for the activity ID, and nrParticipants for all activities
+     *
+     * @param activity The activity for which we want to fetch the details.
+     * @param msgContainer The html element for messages.
+     * @returns {Promise<{mainImage}|*>}
+     */
+    async function fetchActivityDetails(activity, msgContainer) {
+        const { data: detail } = await fetchDetail(activity, msgContainer);
+
+        // For all activities, fetch the number of participants sequentially.
+        const items = await activity.items.reduce((p, item) => {
+            return p.then(acc => {
+                return fetchParticipants(item.calendarId, msgContainer).then( r => {
+                    item.places = detail.maxRegistrations === 0 ? 1000 : detail.maxRegistrations - r.data.nrParticipants;
+                    return [...acc, item];
+                });
+            })
+        }, Promise.resolve([]));
+
+        detail.items = items.filter( i => i.places > 0);
+        detail.imageUrl = detail.mainImage ? new URL(detail.mainImage) : "";
+        detail.onDate = activity.onDate;
+
+        return detail;
+    }
+
+    /**
+     * Display an activity in a modal popup.
+     * Use the html we got from our wp block.
+     *
+     * @param activity Current activity
+     * @param msgElement DOM node of the card element of the activity
+     */
+    function displayActivity(activity, msgElement) {
+        console.log(activity);
+        const box = displayModalBox(activity, msgElement);
+
+        box.querySelector('#mhwp-ipso-box-title').innerHTML = activity.title;
+
+        box.querySelector('#mhwp-ipso-box-image').src = activity.imageUrl;
+
+        box.querySelector('.mhwp-ipso-res-items').append(itemsCheckbox(activity.items));
+    }
+
+    /**
+     * Display the modal popup.
+     * Define event handlers for closing it again. Prepare the reservation form if shown.
+     *
+     * @param activity
+     * @param msgElement
+     * @returns {HTMLElement}
+     */
+    function displayModalBox(activity, msgElement) {
+        // Add an overlay.
+        const overlay = document.createElement('div')
+        overlay.id = "mhwp-ipso-box-overlay";
+        document.body.append(overlay);
+        document.body.style.overflow = 'hidden';
+        document.body.addEventListener('keydown', keyHandler)
+
+        const box = document.getElementById('mhwp-ipso-modal-box');
+        const innerBox = document.getElementById('mhwp-ipso-box-inner');
+
+        // Event handlers.
+        box.querySelector('#mhwp-ipso-box-close').addEventListener('click', closeBox);
+        box.addEventListener('click', closeBoxFromOverlay);
+
+        box.setAttribute('open', 'true')
+
+        // If we have a form in our popup, prepare it.
+        const form = box.querySelector('#mhwp-ipso-box-form');
+        if(form) {
+            const v = $jq(form).validate();
+            if (v) v.destroy();
+
+            function submitHandler (form, event) {
+                makeReservation(activity, form, box, event).then(() => closeBox(null));
+            }
+            function invalidHandler () {
+                // TODO: We want an error message here, this shouldn't happen though.
+                console.log( 'invalid' );
+            }
+
             $jq(form).validate({
                 rules: {
                     phoneNumber: {
@@ -164,42 +229,87 @@ import {addError, clearErrors, clearMessages, fetchWpRest, makeButtonReservation
                         "normalizer": v => v.trim()
                     }
                 },
-                "submitHandler": (form, event) => makeButtonReservation(detail, mailData, form, event),
-                "invalidHandler": function () {
-                    // TODO: We want an error message here.
-                    console.log( 'invalid' );
-                }
-
+                submitHandler, invalidHandler
             })
+        }
+
+        return box;
+
+        /**
+         * Handler for the escape key.
+         *
+         * @param e
+         */
+        function keyHandler(e) {
+            if (e.key === 'Escape') {
+                closeBox(e);
+            }
+        }
+
+        /**
+         * Handler for clicks on the overlay.
+         *
+         * @param e
+         */
+        function closeBoxFromOverlay(e) {
+            if(! innerBox.contains(e.target)) {
+                closeBox(e);
+            }
+        }
+
+        /**
+         * Handler for closing the popup.
+         * Remove the html we appended, remove event listeners.
+         *
+         * @param e
+         */
+        function closeBox(e) {
+            clearErrors(msgElement);
+            clearMessages(msgElement);
+            clearErrors(box);
+            clearMessages(box);
+
+            document.body.style.overflow = 'visible';
+            box.removeAttribute('open');
+
+            document.body.removeEventListener('keydown', keyHandler);
+            box.querySelector('#mhwp-ipso-box-close').removeEventListener('click', closeBox);
+            box.removeEventListener('click', closeBoxFromOverlay);
+
+            // remove item checkboxes.
+            box.querySelector('.mhwp-ipso-res-items').firstElementChild.remove();
+            overlay.remove();
+
+            // The button was hidden upon reservations.
+            box.querySelector('#mhwp-ipso-box-form button').style.display = 'block';
+
+            const form = box.querySelector('form');
+            if(form) form.reset();
+
+            if(e) e.stopImmediatePropagation();
         }
     }
 
     /**
-     * Actually make the request for the details, and again if necessary.
+     * Generate html for the choose time checkbox, or a hidden input if there is only one time available.
      *
-     * @param activity The activity for which to fetch the detail
-     * @param container The parent for messages.
-     * @returns {Promise<any>}
+     * @param items
+     * @returns {ChildNode}
      */
-    async function fetchDetail(activity, container) {
-        const url = new URL( marikenhuisURL );
-        url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
-        url.searchParams.append('activityId', activity.activityID);
-        url.searchParams.append('calendarId', activity.id);
-
-        clearErrors(container);
-        clearMessages(container);
-        return fetchWpRest(url, {}, container, false).then((json) => {
-            // Upon a 429 error (Too many requests), We try again.
-            if ( json.mhwp_ipso_code === 429) {
-                console.log('Error 429, retrying');
-                return wait(1000).then(() => {
-                    return fetchWpRest(url, {}, container, true);
-                });
-            }
-            return json;
+    function itemsCheckbox(items) {
+        items = items.map( (item, idx) => {
+            const date = formatDate(new Date(item.timeStart));
+            const time = formatTime(new Date(item.timeStart));
+            return `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
+                            name="calendarId" value="${item.calendarId}"/>` +
+                `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${date}&nbsp;${time}</label></span>`;
         });
+
+        items[0] = items[0].replace('type="radio"', 'type="radio" checked');
+        items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join("")}</div>`;
+        return createNodeFromHTML(items);
     }
 
-    document.addEventListener('DOMContentLoaded', getActivities);
+    // Run init and the button on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => { init(); button();});
 })();

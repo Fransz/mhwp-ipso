@@ -35,22 +35,7 @@
 
 <?php
 	// Get the current mappings.
-	$option = get_option( 'mhwp_ipso_mail_mappings', array() );
-
-	// Todo: Remove this if all mappings are arrays.
-	$mappings = array_map(
-		function ( $m ): array {
-			if ( is_array( $m ) ) {
-				return $m;
-			} else {
-				return array(
-					'title'     => 'onbekend',
-					'addresses' => $m,
-				);
-			}
-		},
-		$option
-	);
+	$mappings = get_option( 'mhwp_ipso_mail_mappings', array() );
 
 	// Write a header.
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact

@@ -21,7 +21,7 @@
 
 <form method="POST" action="<?php echo esc_url( remove_query_arg( 'mhwp_ipso_tab' ) ); ?>">
 	<input type="hidden" name="mhwp_ipso_tab" value="Activiteiten" />
-	<?php wp_nonce_field( 'mhwp_ipso_activities-options' ); ?>
+	<?php wp_nonce_field( 'wp_rest' ); ?>
 
 	<label for="datepicker" >Kies een datum</label>
 	<input type="date" id="datepicker" name="date" value=<?php echo esc_attr( $default_date ); ?> size="30" />

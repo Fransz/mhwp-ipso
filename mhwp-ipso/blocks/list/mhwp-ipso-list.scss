@@ -1,4 +1,4 @@
-.wp-block-mhwp-ipso-list #mhwp-ipso-list-backend {
+.wp-block-mhwp-ipso-list #mhwp-ipso-backend {
   h4 {
     padding:1em 0.5em;
     width:auto;
@@ -181,7 +181,7 @@ div#mhwp-ipso-modal-box {
 
       &#mhwp-ipso-box-titlerow {
         justify-content: space-between;
-        margin:10px 0 10px 0;
+        margin:20px 0 20px 0;
 
         #mhwp-ipso-box-title {
           font-size:24px;
@@ -211,19 +211,19 @@ div#mhwp-ipso-modal-box {
         justify-content: stretch;
 
         div#mhwp-ipso-box-introrow {
-          align-items: flex-start;
-          justify-content: flex-start;
+          display: block;
           margin-bottom:15px;
           padding:0 15px;
 
           #mhwp-ipso-box-image {
+            float:left;
+            margin-right:1em;
             height:100px;
           }
           #mhwp-ipso-box-intro {
             font-size:22px;
             font-weight: 600;
             text-align:left;
-            padding-left: 20px;
             padding-right: 40px;
           }
         }

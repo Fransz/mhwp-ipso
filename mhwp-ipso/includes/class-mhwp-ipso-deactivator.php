@@ -17,13 +17,12 @@ class MHWP_IPSO_Deactivator {
 
 	/**
 	 * Deactivate the plugin
-	 * todo mail: init setting. rename setting
+	 * We keep the url and mail mappings.
 	 */
 	public static function deactivate() {
 		delete_option( 'mhwp_ipso_live_apikey' );
 		delete_option( 'mhwp_ipso_test_apikey' );
 		delete_option( 'mhwp_ipso_is_test' );
-		delete_option( 'mhwp_ipso_url_mappings' );
 	}
 
 }

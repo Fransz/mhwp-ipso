@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
   "name": "mhwp-ipso/list",
-  "title": "ipsolist",
+  "title": "Marikenhuis - Agenda",
   "description": "Defenieer een ipso activiteiten lijst",
   "category": "text",
   "keywords": [ "ipso" ],
