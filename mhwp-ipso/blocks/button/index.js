@@ -108,6 +108,10 @@ registerBlockType( metadata, {
                                                placeholder="" />
                                         <span className="validity"></span>
                                     </fieldset>
+                                    <fieldset className="mhwp-ipso-res-remark">
+                                        <label htmlFor="mhwp-ipso-res-remark">Opmerking</label>
+                                        <textarea id="mhwp-ipso-res-remark" name="remark" placeholder="" />
+                                    </fieldset>
                                     {
                                         // @see https://stackoverflow.com/questions/5985839/bug-with-firefox-disabled-attribute-of-input-not-resetting-when-refreshing
                                     }

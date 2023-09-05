@@ -89,17 +89,19 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 		$lastname       = $json['lastName'] ?? '';
 		$guest_email    = $json['email'] ?? '';
 		$phonenumber    = $json['phoneNumber'] ?? '';
+		$remark         = $json['remark'] ?? '';
 
 		// Drop parameters not needed for making the reservation from the json.
 		unset( $json['activityId'] );
 		unset( $json['activityTitle'] );
 		unset( $json['activityDate'] );
 		unset( $json['activityTime'] );
+		unset( $json['remark'] );
 
-		// make the reservataion with IPSO.Community.
+		// make the reservation with IPSO.Community.
 		$reservation_resp = $client->add_participants( $json );
 
-		// If we could not correctly make the resevation, bail out.
+		// If we could not correctly make the reservation, bail out.
 		if ( is_wp_error( $reservation_resp ) || 200 !== $reservation_resp->mhwp_ipso_code ) {
 			return new WP_REST_Response( $reservation_resp, 200 );
 		}
@@ -123,7 +125,8 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 			$subject  = sprintf( 'Marikenhuis - Inschrijving activiteit %s', $activity_title );
 			$message  = 'Beste begeleider,';
 			$message .= PHP_EOL . PHP_EOL . sprintf( 'Er is een inschrijving voor activiteit %s, op %s om %s in het Marikenhuis', $activity_title, $activity_date, $activity_time );
-			$message .= PHP_EOL . sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s.', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
+			$message .= PHP_EOL . sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s,', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
+			$message .= PHP_EOL . sprintf( 'Opmerking: %s.', $remark );
 			$message .= PHP_EOL . 'Met vriendelijke groet, ';
 			// phpcs:enable
 
@@ -131,6 +134,7 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 			$logger   = new MHWP_IPSO_Logger();
 			$logline  = sprintf( 'activiteit %s, op %s om %s. ', $activity_title, $activity_date, $activity_time );
 			$logline .= sprintf( 'Naam: %s %s %s, telefoonnummer: %s email adres: %s.', $firstname, $prefix, $lastname, $phonenumber, $guest_email );
+			$logline .= sprintf( 'Opmerking: %s.', $remark );
 			foreach ( $emails as $email ) {
 				$mailed = wp_mail( $email, $subject, $message );
 				if ( ! $mailed ) {
@@ -161,32 +165,37 @@ class MHWP_IPSO_Reservation_Controller extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'activityCalendarId' => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The agenda id of the activity', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
 				'firstName'          => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The firstname', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
 				'lastNamePrefix'     => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The wlastname prefix', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => false,
 				),
 				'lastName'           => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The lastname', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
 				'email'              => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The email address', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => true,
 				),
 				'phoneNumber'        => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'mhwp-ipso' ),
+					'description' => esc_html__( 'The phonenumber', 'mhwp-ipso' ),
+					'type'        => 'string',
+					'required'    => false,
+				),
+				'remark'             => array(
+					'description' => esc_html__( 'The remark', 'mhwp-ipso' ),
 					'type'        => 'string',
 					'required'    => false,
 				),

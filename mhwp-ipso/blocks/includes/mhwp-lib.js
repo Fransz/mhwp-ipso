@@ -157,6 +157,7 @@ async function makeReservation(activity, form, box, event) {
     const email = form.querySelector('input[name="email"]').value;
     let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
     phoneNumber = phoneNumber === "" ? null : phoneNumber;
+    const remark = form.querySelector('textarea[name="remark"]').value;
 
     const activityId = activity.id;
     const activityTitle = activity.title;
@@ -164,10 +165,10 @@ async function makeReservation(activity, form, box, event) {
     const activityTime = formatTime(item.timeStart);
 
     // Data for our endpoint.
-    // activityId, activityTime, activitydate and activityTitle are used for mail.
+    // activityId, activityTime, activitydate, activityTitle and remark are used for mail.
     const data = {
         activityCalendarId, firstName, lastNamePrefix, lastName, email, phoneNumber,
-        activityId, activityTitle, activityDate, activityTime
+        activityId, activityTitle, activityDate, activityTime, remark
     };
 
     const fetchInit = {
