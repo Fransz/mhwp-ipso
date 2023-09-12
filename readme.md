@@ -1,6 +1,10 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.9.1
+- minor css fixes.
+- sorting the lists in the backend.
+
 release 0.9.0
 - Reimplemented the 'Agenda knop': popup, 28 days ahead, max 6 activities.
 - Comment field in the popup.
