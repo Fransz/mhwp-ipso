@@ -305,6 +305,10 @@ div#mhwp-ipso-modal-box {
       div#mhwp-ipso-box-contentrow {
         flex-direction: column;
         justify-content: flex-start;
+
+        #mhwp-ipso-box-contentcolumn {
+          width: 100%;
+        }
       }
     }
   }
