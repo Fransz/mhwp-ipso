@@ -67,14 +67,11 @@ if ( isset( $date ) ) {
 		if ( empty( $activities ) ) {
 			echo '<h4>Geen activiteiten gevonden</h4>';
 		} else {
-			echo '<ul class="ui-list"><li><h4>Agenda Id</h4></li><li><h4>Actviteit Id</h4></li><li><h4>Titel</h4></li></ul>';
+			echo '<ul class="ui-list"><li><h4>Actviteit Id</h4></li><li><h4>Titel</h4></li></ul>';
 		}
 		?>
 		<?php foreach ( $activities as $activity ) : ?>
 		<ul class="ui-list">
-			<li>
-				<span><?php echo esc_html( $activity->id ); ?></span>
-			</li>
 			<li>
 				<span><?php echo esc_html( $activity->activityID ); ?></span>
 			</li>
