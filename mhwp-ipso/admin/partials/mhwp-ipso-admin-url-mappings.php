@@ -35,6 +35,7 @@
 <?php
 	// Get the current mappings, write a header.
 	$mappings = get_option( 'mhwp_ipso_url_mappings', array() );
+	ksort( $mappings, SORT_NUMERIC );
 
 	// phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed,Generic.WhiteSpace.ScopeIndent.IncorrectExact
     if ( empty( $mappings ) ) {
