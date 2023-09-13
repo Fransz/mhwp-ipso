@@ -17,8 +17,8 @@ import {
     // jQuery.
     const $jq = jQuery.noConflict();
 
-    // Nr of days to fetch
-    const daysToFetch = 28;
+    // Nr of days to fetch 3 * 28
+    const daysToFetch = 84;
 
     // Nr of activities to show in the popup
     const actsToShow = 6;
@@ -70,7 +70,7 @@ import {
 
         const from = new Date();
         url.searchParams.append('from', localeISOString(from));
-        const till = from.setDate(from.getDate() + daysToFetch);
+        const till = new Date(from.setDate(from.getDate() + daysToFetch));
         url.searchParams.append('till', localeISOString(till));
 
         return fetchWpRest(url, {}, msgContainer).then(({data: as}) => {

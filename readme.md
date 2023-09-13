@@ -1,6 +1,9 @@
 # MHWP\_IPSO
 
 ## Releases
+release 0.9.2
+- The button now looks ahead 84 days
+
 release 0.9.1
 - minor css fixes.
 - sorting the lists in the backend.
