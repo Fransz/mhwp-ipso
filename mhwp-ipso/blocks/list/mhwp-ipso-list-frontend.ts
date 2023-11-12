@@ -10,7 +10,7 @@ import {
   fetchParticipants,
   localeISOString,
   makeReservation,
-} from "../includes/mhwp-lib.js";
+} from '../includes/mhwp-lib.js';
 
 import type {
   MHWPData,
@@ -20,14 +20,14 @@ import type {
   ActivityDetail,
   ActivityParticipants,
   ActivityItem,
-} from "../includes/mhwp-lib.js";
+} from '../includes/mhwp-lib.js';
 
 declare namespace jQuery {
   function noConflict(): any;
 }
 
 interface State {
-  activities: any;
+  activities: Activity[];
   firstDay: Date;
   lastDay: Date;
   firstFetched: Date;
@@ -35,11 +35,11 @@ interface State {
 }
 
 (function () {
-  console.log("typescript");
+  console.log('typescript');
   function add(a: number, b: number): number {
     return a + b;
   }
-  console.log("Hello " + add(4, 4));
+  console.log('Hello ' + add(4, 4));
   /**
    * Globales.
    */
@@ -62,8 +62,8 @@ interface State {
   function init() {
     // A rule for the jQuery validator. Dutch phone numbers have 10 digits (or 11 and start with +31).
     $jq.validator.addMethod(
-      "phoneNL",
-      function (value: any, element: any) {
+      'phoneNL',
+      function (this: any, value: any, element: HTMLElement) {
         return (
           this.optional(element) ||
           /^((\+|00(\s|\s?-\s?)?)31(\s|\s?-\s?)?(\(0\)[\-\s]?)?|0)[1-9]((\s|\s?-\s?)?[0-9]){8}$/.test(
@@ -71,16 +71,16 @@ interface State {
           )
         );
       },
-      "Vul een geldig telefoonnummer in."
+      'Vul een geldig telefoonnummer in.'
     );
 
     // Initialize the week picker.
-    document.querySelectorAll(".mhwp-ipso-week-previous").forEach((btn) => {
-      btn.addEventListener("click", () => calendar(-7));
+    document.querySelectorAll('.mhwp-ipso-week-previous').forEach((btn) => {
+      btn.addEventListener('click', () => calendar(-7));
     });
 
-    document.querySelectorAll(".mhwp-ipso-week-next").forEach((btn) => {
-      btn.addEventListener("click", () => calendar(7));
+    document.querySelectorAll('.mhwp-ipso-week-next').forEach((btn) => {
+      btn.addEventListener('click', () => calendar(7));
     });
 
     // initialize the filter checkboxes.
@@ -132,7 +132,7 @@ interface State {
    */
   function calendar(shiftDays: number): void {
     const monthContainer = document.querySelector(
-      "#mhwp-ipso-month-container"
+      '#mhwp-ipso-month-container'
     ) as HTMLElement;
 
     const prevFirstDay = new Date(state.firstDay);
@@ -153,9 +153,9 @@ interface State {
     }
 
     const msgContainer = document.querySelector(
-      "#mhwp-ipso-message-top"
+      '#mhwp-ipso-message-top'
     ) as HTMLElement;
-    addMessage("Gegevens ophalen, dit kan even duren", msgContainer);
+    addMessage('Gegevens ophalen, dit kan even duren', msgContainer);
 
     fetchCalendar(msgContainer).then((_) => {
       clearMessages(msgContainer);
@@ -203,7 +203,7 @@ interface State {
    * @param container element where to append thje acitivities.
    */
   function displayCalendar(prevFirstDay: Date, container: HTMLElement): void {
-    document.querySelectorAll(".mhwp-ipso-week-current").forEach((e) => {
+    document.querySelectorAll('.mhwp-ipso-week-current').forEach((e) => {
       e.innerHTML = `${formatDate(state.firstDay)} - ${formatDate(
         state.lastDay
       )}`;
@@ -227,21 +227,21 @@ interface State {
       state.activities
         .filter((a) => {
           const d = new Date(a.onDate);
-          return a.element.parentElement != null && d < state.firstDay;
+          return a.element!.parentElement != null && d < state.firstDay;
         })
-        .forEach((a) => a.element.remove());
+        .forEach((a) => a.element!.remove());
 
       // Add activities that became visible.
       state.activities
         .filter((a) => {
           const d = new Date(a.onDate);
           return (
-            a.element.parentElement == null &&
+            a.element!.parentElement == null &&
             d >= state.firstDay &&
             d <= state.lastDay
           );
         })
-        .forEach((a) => container.append(a.element));
+        .forEach((a) => container.append(a.element!));
     }
     // We browsed backward.
     if (prevFirstDay >= state.firstDay) {
@@ -249,22 +249,22 @@ interface State {
       state.activities
         .filter((a) => {
           const d = new Date(a.onDate);
-          return a.element.parentElement != null && d > state.lastDay;
+          return a.element!.parentElement != null && d > state.lastDay;
         })
-        .forEach((a) => a.element.remove());
+        .forEach((a) => a.element!.remove());
 
       // Add activities that became visible.
       state.activities
         .filter((a) => {
           const d = new Date(a.onDate);
           return (
-            a.element.parentElement == null &&
+            a.element!.parentElement == null &&
             d >= state.firstDay &&
             d <= state.lastDay
           );
         })
         .reverse()
-        .forEach((a) => container.prepend(a.element));
+        .forEach((a) => container.prepend(a.element!));
     }
   }
 
@@ -281,10 +281,10 @@ interface State {
     msgContainer: HTMLElement
   ): Promise<Activity[]> {
     const url = new URL(document.location.origin);
-    url.pathname = "wp-json/mhwp-ipso/v1/activity";
+    url.pathname = 'wp-json/mhwp-ipso/v1/activity';
 
-    url.searchParams.append("from", localeISOString(from));
-    url.searchParams.append("till", localeISOString(till));
+    url.searchParams.append('from', localeISOString(from));
+    url.searchParams.append('till', localeISOString(till));
 
     return fetchWpRest(url, {}, msgContainer).then((json) => {
       // Collapse, sort, create a dom element, process filters.
@@ -387,7 +387,7 @@ interface State {
    */
   function createActivityElement(activity: Activity): Activity {
     const template: Element = (
-      document.getElementById("mhwp-ipso-month-card") as HTMLTemplateElement
+      document.getElementById('mhwp-ipso-month-card') as HTMLTemplateElement
     ).content.firstElementChild!;
 
     const element: HTMLElement = template.cloneNode(true) as HTMLElement;
@@ -395,15 +395,15 @@ interface State {
     const date = formatDate(new Date(activity.onDate));
     // For now, we don't display the times in the cards.
     // const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
-    const times = "";
+    const times = '';
 
-    element.querySelector(".mhwp-ipso-card-title")!.innerHTML = activity.title;
-    element.querySelector(".mhwp-ipso-card-date")!.innerHTML = date;
-    element.querySelector(".mhwp-ipso-card-time")!.innerHTML = times;
+    element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
+    element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
+    element.querySelector('.mhwp-ipso-card-time')!.innerHTML = times;
 
     element
-      .querySelector(".mhwp-ipso-card-more")!
-      .addEventListener("click", readMore);
+      .querySelector('.mhwp-ipso-card-more')!
+      .addEventListener('click', readMore);
 
     activity.element = element;
     return activity;
@@ -415,14 +415,14 @@ interface State {
     async function readMore() {
       clearErrors(element);
       clearMessages(element);
-      addMessage("Gevens ophalen, dit kan even duren", element);
+      addMessage('Gevens ophalen, dit kan even duren', element);
 
       const detail = await fetchActivityDetails(activity, element);
 
       if (detail.items.length === 0) {
         clearMessages(element);
         addMessage(
-          "De activiteit is vol, je kunt niet meer reserveren.",
+          'De activiteit is vol, je kunt niet meer reserveren.',
           element
         );
         setTimeout(() => clearMessages(element), 4000);
@@ -449,10 +449,8 @@ interface State {
     // Create a chain of promises, starting with an resolved Promise of an empty array.
     const items = await activity.items.reduce((p, item) => {
       return p.then((acc) => {
-
         // Add the promise from fetchParticipants.
         return fetchParticipants(item.calendarId, msgContainer).then(
-
           // Which after resolving adds the places to the current item.
           (ddata: MHWPData) => {
             const parts = (ddata.data as ActivityParticipants).nrParticipants;
@@ -471,9 +469,9 @@ interface State {
     return {
       ...data,
       items: items.filter((i) => i.places! > 0),
-      imageUrl: data.mainImage ? new URL(data.mainImage) : "",
-      onDate: activity.onDate
-    }
+      imageUrl: data.mainImage ? new URL(data.mainImage).toString() : '',
+      onDate: activity.onDate,
+    };
   }
 
   /**
@@ -483,27 +481,30 @@ interface State {
    * @param activity Current activity
    * @param cardElement DOM node of the card element of the activity
    */
-  function displayActivity(activity, cardElement) {
+  function displayActivity(
+    activity: ActivityDetail,
+    cardElement: HTMLElement
+  ): void {
     const box = displayModalBox(activity, cardElement);
 
-    box.querySelector("#mhwp-ipso-box-title").innerHTML = activity.title;
+    box.querySelector('#mhwp-ipso-box-title')!.innerHTML = activity.title;
 
-    box.querySelector("#mhwp-ipso-box-date").innerHTML = formatDate(
+    box.querySelector('#mhwp-ipso-box-date')!.innerHTML = formatDate(
       activity.onDate
     );
-    box.querySelector("#mhwp-ipso-box-items").innerHTML =
-      "&nbsp;" +
-      activity.items.map((i) => formatTime(i.timeStart)).join("&comma;&nbsp;");
+    box.querySelector('#mhwp-ipso-box-items')!.innerHTML =
+      '&nbsp;' +
+      activity.items.map((i) => formatTime(i.timeStart)).join('&comma;&nbsp;');
 
-    box.querySelector("#mhwp-ipso-box-intro").innerHTML = activity.intro;
-    (box.querySelector("#mhwp-ipso-box-image") as HTMLImageElement).src =
+    box.querySelector('#mhwp-ipso-box-intro')!.innerHTML = activity.intro;
+    (box.querySelector('#mhwp-ipso-box-image') as HTMLImageElement)!.src =
       activity.imageUrl;
 
-    box.querySelector("#mhwp-ipso-box-description").innerHTML =
+    box.querySelector('#mhwp-ipso-box-description')!.innerHTML =
       activity.description;
 
     box
-      .querySelector(".mhwp-ipso-res-items")
+      .querySelector('.mhwp-ipso-res-items')!
       .append(itemsCheckbox(activity.items));
   }
 
@@ -515,58 +516,64 @@ interface State {
    * @param cardElement
    * @returns {HTMLElement}
    */
-  function displayModalBox(activity, cardElement) {
+  function displayModalBox(activity: ActivityDetail, cardElement: HTMLElement) {
     // Add an overlay.
-    const overlay = document.createElement("div");
-    overlay.id = "mhwp-ipso-box-overlay";
+    const overlay = document.createElement('div');
+    overlay.id = 'mhwp-ipso-box-overlay';
     document.body.append(overlay);
-    document.body.style.overflow = "hidden";
-    document.body.addEventListener("keydown", keyHandler);
+    document.body.style.overflow = 'hidden';
+    document.body.addEventListener('keydown', keyHandler);
 
-    const box = document.getElementById("mhwp-ipso-modal-box");
-    const innerBox = document.getElementById("mhwp-ipso-box-inner");
+    const box: HTMLElement = document.getElementById('mhwp-ipso-modal-box')!;
+    const innerBox: HTMLElement = document.getElementById(
+      'mhwp-ipso-box-inner'
+    )!;
 
     // Event handlers.
     box
-      .querySelector("#mhwp-ipso-box-close")
-      .addEventListener("click", closeBox);
-    box.addEventListener("click", closeBoxFromOverlay);
+      .querySelector('#mhwp-ipso-box-close')!
+      .addEventListener('click', closeBox);
+    box.addEventListener('click', closeBoxFromOverlay);
 
     // A different reservation button? The form?
     if (!activity.reservationUrl) {
       (
-        box.querySelector("#mhwp-ipso-box-directbutton") as HTMLElement
-      ).style.display = "none";
+        box.querySelector('#mhwp-ipso-box-directbutton') as HTMLElement
+      ).style.display = 'none';
     } else {
       (
-        box.querySelector("#mhwp-ipso-box-formcolumn") as HTMLElement
-      ).style.display = "none";
+        box.querySelector('#mhwp-ipso-box-formcolumn') as HTMLElement
+      ).style.display = 'none';
 
-      const button = box.querySelector("#mhwp-ipso-box-directbutton button");
-      button.addEventListener("click", redirectReservation);
+      const button: HTMLButtonElement = box.querySelector(
+        '#mhwp-ipso-box-directbutton button'
+      )!;
+      button.addEventListener('click', redirectReservation);
 
       if (activity.disableReservation) {
         (
-          box.querySelector("#mhwp-ipso-box-directbutton") as HTMLElement
-        ).style.display = "none";
+          box.querySelector('#mhwp-ipso-box-directbutton') as HTMLElement
+        ).style.display = 'none';
       }
     }
 
-    box.setAttribute("open", "true");
+    box.setAttribute('open', 'true');
 
     // If we have a form in our popup, prepare it.
-    const form = box.querySelector("#mhwp-ipso-box-form");
+    const form: HTMLFormElement = box.querySelector('#mhwp-ipso-box-form')!;
     if (form) {
       // Destory a previous instance of the validator if it exists.
       const v = $jq(form).validate();
       if (v) v.destroy();
 
-      function submitHandler(form, event) {
-        makeReservation(activity, form, box, event).then(() => closeBox(null));
+      function submitHandler(form: HTMLFormElement, event: Event) {
+        makeReservation(activity, form, box, event).then(() =>
+          closeBox(new MouseEvent('click'))
+        );
       }
       function invalidHandler() {
         // TODO: We want an error message here, this shouldn't happen though.
-        console.log("invalid");
+        console.log('invalid');
       }
 
       // Validate our form
@@ -574,7 +581,7 @@ interface State {
         rules: {
           phoneNumber: {
             phoneNL: true,
-            normalizer: (v) => v.trim(),
+            normalizer: (v: string) => v.trim(),
           },
         },
         submitHandler,
@@ -589,8 +596,8 @@ interface State {
      *
      * @param e
      */
-    function keyHandler(e) {
-      if (e.key === "Escape") {
+    function keyHandler(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
         closeBox(e);
       }
     }
@@ -600,8 +607,8 @@ interface State {
      *
      * @param e
      */
-    function closeBoxFromOverlay(e) {
-      if (!innerBox.contains(e.target)) {
+    function closeBoxFromOverlay(e: MouseEvent): void {
+      if (!innerBox.contains(e.target as Node)) {
         closeBox(e);
       }
     }
@@ -612,39 +619,41 @@ interface State {
      *
      * @param e
      */
-    function closeBox(e) {
+    function closeBox(e: Event): void {
       clearErrors(cardElement);
       clearMessages(cardElement);
       clearErrors(box);
       clearMessages(box);
 
-      document.body.style.overflow = "visible";
-      box.removeAttribute("open");
+      document.body.style.overflow = 'visible';
+      box.removeAttribute('open');
 
-      document.body.removeEventListener("keydown", keyHandler);
+      document.body.removeEventListener('keydown', keyHandler);
       box
-        .querySelector("#mhwp-ipso-box-close")
-        .removeEventListener("click", closeBox);
-      box.removeEventListener("click", closeBoxFromOverlay);
+        .querySelector('#mhwp-ipso-box-close')!
+        .removeEventListener('click', closeBox);
+      box.removeEventListener('click', closeBoxFromOverlay);
 
-      box.querySelector(".mhwp-ipso-res-items").firstElementChild.remove();
+      box.querySelector('.mhwp-ipso-res-items')!.firstElementChild!.remove();
       overlay.remove();
 
-      const form = box.querySelector("form");
+      const form = box.querySelector('form');
       if (form) form.reset();
 
       (
-        box.querySelector("#mhwp-ipso-box-formcolumn") as HTMLElement
-      ).style.display = "block";
+        box.querySelector('#mhwp-ipso-box-formcolumn') as HTMLElement
+      ).style.display = 'block';
       (
-        box.querySelector("#mhwp-ipso-box-directbutton") as HTMLElement
-      ).style.display = "block";
+        box.querySelector('#mhwp-ipso-box-directbutton') as HTMLElement
+      ).style.display = 'block';
       (
-        box.querySelector("#mhwp-ipso-box-form button") as HTMLElement
-      ).style.display = "block";
+        box.querySelector('#mhwp-ipso-box-form button') as HTMLElement
+      ).style.display = 'block';
 
-      const button = box.querySelector("#mhwp-ipso-box-directbutton button");
-      button.removeEventListener("click", redirectReservation);
+      const button: HTMLButtonElement = box.querySelector(
+        '#mhwp-ipso-box-directbutton button'
+      )!;
+      button.removeEventListener('click', redirectReservation);
 
       if (e) e.stopImmediatePropagation();
     }
@@ -653,8 +662,8 @@ interface State {
      * Handler for clicking on a reservation button with a redirect.
      * @param e
      */
-    function redirectReservation(e) {
-      window.location = activity.reservationUrl;
+    function redirectReservation(e: MouseEvent): void {
+      window.location.href = activity.reservationUrl;
     }
   }
 
@@ -664,8 +673,8 @@ interface State {
    * @param items
    * @returns {ChildNode}
    */
-  function itemsCheckbox(items): Node {
-    items = items.map((item, idx) => {
+  function itemsCheckbox(items: ActivityItem[]): Node {
+    let iStrings = items.map((item, idx) => {
       const time = formatTime(new Date(item.timeStart));
       return (
         `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
@@ -674,16 +683,16 @@ interface State {
       );
     });
 
-    items[0] = items[0].replace('type="radio"', 'type="radio" checked');
-    items = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${items.join(
-      ""
+    iStrings[0] = iStrings[0].replace('type="radio"', 'type="radio" checked');
+    const html = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${iStrings.join(
+      ''
     )}</div>`;
-    return createNodeFromHTML(items) as Node;
+    return createNodeFromHTML(html) as Node;
   }
 
   // Run init and handleWeekChange on DOMContentLoaded
   // document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0, 28);});
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener('DOMContentLoaded', () => {
     init();
     calendar(0);
   });
