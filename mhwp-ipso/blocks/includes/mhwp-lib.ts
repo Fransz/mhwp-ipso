@@ -141,7 +141,9 @@ async function makeReservation(
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/reservation';
 
-  const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
+  const msgContainer = box.querySelector(
+    '#mhwp-ipso-box-messagerow'
+  ) as HTMLElement;
 
   // Get the item corresponding to the hidden input or selected radiobutton.
   let calendarId: number;
@@ -203,7 +205,7 @@ async function makeReservation(
         msgContainer
       );
       msgContainer.scrollIntoView();
-      form.querySelector('button').style.display = 'none';
+      form.querySelector('button')!.style.display = 'none';
 
       // Return a promise that resolves after 4 seconds.
       // After that the box is closed.
@@ -211,7 +213,7 @@ async function makeReservation(
     })
     .catch((_) => {
       // An exception occured, we already have shown the error.
-      form.querySelector('button').style.display = 'none';
+      form.querySelector('button')!.style.display = 'none';
 
       // Return a promise that resolves after 5 seconds.
       // After that the box is closed.

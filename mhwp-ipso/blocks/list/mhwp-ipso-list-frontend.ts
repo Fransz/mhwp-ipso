@@ -10,7 +10,7 @@ import {
   fetchParticipants,
   localeISOString,
   makeReservation,
-} from '../includes/mhwp-lib.js';
+} from '../includes/mhwp-lib';
 
 import type {
   MHWPData,
@@ -20,7 +20,7 @@ import type {
   ActivityDetail,
   ActivityParticipants,
   ActivityItem,
-} from '../includes/mhwp-lib.js';
+} from '../includes/mhwp-lib';
 
 declare namespace jQuery {
   function noConflict(): any;
