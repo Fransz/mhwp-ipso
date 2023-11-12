@@ -9,8 +9,8 @@ interface MHWPData {
   data: IPSOActivity[] | IPSOActivityDetail | ActivityParticipants;
 }
 interface IPSOActivity {
-  id: string;
-  activityID: string;
+  id: number;
+  activityID: number;
   onDate: string;
   timeOpen: string;
   timeStart: string;
@@ -20,7 +20,7 @@ interface IPSOActivity {
   title: string;
 }
 interface IPSOActivityDetail {
-  id: string;
+  id: number;
   title: string;
   mainImage: string;
   intro: string;
@@ -42,7 +42,7 @@ interface ActivityParticipants {
 }
 
 interface Activity {
-  activityID: string;
+  activityID: number;
   title: string;
   extraInfo: string;
   mentors: string[];
@@ -52,7 +52,7 @@ interface Activity {
 }
 
 interface ActivityItem {
-  calendarId: string;
+  calendarId: number;
   timeOpen: string;
   timeStart: string;
   timeEnd: string;
@@ -78,7 +78,7 @@ async function fetchDetail(
 ): Promise<MHWPData> {
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
-  url.searchParams.append('activityId', activity.activityID);
+  url.searchParams.append('activityId', activity.activityID.toString());
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
@@ -100,12 +100,12 @@ async function fetchDetail(
  * @returns {Promise<any>}
  */
 function fetchParticipants(
-  calendarId: string,
+  calendarId: number,
   msgContainer: HTMLElement
 ): Promise<MHWPData> {
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/participants';
-  url.searchParams.append('calendarId', calendarId);
+  url.searchParams.append('calendarId', calendarId.toString());
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
