@@ -1,24 +1,20 @@
 import {
-  fetchWpRest,
   addMessage,
   clearErrors,
   clearMessages,
   createNodeFromHTML,
+  fetchActivityDetails,
+  fetchWpRest,
   formatDate,
   formatTime,
-  fetchDetail,
-  fetchParticipants,
   localeISOString,
   makeReservation,
 } from '../includes/mhwp-lib';
 
 import type {
-  MHWPData,
   IPSOActivity,
-  IPSOActivityDetail,
   Activity,
   ActivityDetail,
-  ActivityParticipants,
   ActivityItem,
 } from '../includes/mhwp-lib';
 
@@ -290,13 +286,13 @@ interface State {
   function collapseActivities(activities: Activity[]): Activity[] {
     type Grouped = {
       [n: string]: Activity[];
-    }
+    };
 
     type GroupedGrouped = {
       [n: string]: {
         [m: string]: Activity[];
       };
-    }
+    };
 
     let groups: Grouped = activities.reduce(groupById, {});
 
@@ -319,7 +315,7 @@ interface State {
 
     /**
      * Reducer function for grouping.
-     * 
+     *
      * @param key the key on which to group
      * @param acc the accumulator
      * @param cur the current entry to add
@@ -336,17 +332,18 @@ interface State {
 
     /**
      * Make a single activity from an array of activities by concatenating all item properties.
-     * 
+     *
      * @param activities an array of Activities
      * @returns Activity
      */
     function collect(activities: Activity[]): Activity {
       activities.sort(
         (a1, a2) =>
-          new Date(a1.items[0].timeStart).getTime() - new Date(a2.items[0].timeStart).getTime()
+          new Date(a1.items[0].timeStart).getTime() -
+          new Date(a2.items[0].timeStart).getTime()
       );
 
-      const items = activities.flatMap(a => a.items);
+      const items = activities.flatMap((a) => a.items);
       return {
         activityID: activities[0].activityID,
         title: activities[0].title,
@@ -409,48 +406,6 @@ interface State {
         displayActivity(detail, element);
       }
     }
-  }
-
-  /**
-   * Fetch the details for an activity, filter all of its items on places available.
-   *
-   * @param activity
-   * @param msgContainer
-   * @returns {Promise<{detail}>} All information for an activity.
-   */
-  async function fetchActivityDetails(
-    activity: Activity,
-    msgContainer: HTMLElement
-  ): Promise<ActivityDetail> {
-    const mhwpdata: MHWPData = await fetchDetail(activity, msgContainer);
-    const data: IPSOActivityDetail = mhwpdata.data as IPSOActivityDetail;
-
-    // Create a chain of promises, starting with an resolved Promise of an empty array.
-    const items: ActivityItem[] = await activity.items.reduce((p, item) => {
-      return p.then((acc) => {
-        // Add the promise from fetchParticipants.
-        return fetchParticipants(item.calendarId, msgContainer).then(
-          // Which after resolving adds the places to the current item.
-          (ddata: MHWPData) => {
-            const parts = (ddata.data as ActivityParticipants).nrParticipants;
-            item.places =
-              data.maxRegistrations === 0
-                ? 1000
-                : data.maxRegistrations - parts;
-
-            // Add the current item to the accumulator.
-            return [...acc, item];
-          }
-        );
-      });
-    }, Promise.resolve([] as ActivityItem[]));
-
-    return {
-      ...data,
-      items: items.filter((i) => i.places! > 0),
-      imageUrl: data.mainImage ? new URL(data.mainImage).toString() : '',
-      onDate: activity.onDate,
-    };
   }
 
   /**

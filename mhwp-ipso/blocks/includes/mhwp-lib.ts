@@ -76,6 +76,48 @@ type ActivityParticipants = {
 };
 
 /**
+ * Fetch details for the activity ID, and nrParticipants for all activities
+ *
+ * @param activity The activity for which we want to fetch the details.
+ * @param msgContainer The html element for messages.
+ * @returns {Promise<ActivityDetail>}
+ */
+async function fetchActivityDetails(
+  activity: Activity,
+  msgContainer: HTMLElement
+): Promise<ActivityDetail> {
+  const mhwpdata: MHWPData = await fetchDetail(activity, msgContainer);
+  const detail: IPSOActivityDetail = mhwpdata.data as IPSOActivityDetail;
+
+  // Create a chain of promises, starting with an resolved Promise of an empty array.
+  const items: ActivityItem[] = await activity.items.reduce((p, item) => {
+    return p.then((acc) => {
+      // Chain the promise from fetchParticipants.
+      return fetchParticipants(item.calendarId, msgContainer).then(
+        (data: MHWPData) => {
+          // Which after resolving adds the places to the current item.
+          const places = (data.data as ActivityParticipants).nrParticipants;
+          item.places =
+            detail.maxRegistrations === 0
+              ? 1000
+              : detail.maxRegistrations - places;
+
+          // Add the current item to the accumulator.
+          return [...acc, item];
+        }
+      );
+    });
+  }, Promise.resolve([] as ActivityItem[]));
+
+  return {
+    ...detail,
+    items: items.filter((i) => i.places! > 0),
+    imageUrl: detail.mainImage ? new URL(detail.mainImage).toString() : '',
+    onDate: activity.onDate,
+  };
+}
+
+/**
  * Make a request for the details of an activity, and again if necessary.
  *
  * @param activity The activity for which to fetch the detail
@@ -405,27 +447,25 @@ function localeISOString(d: Date): string {
 }
 
 export {
-  fetchWpRest,
-  wait,
   addError,
   addMessage,
   clearErrors,
   clearMessages,
-  makeReservation,
   createNodeFromHTML,
-  formatTime,
-  formatDate,
-  localeISOString,
+  fetchActivityDetails,
   fetchDetail,
   fetchParticipants,
+  fetchWpRest,
+  formatDate,
+  formatTime,
+  localeISOString,
+  makeReservation,
+  wait,
 };
 
 export type {
-  MHWPData,
-  IPSOActivity,
-  IPSOActivityDetail,
   Activity,
-  ActivityItem,
   ActivityDetail,
-  ActivityParticipants,
+  ActivityItem,
+  IPSOActivity,
 };

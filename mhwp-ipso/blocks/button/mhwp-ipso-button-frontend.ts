@@ -3,9 +3,8 @@ import {
   clearErrors,
   clearMessages,
   createNodeFromHTML,
+  fetchActivityDetails,
   fetchWpRest,
-  fetchDetail,
-  fetchParticipants,
   formatDate,
   formatTime,
   localeISOString,
@@ -13,12 +12,9 @@ import {
 } from '../includes/mhwp-lib';
 
 import type {
-  MHWPData,
   IPSOActivity,
-  IPSOActivityDetail,
   Activity,
   ActivityDetail,
-  ActivityParticipants,
   ActivityItem,
 } from '../includes/mhwp-lib';
 
@@ -142,8 +138,8 @@ declare namespace jQuery {
       activityID: acts[0]?.activityID,
       title: acts[0]?.title,
       extraInfo: acts[0]?.extraInfo,
-      mentors: acts[0]?.mentors,
       onDate: acts[0]?.onDate,
+      element: undefined,
       items,
     };
   }
@@ -188,44 +184,6 @@ declare namespace jQuery {
         displayActivity(detail, msgContainer);
       }
     }
-  }
-
-  /**
-   * Fetch details for the activity ID, and nrParticipants for all activities
-   *
-   * @param activity The activity for which we want to fetch the details.
-   * @param msgContainer The html element for messages.
-   * @returns {Promise<{mainImage}|*>}
-   */
-  async function fetchActivityDetails(
-    activity: Activity,
-    msgContainer: HTMLElement
-  ): Promise<ActivityDetail> {
-    const mhwpdata: MHWPData = await fetchDetail(activity, msgContainer);
-    const detail: IPSOActivityDetail = mhwpdata.data as IPSOActivityDetail;
-
-    // For all activities, fetch the number of participants sequentially.
-    const items: ActivityItem[] = await activity.items.reduce((p, item) => {
-      return p.then((acc) => {
-        return fetchParticipants(item.calendarId, msgContainer).then(
-          (data: MHWPData) => {
-            const parts = (data.data as ActivityParticipants).nrParticipants;
-            item.places =
-              detail.maxRegistrations === 0
-                ? 1000
-                : detail.maxRegistrations - parts;
-            return [...acc, item];
-          }
-        );
-      });
-    }, Promise.resolve([] as ActivityItem[]));
-
-    return {
-      ...detail,
-      items: items.filter((i) => i.places! > 0),
-      imageUrl: detail.mainImage ? new URL(detail.mainImage).toString() : '',
-      onDate: activity.onDate,
-    };
   }
 
   /**
