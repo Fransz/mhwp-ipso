@@ -33,6 +33,8 @@ interface IPSOActivityDetail {
   closeOnMaxRegistrations: boolean;
   appointment: boolean;
   appointmentInfo: string;
+  reservationUrl: string;
+  disableReservation: string;
 }
 
 interface ActivityParticipants {
@@ -58,7 +60,7 @@ interface ActivityItem {
 }
 
 interface ActivityDetail extends IPSOActivityDetail {
-  imageUrl: URL | string;
+  imageUrl: string;
   onDate: string;
   items: ActivityItem[];
 }
@@ -75,13 +77,13 @@ async function fetchDetail(
   msgContainer: HTMLElement
 ): Promise<MHWPData> {
   const url = new URL(document.location.origin);
-  url.pathname = "wp-json/mhwp-ipso/v1/activitydetail";
-  url.searchParams.append("activityId", activity.activityID);
+  url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
+  url.searchParams.append('activityId', activity.activityID);
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
     if (json.mhwp_ipso_code === 429) {
-      console.log("Error 429, retrying");
+      console.log('Error 429, retrying');
       return wait(1000).then(() => {
         return fetchWpRest(url, {}, msgContainer, true);
       });
@@ -102,13 +104,13 @@ function fetchParticipants(
   msgContainer: HTMLElement
 ): Promise<MHWPData> {
   const url = new URL(document.location.origin);
-  url.pathname = "wp-json/mhwp-ipso/v1/participants";
-  url.searchParams.append("calendarId", calendarId);
+  url.pathname = 'wp-json/mhwp-ipso/v1/participants';
+  url.searchParams.append('calendarId', calendarId);
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
     if (json.mhwp_ipso_code === 429) {
-      console.log("Error 429, retrying");
+      console.log('Error 429, retrying');
       return wait(1000).then(() => {
         return fetchWpRest(url, {}, msgContainer, true);
       });
@@ -127,32 +129,47 @@ function fetchParticipants(
  * @param event The submit event.
  * @returns {Promise<void>}
  */
-async function makeReservation(activity, form, box, event) {
+async function makeReservation(
+  activity: ActivityDetail,
+  form: HTMLFormElement,
+  box: HTMLElement,
+  event: Event
+): Promise<void> {
   event.preventDefault();
 
   // The URL for making the reservation
   const url = new URL(document.location.origin);
-  url.pathname = "wp-json/mhwp-ipso/v1/reservation";
+  url.pathname = 'wp-json/mhwp-ipso/v1/reservation';
 
-  const msgContainer = box.querySelector("#mhwp-ipso-box-messagerow");
+  const msgContainer = box.querySelector('#mhwp-ipso-box-messagerow');
 
   // Get the item corresponding to the hidden input or selected radiobutton.
-  let calendarId;
+  let calendarId: number;
   calendarId = parseInt(
-    form.querySelector('input[name="calendarId"]:checked').value
+    (form.querySelector('input[name="calendarId"]:checked') as HTMLInputElement)
+      .value
   );
   const item = activity.items.filter((i) => i.calendarId === calendarId)[0];
 
   const activityCalendarId = item.calendarId.toString();
-  const firstName = form.querySelector('input[name="firstName"]').value;
-  const lastNamePrefix = form.querySelector(
-    'input[name="lastNamePrefix"]'
+  const firstName = (
+    form.querySelector('input[name="firstName"]') as HTMLInputElement
   ).value;
-  const lastName = form.querySelector('input[name="lastName"]').value;
-  const email = form.querySelector('input[name="email"]').value;
-  let phoneNumber = form.querySelector('input[name="phoneNumber"]').value;
-  phoneNumber = phoneNumber === "" ? null : phoneNumber;
-  const remark = form.querySelector('textarea[name="remark"]').value;
+  const lastNamePrefix = (
+    form.querySelector('input[name="lastNamePrefix"]') as HTMLInputElement
+  ).value;
+  const lastName = (
+    form.querySelector('input[name="lastName"]') as HTMLInputElement
+  ).value;
+  const email = (form.querySelector('input[name="email"]') as HTMLInputElement)
+    .value;
+  let phoneNumber: string | null = (
+    form.querySelector('input[name="phoneNumber"]') as HTMLInputElement
+  ).value;
+  phoneNumber = phoneNumber === '' ? null : phoneNumber;
+  const remark = (
+    form.querySelector('textarea[name="remark"]') as HTMLInputElement
+  ).value;
 
   const activityId = activity.id;
   const activityTitle = activity.title;
@@ -176,17 +193,17 @@ async function makeReservation(activity, form, box, event) {
   };
 
   const fetchInit = {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(data),
   };
   await fetchWpRest(url, fetchInit, msgContainer)
     .then(() => {
       addMessage(
-        "Er is een plaats voor je gereserveerd; Je ontvangt een email",
+        'Er is een plaats voor je gereserveerd; Je ontvangt een email',
         msgContainer
       );
       msgContainer.scrollIntoView();
-      form.querySelector("button").style.display = "none";
+      form.querySelector('button').style.display = 'none';
 
       // Return a promise that resolves after 4 seconds.
       // After that the box is closed.
@@ -194,7 +211,7 @@ async function makeReservation(activity, form, box, event) {
     })
     .catch((_) => {
       // An exception occured, we already have shown the error.
-      form.querySelector("button").style.display = "none";
+      form.querySelector('button').style.display = 'none';
 
       // Return a promise that resolves after 5 seconds.
       // After that the box is closed.
@@ -218,44 +235,44 @@ function fetchWpRest(
   throw_429: boolean = true
 ): Promise<MHWPData> {
   const defaults: RequestInit = {
-    method: "GET",
-    cache: "no-store",
+    method: 'GET',
+    cache: 'no-store',
     headers: {
-      "X-WP-Nonce": wpApiSettings.nonce,
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'X-WP-Nonce': wpApiSettings.nonce,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
   };
   return fetch(url, Object.assign({}, defaults, init))
     .then((res) => {
       if (!res.ok) {
-        throw new TypeError("Er is een probleem op de server.");
+        throw new TypeError('Er is een probleem op de server.');
       }
 
       // Get a possibly new nonce from the response header, store it globally.
-      const nonce = res.headers.get("X-WP-Nonce");
+      const nonce = res.headers.get('X-WP-Nonce');
       if (nonce) wpApiSettings.nonce = nonce;
 
       return res.json();
     })
     .then((json: MHWPData) => {
-      if (json.mhwp_ipso_status !== "ok") {
+      if (json.mhwp_ipso_status !== 'ok') {
         // Upon a 429 error and if the caller can handle it, we return our JSON.
         if (json.mhwp_ipso_code === 429 && !throw_429) {
           return json;
         }
-        const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : "";
+        const message = json.mhwp_ipso_msg ? json.mhwp_ipso_msg : '';
         throw new TypeError(message);
       }
       return json;
     })
     .catch((err) => {
-      let message = "";
+      let message = '';
       if (err instanceof TypeError) {
         message = err.message;
       }
-      if ("" === message) {
-        message = "Er gaat iets mis, probeer het later nog eens";
+      if ('' === message) {
+        message = 'Er gaat iets mis, probeer het later nog eens';
       }
       clearErrors(errorContainer);
       clearMessages(errorContainer);
@@ -274,7 +291,7 @@ function fetchWpRest(
  */
 function wait(duration: number): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (duration < 0) reject(new Error("Cannot wait negative time"));
+    if (duration < 0) reject(new Error('Cannot wait negative time'));
     setTimeout(resolve, duration);
   });
 }
@@ -286,7 +303,7 @@ function wait(duration: number): Promise<void> {
  * @param htmlString The HTML string
  */
 function createNodeFromHTML(htmlString: string): ChildNode {
-  const div = document.createElement("div");
+  const div = document.createElement('div');
   div.innerHTML = htmlString.trim();
   return div.firstChild!;
 }
@@ -308,10 +325,10 @@ function addNode(
   container.append(node);
 }
 function addError(message: string, container: HTMLElement) {
-  addNode(message, "error", container);
+  addNode(message, 'error', container);
 }
 function addMessage(message: string, container: HTMLElement) {
-  addNode(message, "message", container);
+  addNode(message, 'message', container);
 }
 
 /**
@@ -323,10 +340,10 @@ function clearNodes(className: string, container: HTMLElement): void {
   container.querySelector(`.${className}-container`)?.remove();
 }
 function clearErrors(container: HTMLElement): void {
-  clearNodes("error", container);
+  clearNodes('error', container);
 }
 function clearMessages(container: HTMLElement): void {
-  clearNodes("message", container);
+  clearNodes('message', container);
 }
 
 /**
@@ -335,12 +352,12 @@ function clearMessages(container: HTMLElement): void {
  * @param datetime
  * @returns {string}
  */
-function formatTime(datetime: Date): string {
-  const timeFormat = new Intl.DateTimeFormat("nl-NL", {
-    hour: "numeric",
-    minute: "numeric",
+function formatTime(datetime: Date | string): string {
+  const timeFormat = new Intl.DateTimeFormat('nl-NL', {
+    hour: 'numeric',
+    minute: 'numeric',
   }).format;
-  return timeFormat(new Date(datetime)).replace(":", ".");
+  return timeFormat(new Date(datetime)).replace(':', '.');
 }
 
 /**
@@ -350,14 +367,14 @@ function formatTime(datetime: Date): string {
  * @param replace Do we want to replace spaces by the &nbsp; entity.
  * @returns {string}
  */
-function formatDate(datetime: Date, replace: boolean = true): string {
+function formatDate(datetime: Date | string, replace: boolean = true): string {
   const dateFormat = new Intl.DateTimeFormat(undefined, {
-    month: "long",
-    day: "numeric",
-    weekday: "long",
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
   }).format;
   if (replace) {
-    return dateFormat(new Date(datetime)).replace(/ /g, "&nbsp;");
+    return dateFormat(new Date(datetime)).replace(/ /g, '&nbsp;');
   } else {
     return dateFormat(new Date(datetime));
   }
