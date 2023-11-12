@@ -13,6 +13,7 @@
   "devDependencies": {
     "@babel/core": "^7.18.0",
     "@babel/plugin-transform-react-jsx": "^7.17.0",
+    "@types/jquery.validation": "^1.16.10",
     "@wordpress/babel-preset-default": "^6.13.0",
     "@wordpress/scripts": "^24.4.0",
     "babel-loader": "^8.2.0",
