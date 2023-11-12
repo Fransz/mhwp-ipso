@@ -366,7 +366,6 @@ interface State {
         activityID: acts[0].activityID,
         title: acts[0].title,
         extraInfo: acts[0].extraInfo,
-        mentors: acts[0].mentors,
         onDate: acts[0].onDate,
         element: undefined,
         items,

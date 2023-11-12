@@ -2,68 +2,78 @@ declare namespace wpApiSettings {
   let nonce: string;
 }
 
-interface MHWPData {
-  mhwp_ipso_code: number;
-  mhwp_ipso_status: string;
-  mhwp_ipso_msg: string;
+type MHWPData = {
   data: IPSOActivity[] | IPSOActivityDetail | ActivityParticipants;
-}
-interface IPSOActivity {
-  id: number;
-  activityID: number;
+  mhwp_ipso_code: number;
+  mhwp_ipso_msg: string;
+  mhwp_ipso_status: string;
+};
+
+type IPSOActivity = {
+  activityID: number; // Activity Id
+  extraInfo: string;
+  id: number; // Calendar Id
+  mentors: string[];
   onDate: string;
+  timeEnd: string;
   timeOpen: string;
   timeStart: string;
-  timeEnd: string;
-  extraInfo: string;
-  mentors: string[];
   title: string;
-}
-interface IPSOActivityDetail {
-  id: number;
-  title: string;
-  mainImage: string;
-  intro: string;
-  description: string;
-  price: number;
-  priceExplanation: string;
-  maxRegistrations: number;
-  minRegistrations: number;
-  waitingList: boolean;
-  closeOnMaxRegistrations: boolean;
+};
+
+type IPSOActivityDetail = {
   appointment: boolean;
   appointmentInfo: string;
-  reservationUrl: string;
-  disableReservation: string;
-}
-
-interface ActivityParticipants {
-  nrParticipants: number;
-}
-
-interface Activity {
-  activityID: number;
+  closeOnMaxRegistrations: boolean;
+  description: string;
+  disableReservation: string; // From mhwp
+  id: number; // Activiy Id
+  intro: string;
+  mainImage: string;
+  maxRegistrations: number;
+  minRegistrations: number;
+  priceExplanation: string;
+  price: number;
+  reservationUrl: string; // From mhwp
   title: string;
-  extraInfo: string;
-  mentors: string[];
-  onDate: string;
-  items: ActivityItem[];
-  element?: HTMLElement;
-}
+  waitingList: boolean;
+};
 
-interface ActivityItem {
+type Activity = Omit<
+  IPSOActivity,
+  'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart'
+> & {
+  element?: HTMLElement;
+  items: ActivityItem[];
+};
+
+type ActivityItem = {
   calendarId: number;
   timeOpen: string;
   timeStart: string;
   timeEnd: string;
   places?: number;
-}
+};
 
-interface ActivityDetail extends IPSOActivityDetail {
+type ActivityDetail = Omit<
+  IPSOActivityDetail,
+  | 'appointment'
+  | 'appointmentInfo'
+  | 'closeOnMaxRegistations'
+  | 'maxRegistrations'
+  | 'minRegistrations'
+  | 'priceExplanation'
+  | 'price'
+  | 'waitingList'
+> & {
   imageUrl: string;
   onDate: string;
   items: ActivityItem[];
-}
+};
+
+type ActivityParticipants = {
+  nrParticipants: number;
+};
 
 /**
  * Make a request for the details of an activity, and again if necessary.
