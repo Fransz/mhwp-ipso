@@ -35,11 +35,6 @@ interface State {
 }
 
 (function () {
-  console.log('typescript');
-  function add(a: number, b: number): number {
-    return a + b;
-  }
-  console.log('Hello ' + add(4, 4));
   /**
    * Globales.
    */
@@ -447,7 +442,7 @@ interface State {
     const data: IPSOActivityDetail = mhwpdata.data as IPSOActivityDetail;
 
     // Create a chain of promises, starting with an resolved Promise of an empty array.
-    const items = await activity.items.reduce((p, item) => {
+    const items: ActivityItem[] = await activity.items.reduce((p, item) => {
       return p.then((acc) => {
         // Add the promise from fetchParticipants.
         return fetchParticipants(item.calendarId, msgContainer).then(
@@ -516,7 +511,10 @@ interface State {
    * @param cardElement
    * @returns {HTMLElement}
    */
-  function displayModalBox(activity: ActivityDetail, cardElement: HTMLElement) {
+  function displayModalBox(
+    activity: ActivityDetail,
+    cardElement: HTMLElement
+  ): HTMLElement {
     // Add an overlay.
     const overlay = document.createElement('div');
     overlay.id = 'mhwp-ipso-box-overlay';
