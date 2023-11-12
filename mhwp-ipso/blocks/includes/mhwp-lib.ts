@@ -43,7 +43,7 @@ type Activity = Omit<
   IPSOActivity,
   'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart'
 > & {
-  element?: HTMLElement;
+  element: HTMLElement | undefined;
   items: ActivityItem[];
 };
 

@@ -228,7 +228,7 @@ interface State {
    * @param from
    * @param till
    * @param msgContainer
-   * @returns {Promise<{activityID: *, onDate: *, mentors: *, title: *, items: [], extraInfo: *}[]>}
+   * @returns {Promise<Activity[]>}
    */
   function fetchActivities(
     from: Date,
@@ -241,38 +241,60 @@ interface State {
     url.searchParams.append('from', localeISOString(from));
     url.searchParams.append('till', localeISOString(till));
 
-    return fetchWpRest(url, {}, msgContainer).then((json) => {
-      // Collapse, sort, create a dom element.
-      const acts = collapseActivities(json.data as IPSOActivity[]);
-      acts.sort(
-        (a1, a2) =>
-          new Date(a1.items[0].timeStart).getTime() -
-          new Date(a2.items[0].timeStart).getTime()
-      );
-      acts.forEach((a) => createActivityElement(a));
+    return fetchWpRest(url, {}, msgContainer)
+      .then((json) => {
+        // Create an Activity object for all returned data.
+        const data: IPSOActivity[] = json.data as IPSOActivity[];
+        return data.map((a) => {
+          return {
+            activityID: a.activityID,
+            title: a.title,
+            extraInfo: a.extraInfo,
+            onDate: a.onDate,
+            element: undefined,
+            items: [
+              {
+                calendarId: a.id,
+                timeOpen: a.timeOpen,
+                timeStart: a.timeStart,
+                timeEnd: a.timeEnd,
+              },
+            ],
+          };
+        });
+      })
+      .then((activities: Activity[]) => {
+        // Collapse, sort, create a dom element.
+        const as: Activity[] = collapseActivities(activities);
+        as.sort(
+          (a1, a2) =>
+            new Date(a1.items[0].timeStart).getTime() -
+            new Date(a2.items[0].timeStart).getTime()
+        );
+        as.forEach((a) => createActivityElement(a));
 
-      return acts;
-    });
+        return as;
+      });
   }
 
   /**
    * Collapse the same activities on the same day.
    * Create an object with all activityIds as key and as value:
-   * an object with all dates for that activity as key:
-   * and as value: an array of all those activities on that day.
+   *   an object with all dates for that activity as key:
+   *    and as value: an array of all those activities on that day.
    * Then collect all activities into a single array again.
    *
    * @param activities
    * @returns Activity[]
    */
-  function collapseActivities(activities: IPSOActivity[]): Activity[] {
-    interface Grouped {
-      [n: string]: IPSOActivity[];
+  function collapseActivities(activities: Activity[]): Activity[] {
+    type Grouped = {
+      [n: string]: Activity[];
     }
 
-    interface GroupedGrouped {
+    type GroupedGrouped = {
       [n: string]: {
-        [m: string]: IPSOActivity[];
+        [m: string]: Activity[];
       };
     }
 
@@ -287,42 +309,49 @@ interface State {
       Object.keys(datedGroups[ak]).map((dk) => collect(datedGroups[ak][dk]))
     );
 
-    function groupById(acc: Grouped, cur: IPSOActivity): Grouped {
+    function groupById(acc: Grouped, cur: Activity): Grouped {
       return groupBy(cur.activityID, acc, cur);
     }
 
-    function groupByDate(acc: Grouped, cur: IPSOActivity): Grouped {
+    function groupByDate(acc: Grouped, cur: Activity): Grouped {
       return groupBy(cur.onDate, acc, cur);
     }
 
+    /**
+     * Reducer function for grouping.
+     * 
+     * @param key the key on which to group
+     * @param acc the accumulator
+     * @param cur the current entry to add
+     * @returns An object with activities grouped in an array.
+     */
     function groupBy(
       key: string | number,
       acc: Grouped,
-      cur: IPSOActivity
+      cur: Activity
     ): Grouped {
       const grp = acc[key] ?? [];
       return { ...acc, [key]: [...grp, cur] };
     }
 
-    function collect(acts: IPSOActivity[]): Activity {
-      acts.sort(
+    /**
+     * Make a single activity from an array of activities by concatenating all item properties.
+     * 
+     * @param activities an array of Activities
+     * @returns Activity
+     */
+    function collect(activities: Activity[]): Activity {
+      activities.sort(
         (a1, a2) =>
-          new Date(a1.timeStart).getTime() - new Date(a2.timeStart).getTime()
+          new Date(a1.items[0].timeStart).getTime() - new Date(a2.items[0].timeStart).getTime()
       );
 
-      const items = acts.map((a) => {
-        return {
-          calendarId: a.id,
-          timeOpen: a.timeOpen,
-          timeStart: a.timeStart,
-          timeEnd: a.timeEnd,
-        };
-      });
+      const items = activities.flatMap(a => a.items);
       return {
-        activityID: acts[0].activityID,
-        title: acts[0].title,
-        extraInfo: acts[0].extraInfo,
-        onDate: acts[0].onDate,
+        activityID: activities[0].activityID,
+        title: activities[0].title,
+        extraInfo: activities[0].extraInfo,
+        onDate: activities[0].onDate,
         element: undefined,
         items,
       };
