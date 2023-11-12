@@ -47,8 +47,6 @@ interface State {
     lastDay: new Date(),
     firstFetched: new Date(),
     lastFetched: new Date(),
-    // For now we dont have filters.
-    // filters: [],
   };
 
   /**
@@ -78,12 +76,6 @@ interface State {
       btn.addEventListener('click', () => calendar(7));
     });
 
-    // initialize the filter checkboxes.
-    // For now, we don't have filtering.
-    // document.querySelectorAll('.mhwp-ipso-filter-checkbox').forEach( cb => {
-    //     cb.addEventListener('click', changeStateFilters );
-    // });
-
     // Initialize state such that calender(0) shows 28 days, starting today.
     state.firstDay = new Date();
     state.firstDay.setHours(0, 0, 0, 0);
@@ -99,26 +91,6 @@ interface State {
     state.lastFetched.setHours(0, 0, 0, 0);
     state.lastFetched.setDate(state.lastFetched.getDate() - 1);
   }
-
-  /**
-     * Event handler for the filter checkboxes.
-     * Add or delete a filter string, all lowercase, only [a-zA-Z0-9_]
-     *
-     * @param e the event.
-     * @return void
-        // For now, we do not filter.
-
-    function changeStateFilters(e) {
-        const f = e.currentTarget.value.toLowerCase().replaceAll(/\W/g, '');
-        const idx = state.filters.indexOf(f);
-        if (idx === -1) {
-            state.filters.push(f);
-        } else {
-            state.filters.splice(idx, 1);
-        }
-        calendar(0);
-    }
-     */
 
   /**
    * Fetch and display the calendar, adjusting the state with shift days.
@@ -204,18 +176,6 @@ interface State {
       )}`;
     });
 
-    // Filter. Does some checkbox filter match some activity filter.
-    // For now, we do not filter.
-    // state.activities.forEach((a) => {
-    //     const show = state.filters.length === 0 || state.filters.some((cbf)  => a.filters.some((af) => af === cbf));
-    //
-    //     if (show) {
-    //         a.element.classList.remove('filtered');
-    //     } else {
-    //         a.element.classList.add('filtered');
-    //     }
-    // })
-
     // We browsed forward.
     if (prevFirstDay < state.firstDay) {
       // Remove no longer visible activities.
@@ -264,7 +224,7 @@ interface State {
   }
 
   /**
-   * Fetch the activities from the server, collapse, sort, add an element and  filter.
+   * Fetch the activities from the server, collapse, sort, add an element.
    * @param from
    * @param till
    * @param msgContainer
@@ -282,7 +242,7 @@ interface State {
     url.searchParams.append('till', localeISOString(till));
 
     return fetchWpRest(url, {}, msgContainer).then((json) => {
-      // Collapse, sort, create a dom element, process filters.
+      // Collapse, sort, create a dom element.
       const acts = collapseActivities(json.data as IPSOActivity[]);
       acts.sort(
         (a1, a2) =>
@@ -290,10 +250,6 @@ interface State {
           new Date(a2.items[0].timeStart).getTime()
       );
       acts.forEach((a) => createActivityElement(a));
-      // For now we are not filtering
-      // acts.forEach(a => {
-      //     a.filters = a.extraInfo.split(';').filter(Boolean).map(s => s.toLowerCase().replaceAll(/\W/g, ''));
-      // })
 
       return acts;
     });
@@ -687,8 +643,6 @@ interface State {
     return createNodeFromHTML(html) as Node;
   }
 
-  // Run init and handleWeekChange on DOMContentLoaded
-  // document.addEventListener('DOMContentLoaded', () => { init(); handleWeekChange(0, 28);});
   document.addEventListener('DOMContentLoaded', () => {
     init();
     calendar(0);
