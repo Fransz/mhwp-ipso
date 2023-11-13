@@ -254,6 +254,7 @@ interface State {
                 timeOpen: a.timeOpen,
                 timeStart: a.timeStart,
                 timeEnd: a.timeEnd,
+                places: undefined,
               },
             ],
           };
@@ -421,17 +422,18 @@ interface State {
   ): void {
     const box = displayModalBox(activity, cardElement);
 
-    box.querySelector('#mhwp-ipso-box-title')!.innerHTML = activity.title;
+    (box.querySelector('#mhwp-ipso-box-title') as HTMLElement).innerHTML =
+      activity.title;
 
-    box.querySelector('#mhwp-ipso-box-date')!.innerHTML = formatDate(
-      activity.onDate
-    );
-    box.querySelector('#mhwp-ipso-box-items')!.innerHTML =
+    (box.querySelector('#mhwp-ipso-box-date') as HTMLElement).innerHTML =
+      formatDate(activity.onDate);
+    (box.querySelector('#mhwp-ipso-box-items') as HTMLElement).innerHTML =
       '&nbsp;' +
       activity.items.map((i) => formatTime(i.timeStart)).join('&comma;&nbsp;');
 
-    box.querySelector('#mhwp-ipso-box-intro')!.innerHTML = activity.intro;
-    (box.querySelector('#mhwp-ipso-box-image') as HTMLImageElement)!.src =
+    (box.querySelector('#mhwp-ipso-box-intro') as HTMLElement).innerHTML =
+      activity.intro;
+    (box.querySelector('#mhwp-ipso-box-image') as HTMLImageElement).src =
       activity.imageUrl;
 
     box.querySelector('#mhwp-ipso-box-description')!.innerHTML =
@@ -611,20 +613,22 @@ interface State {
    * @returns {ChildNode}
    */
   function itemsCheckbox(items: ActivityItem[]): Node {
-    let iStrings = items.map((item, idx) => {
+    let strings = items.map((item, idx) => {
       const time = formatTime(new Date(item.timeStart));
-      return (
-        `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
-                            name="calendarId" value="${item.calendarId}"/>` +
-        `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label></span>`
-      );
+      return `<span>
+         <input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="calendarId" value="${item.calendarId}"/>
+         <label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${time}</label>
+         </span>`;
     });
 
-    iStrings[0] = iStrings[0].replace('type="radio"', 'type="radio" checked');
-    const html = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${iStrings.join(
-      ''
-    )}</div>`;
-    return createNodeFromHTML(html) as Node;
+    strings[0] = strings[0].replace('type="radio"', 'type="radio" checked');
+
+    return createNodeFromHTML(
+      `<div>
+      <div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>
+      ${strings.join('')}
+      </div>`
+    );
   }
 
   document.addEventListener('DOMContentLoaded', () => {

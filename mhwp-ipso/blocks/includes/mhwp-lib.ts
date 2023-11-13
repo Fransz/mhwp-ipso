@@ -52,7 +52,7 @@ type ActivityItem = {
   timeOpen: string;
   timeStart: string;
   timeEnd: string;
-  places?: number;
+  places: number | undefined;
 };
 
 type ActivityDetail = Omit<
@@ -111,7 +111,7 @@ async function fetchActivityDetails(
 
   return {
     ...detail,
-    items: items.filter((i) => i.places! > 0),
+    items: items.filter((i) => i.places && i.places > 0),
     imageUrl: detail.mainImage ? new URL(detail.mainImage).toString() : '',
     onDate: activity.onDate,
   };
@@ -356,7 +356,7 @@ function wait(duration: number): Promise<void> {
  *
  * @param htmlString The HTML string
  */
-function createNodeFromHTML(htmlString: string): ChildNode {
+function createNodeFromHTML(htmlString: string): Node {
   const div = document.createElement('div');
   div.innerHTML = htmlString.trim();
   return div.firstChild!;
@@ -463,9 +463,4 @@ export {
   wait,
 };
 
-export type {
-  Activity,
-  ActivityDetail,
-  ActivityItem,
-  IPSOActivity,
-};
+export type { Activity, ActivityDetail, ActivityItem, IPSOActivity };

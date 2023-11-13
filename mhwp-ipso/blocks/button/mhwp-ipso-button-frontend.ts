@@ -132,6 +132,7 @@ declare namespace jQuery {
         timeOpen: a.timeOpen,
         timeStart: a.timeStart,
         timeEnd: a.timeEnd,
+        places: undefined,
       };
     });
     return {
@@ -346,17 +347,21 @@ declare namespace jQuery {
       const date = formatDate(new Date(item.timeStart));
       const time = formatTime(new Date(item.timeStart));
       return (
-        `<span><input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" 
-                            name="calendarId" value="${item.calendarId}"/>` +
-        `<label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${date}&nbsp;${time}</label></span>`
+        `<span>
+         <input class="mhwp-ipso-res-itemchoice" type="radio" id="mhwp-ipso-res-item-${idx}" name="calendarId" value="${item.calendarId}"/>
+         <label class="mhwp-ipso-res-itemlabel" for="mhwp-ipso-res-item-${idx}">${date}&nbsp;${time}</label>
+         </span>`
       );
     });
 
     strings[0] = strings[0].replace('type="radio"', 'type="radio" checked');
-    const html = `<div><div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>${strings.join(
-      ''
-    )}</div>`;
-    return createNodeFromHTML(html) as Node;
+
+    return createNodeFromHTML(
+      `<div>
+      <div id="mhwp-ipso-res-itemslabel">Kies je tijd</div>
+      ${strings.join('')}
+      </div>`
+    );
   }
 
   // Run init and the button on DOMContentLoaded
