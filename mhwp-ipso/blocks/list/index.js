@@ -33,60 +33,6 @@ registerBlockType( metadata, {
 
                 <div id="mhwp-ipso-message-top"></div>
 
-                { /* For now, we dont have filters.
-                <div id="mhwp-ipso-filters">
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-buitenactiviteit"
-                               name="filter" value="buitenactiviteit"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-buitenactiviteit">
-                            Buitenactiviteit
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lichaamsgericht"
-                               name="filter" value="lichaamsgericht"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lichaamsgericht">
-                            Lichaamsgericht
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-ontspanning"
-                               name="filter" value="ontspanning"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-ontspanning">
-                            Ontspanning
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-lotgenotencontact"
-                               name="filter" value="lotgenotencontact"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-lotgenotencontact">
-                            Lotgenotencontact
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-evenement"
-                               name="filter" value="evenement"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-evenement">
-                            Evenement
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-themaavond"
-                               name="filter" value="themaavond"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-themaavond">
-                            Thema-avond
-                        </label>
-                    </div>
-                    <div>
-                        <input className="mhwp-ipso-filter-checkbox" type="checkbox" id="mhwp-ipso-filter-creatief"
-                               name="filter" value="creatief"/>
-                        <label className="mhwp-ipso-filter-label" htmlFor="mhwp-ipso-filter-creatief">
-                            Creatief
-                        </label>
-                    </div>
-                </div>
-                */ }
-
                 <ul id="mhwp-ipso-month-container"></ul>
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
