@@ -41,8 +41,9 @@ type IPSOActivityDetail = {
 
 type Activity = Omit<
   IPSOActivity,
-  'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart'
+  'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart' | 'extraInfo'
 > & {
+  location: string;
   element: HTMLElement | undefined;
   items: ActivityItem[];
 };

@@ -39,7 +39,7 @@ registerBlockType( metadata, {
                         <div className="mhwp-ipso-card-title"></div>
                         <div className="mhwp-ipso-card-daterow">
                             <span className="mhwp-ipso-card-date"></span>
-                            <span className="mhwp-ipso-card-time"></span>
+                            <span className="mhwp-ipso-card-location"></span>
                         </div>
                         <div className="mhwp-ipso-card-buttonrow">
                         <button className="mhwp-ipso-card-more" type="button">

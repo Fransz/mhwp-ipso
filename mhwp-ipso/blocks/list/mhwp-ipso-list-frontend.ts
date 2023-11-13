@@ -245,9 +245,9 @@ interface State {
           return {
             activityID: a.activityID,
             title: a.title,
-            extraInfo: a.extraInfo,
             onDate: a.onDate,
             element: undefined,
+            location: /cu(?:y|ij)k/i.test(a.extraInfo) ? 'Cuijk' : 'Nijmegen',
             items: [
               {
                 calendarId: a.id,
@@ -286,24 +286,44 @@ interface State {
    */
   function collapseActivities(activities: Activity[]): Activity[] {
     type Grouped = {
-      [n: string]: Activity[];
+      [i: string]: Activity[];
     };
 
-    type GroupedGrouped = {
-      [n: string]: {
-        [m: string]: Activity[];
+    type GGrouped = {
+      [i: string]: {
+        [d: string]: Activity[];
+      };
+    };
+
+    type GGGrouped = {
+      [i: string]: {
+        [d: string]: {
+          [l: string]: Activity[];
+        };
       };
     };
 
     let groups: Grouped = activities.reduce(groupById, {});
 
-    let datedGroups: GroupedGrouped = {};
+    let dateGroups: GGrouped = {};
     Object.keys(groups).forEach(
-      (k: string) => (datedGroups[k] = groups[k].reduce(groupByDate, {}))
+      (k: string) => (dateGroups[k] = groups[k].reduce(groupByDate, {}))
     );
 
-    return Object.keys(datedGroups).flatMap((ak) =>
-      Object.keys(datedGroups[ak]).map((dk) => collect(datedGroups[ak][dk]))
+    let locdateGroups: GGGrouped = {};
+    Object.keys(groups).forEach((i: string) =>
+      Object.keys(dateGroups[i]).forEach((d: string) => {
+        if (!locdateGroups.hasOwnProperty(i)) locdateGroups[i] = {};
+        locdateGroups[i][d] = dateGroups[i][d].reduce(groupByLocation, {});
+      })
+    );
+
+    return Object.keys(locdateGroups).flatMap((i) =>
+      Object.keys(locdateGroups[i]).flatMap((d) =>
+        Object.keys(locdateGroups[i][d]).map((l) =>
+          collect(locdateGroups[i][d][l])
+        )
+      )
     );
 
     function groupById(acc: Grouped, cur: Activity): Grouped {
@@ -312,6 +332,10 @@ interface State {
 
     function groupByDate(acc: Grouped, cur: Activity): Grouped {
       return groupBy(cur.onDate, acc, cur);
+    }
+
+    function groupByLocation(acc: Grouped, cur: Activity): Grouped {
+      return groupBy(cur.location, acc, cur);
     }
 
     /**
@@ -348,7 +372,7 @@ interface State {
       return {
         activityID: activities[0].activityID,
         title: activities[0].title,
-        extraInfo: activities[0].extraInfo,
+        location: activities[0].location,
         onDate: activities[0].onDate,
         element: undefined,
         items,
@@ -370,13 +394,10 @@ interface State {
     const element: HTMLElement = template.cloneNode(true) as HTMLElement;
 
     const date = formatDate(new Date(activity.onDate));
-    // For now, we don't display the times in the cards.
-    // const times = activity.items.map( i => formatTime(new Date(i.timeStart))).join(',&nbsp;');
-    const times = '';
 
     element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
     element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
-    element.querySelector('.mhwp-ipso-card-time')!.innerHTML = times;
+    element.querySelector('.mhwp-ipso-card-location')!.innerHTML = activity.location;
 
     element
       .querySelector('.mhwp-ipso-card-more')!

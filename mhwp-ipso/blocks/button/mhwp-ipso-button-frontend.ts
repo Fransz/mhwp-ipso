@@ -138,7 +138,7 @@ declare namespace jQuery {
     return {
       activityID: acts[0]?.activityID,
       title: acts[0]?.title,
-      extraInfo: acts[0]?.extraInfo,
+      location: '',
       onDate: acts[0]?.onDate,
       element: undefined,
       items,
