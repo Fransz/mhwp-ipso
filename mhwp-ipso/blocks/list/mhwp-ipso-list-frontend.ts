@@ -135,7 +135,7 @@ interface State {
   function fetchCalendar(errContainer: HTMLElement): Promise<void> {
     if (state.firstDay < state.firstFetched) {
       const from = new Date(state.firstDay);
-      const till = new Date(state.firstFetched!);
+      const till = new Date(state.firstFetched);
       till.setDate(state.firstFetched.getDate() - 1);
 
       state.firstFetched = from;
@@ -276,10 +276,12 @@ interface State {
 
   /**
    * Collapse the same activities on the same day.
-   * Create an object with all activityIds as key and as value:
-   *   an object with all dates for that activity as key:
+   * Create an object with all activityIds as key
+   *   and as value: an object with all dates for that activityID as key
+   *    and as value: an object with all locations for that activityID and date as key
    *    and as value: an array of all those activities on that day.
-   * Then collect all activities into a single array again.
+   * Then collect all activities into a single array again while
+   * merge all items arrays for those grouped activities, and return one activity for the activity array,
    *
    * @param activities
    * @returns Activity[]
@@ -307,7 +309,7 @@ interface State {
 
     let dateGroups: GGrouped = {};
     Object.keys(groups).forEach(
-      (k: string) => (dateGroups[k] = groups[k].reduce(groupByDate, {}))
+      (i: string) => (dateGroups[i] = groups[i].reduce(groupByDate, {}))
     );
 
     let locdateGroups: GGGrouped = {};
@@ -397,7 +399,8 @@ interface State {
 
     element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
     element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
-    element.querySelector('.mhwp-ipso-card-location')!.innerHTML = activity.location;
+    element.querySelector('.mhwp-ipso-card-location')!.innerHTML =
+      activity.location === 'Cuijk' ? activity.location : '';
 
     element
       .querySelector('.mhwp-ipso-card-more')!
@@ -448,6 +451,8 @@ interface State {
 
     (box.querySelector('#mhwp-ipso-box-date') as HTMLElement).innerHTML =
       formatDate(activity.onDate);
+    (box.querySelector('#mhwp-ipso-box-location') as HTMLElement).innerHTML =
+      activity.location === 'Cuijk' ? activity.location : '';
     (box.querySelector('#mhwp-ipso-box-items') as HTMLElement).innerHTML =
       '&nbsp;' +
       activity.items.map((i) => formatTime(i.timeStart)).join('&comma;&nbsp;');

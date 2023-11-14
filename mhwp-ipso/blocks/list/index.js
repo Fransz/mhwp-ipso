@@ -58,6 +58,7 @@ registerBlockType( metadata, {
                         <div id="mhwp-ipso-box-daterow" className="mhwp-ipso-box-row">
                             <div id="mhwp-ipso-box-date"></div>
                             <div id="mhwp-ipso-box-items"></div>
+                            <div id="mhwp-ipso-box-location"></div>
                         </div>
                         <div id="mhwp-ipso-box-rulerrow" className="mhwp-ipso-box-row">
                             <hr />

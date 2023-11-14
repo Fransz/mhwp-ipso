@@ -70,6 +70,7 @@ type ActivityDetail = Omit<
   imageUrl: string;
   onDate: string;
   items: ActivityItem[];
+  location: string;
 };
 
 type ActivityParticipants = {
@@ -115,6 +116,7 @@ async function fetchActivityDetails(
     items: items.filter((i) => i.places && i.places > 0),
     imageUrl: detail.mainImage ? new URL(detail.mainImage).toString() : '',
     onDate: activity.onDate,
+    location: activity.location,
   };
 }
 
