@@ -401,7 +401,7 @@ interface State {
     element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
     element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
     if (activity.location === 'Cuijk') {
-      element.classList.add('location_cuijk')
+      element.classList.add('location_cuijk');
       element.querySelector('.mhwp-ipso-card-location')!.innerHTML = 'Cuijk';
     }
 
@@ -419,6 +419,10 @@ interface State {
     async function readMore() {
       clearErrors(element);
       clearMessages(element);
+      (
+        element.querySelector('.mhwp-ipso-card-more')! as HTMLButtonElement
+      ).style.display = 'none';
+
       addMessage('Gevens ophalen, dit kan even duren', element);
 
       const detail = await fetchActivityDetails(activity, element);
@@ -429,6 +433,11 @@ interface State {
           'De activiteit is vol, je kunt niet meer reserveren.',
           element
         );
+
+        (
+          element.querySelector('.mhwp-ipso-card-more')! as HTMLButtonElement
+        ).style.display = 'block';
+
         setTimeout(() => clearMessages(element), 4000);
       } else {
         displayActivity(detail, element);
@@ -592,6 +601,10 @@ interface State {
       clearMessages(cardElement);
       clearErrors(box);
       clearMessages(box);
+
+      (
+        cardElement.querySelector('.mhwp-ipso-card-more')! as HTMLButtonElement
+      ).style.display = 'block';
 
       document.body.style.overflow = 'visible';
       box.removeAttribute('open');
