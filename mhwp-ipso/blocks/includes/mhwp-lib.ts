@@ -192,6 +192,9 @@ async function makeReservation(
 ): Promise<void> {
   event.preventDefault();
 
+  // Prevent double clicks.
+  form.querySelector('button')!.style.display = 'none';
+
   // The URL for making the reservation
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/reservation';
@@ -260,7 +263,6 @@ async function makeReservation(
         msgContainer
       );
       msgContainer.scrollIntoView();
-      form.querySelector('button')!.style.display = 'none';
 
       // Return a promise that resolves after 4 seconds.
       // After that the box is closed.
