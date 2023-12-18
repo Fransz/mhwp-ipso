@@ -397,7 +397,6 @@ interface State {
 
     const date = formatDate(new Date(activity.onDate));
 
-    element.classList.add('cuijk');
     element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
     element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
     if (activity.location === 'Cuijk') {
