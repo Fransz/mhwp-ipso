@@ -397,10 +397,13 @@ interface State {
 
     const date = formatDate(new Date(activity.onDate));
 
+    element.classList.add('cuijk');
     element.querySelector('.mhwp-ipso-card-title')!.innerHTML = activity.title;
     element.querySelector('.mhwp-ipso-card-date')!.innerHTML = date;
-    element.querySelector('.mhwp-ipso-card-location')!.innerHTML =
-      activity.location === 'Cuijk' ? activity.location : '';
+    if (activity.location === 'Cuijk') {
+      element.classList.add('location_cuijk')
+      element.querySelector('.mhwp-ipso-card-location')!.innerHTML = 'Cuijk';
+    }
 
     element
       .querySelector('.mhwp-ipso-card-more')!
