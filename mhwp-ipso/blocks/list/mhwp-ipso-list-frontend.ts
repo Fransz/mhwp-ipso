@@ -28,6 +28,7 @@ interface State {
   lastDay: Date;
   firstFetched: Date;
   lastFetched: Date;
+  locationFilter: string
 }
 
 (function () {
@@ -43,6 +44,7 @@ interface State {
     lastDay: new Date(),
     firstFetched: new Date(),
     lastFetched: new Date(),
+    locationFilter: "Cuijk",
   };
 
   /**
@@ -86,6 +88,18 @@ interface State {
     state.lastFetched = new Date(state.firstFetched);
     state.lastFetched.setHours(0, 0, 0, 0);
     state.lastFetched.setDate(state.lastFetched.getDate() - 1);
+
+    // Check the url for a locationfilter.
+    let params = new URLSearchParams(document.location.search);
+    let locatie = params.get("locatie")?.toLowerCase(); // is the string "Jonathan"
+    
+    state.locationFilter = "";
+    if(locatie === 'cuijk') {
+      state.locationFilter = 'Cuijk'
+    } else if (locatie === 'nijmegen') {
+      state.locationFilter = 'Nijmegen'
+    }
+
   }
 
   /**
@@ -191,6 +205,8 @@ interface State {
             d >= state.firstDay &&
             d <= state.lastDay
           );
+        }).filter((a) => {
+          return state.locationFilter === "" || a.location === state.locationFilter
         })
         .forEach((a) => container.append(a.element!));
     }
@@ -213,6 +229,8 @@ interface State {
             d >= state.firstDay &&
             d <= state.lastDay
           );
+        }).filter((a) => {
+          return state.locationFilter === "" || a.location === state.locationFilter
         })
         .reverse()
         .forEach((a) => container.prepend(a.element!));
