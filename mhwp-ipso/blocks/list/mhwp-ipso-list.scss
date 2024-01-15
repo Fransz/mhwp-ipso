@@ -59,32 +59,32 @@
     }
   }
 
-  /* For now, we dont have filters.
-  div#mhwp-ipso-filters {
+  div#mhwp-ipso-location-filter {
     margin: 5px auto;
     padding: 5px 10px;
     background-color: white;
 
     display: flex;
     flex-flow: row wrap;
+    justify-content: space-around;
 
     div {
       flex:0 1 25%;
       white-space: pre;
 
-      input {
-        accent-color:#e24219;
-      }
-
       label {
         font-size:16px;
         font-weight: 400;
-        margin-left: 5px;
+        margin-right: 5px;
+      }
+
+      input {
+        accent-color:#e24219;
+        vertical-align: middle;
       }
 
     }
   }
-   */
 
   ul#mhwp-ipso-month-container {
     display: flex;
@@ -281,6 +281,7 @@ div#mhwp-ipso-modal-box {
               padding: 0 10px 0 0;
             }
             input.mhwp-ipso-res-itemchoice {
+              accent-color:#e24219;
               width: auto;
               padding: 0 5px;
             }

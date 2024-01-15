@@ -33,6 +33,24 @@ registerBlockType( metadata, {
 
                 <div id="mhwp-ipso-message-top"></div>
 
+               <div id="mhwp-ipso-location-filter">
+                    <div>
+                        <label htmlFor="mhwp-ipso-location-filter-all">Alle activiteiten </label>
+                        <input type="radio" id="mhwp-ipso-location-filter-all" name="mhwp-ipso-location-filter" 
+                            value="alles" checked autocomplete="off"/>
+                        </div>
+                        <div>
+                        <label htmlFor="mhwp-ipso-location-filter-nijmegen">Activiteiten in Nijmegen</label>
+                        <input type="radio" id="mhwp-ipso-location-filter-nijmegen" name="mhwp-ipso-location-filter" 
+                            value="nijmegen" autocomplete="off"/>
+                        </div>
+                        <div>
+                        <label htmlFor="mhwp-ipso-location-filter-cuijk">Activiteiten in Cuijk</label>
+                        <input type="radio" id="mhwp-ipso-location-filter-cuijk" name="mhwp-ipso-location-filter" 
+                            value="cuijk" autocomplete="off"/>
+                    </div>
+               </div> 
+
                 <ul id="mhwp-ipso-month-container"></ul>
                 <template id="mhwp-ipso-month-card">
                     <li className="mhwp-ipso-month-card">
