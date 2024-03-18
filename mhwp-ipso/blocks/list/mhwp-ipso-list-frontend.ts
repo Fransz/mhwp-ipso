@@ -284,23 +284,25 @@ interface State {
       .then((json) => {
         // Create an Activity object for all returned data.
         const data: IPSOActivity[] = json.data as IPSOActivity[];
-        return data.map((a) => {
-          return {
-            activityID: a.activityID,
-            title: a.title,
-            onDate: a.onDate,
-            element: undefined,
-            location: /cu(?:y|ij)k/i.test(a.extraInfo) ? "cuijk" : "nijmegen",
-            items: [
-              {
-                calendarId: a.id,
-                timeOpen: a.timeOpen,
-                timeStart: a.timeStart,
-                timeEnd: a.timeEnd,
-                places: undefined,
-              },
-            ],
-          };
+        return data
+          .filter((a) => a.activityID !== 0)
+          .map((a) => {
+            return {
+              activityID: a.activityID,
+              title: a.title,
+              onDate: a.onDate,
+              element: undefined,
+              location: /cu(?:y|ij)k/i.test(a.extraInfo) ? "cuijk" : "nijmegen",
+              items: [
+                {
+                  calendarId: a.id,
+                  timeOpen: a.timeOpen,
+                  timeStart: a.timeStart,
+                  timeEnd: a.timeEnd,
+                  places: undefined,
+                },
+              ],
+            };
         });
       })
       .then((activities: Activity[]) => {
