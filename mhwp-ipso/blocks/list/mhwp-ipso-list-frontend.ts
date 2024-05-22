@@ -283,7 +283,7 @@ interface State {
     return fetchWpRest(url, {}, msgContainer)
       .then((json) => {
         // Create an Activity object for all returned data.
-        const data: IPSOActivity[] = json.data as IPSOActivity[];
+        const data: IPSOActivity[] = json ? json.data as IPSOActivity[] : [];
         return data
           .filter((a) => a.activityID !== 0)
           .map((a) => {
@@ -471,7 +471,7 @@ interface State {
 
       const detail = await fetchActivityDetails(activity, element);
 
-      if (detail.items.length === 0) {
+      if (detail && detail.items.length === 0) {
         clearMessages(element);
         addMessage(
           "De activiteit is vol, je kunt niet meer reserveren.",
@@ -483,7 +483,7 @@ interface State {
         ).style.display = "block";
 
         setTimeout(() => clearMessages(element), 4000);
-      } else {
+      } else if(detail) {
         displayActivity(detail, element);
       }
     }

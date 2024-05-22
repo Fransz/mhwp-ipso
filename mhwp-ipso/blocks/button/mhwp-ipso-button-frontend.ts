@@ -62,7 +62,7 @@ declare namespace jQuery {
 
     fetchButton(msgContainer).then((activity) => {
       // Only display the button if we found activities with free places.
-      if (activity.activityID && activity.items.length !== 0) {
+      if (activity && activity.activityID && activity.items.length !== 0) {
         clearMessages(msgContainer);
         displayButton(activity, msgContainer);
       } else {
@@ -83,7 +83,7 @@ declare namespace jQuery {
    * @param msgContainer
    * @returns {Promise<{activityID: *, onDate: *, mentors: *, title, items: *[], extraInfo: *}>}
    */
-  function fetchButton(msgContainer: HTMLElement): Promise<Activity> {
+  function fetchButton(msgContainer: HTMLElement): Promise<Activity | void> {
     const id = parseInt(
       (
         document.querySelector(
@@ -106,6 +106,7 @@ declare namespace jQuery {
     url.searchParams.append('till', localeISOString(till));
 
     return fetchWpRest(url, {}, msgContainer).then((json) => {
+      if(json) {
       let activities = json.data as IPSOActivity[];
       // sort, filter, truncate and collapse.
       activities.sort(
@@ -116,6 +117,7 @@ declare namespace jQuery {
 
       if (activities.length > actsToShow) activities.length = actsToShow;
       return collapse(activities);
+      } else return undefined
     });
   }
 
@@ -168,19 +170,19 @@ declare namespace jQuery {
       clearMessages(msgContainer);
       addMessage('Gevens ophalen, dit kan even duren', msgContainer);
 
-      const detail: ActivityDetail = await fetchActivityDetails(
+      const detail: ActivityDetail | void = await fetchActivityDetails(
         activity,
         msgContainer
       );
 
-      if (detail.items.length === 0) {
+      if (detail && detail.items.length === 0) {
         clearMessages(msgContainer);
         addMessage(
           'Er zijn helaas voorlopig geen vrije plaatsen.',
           msgContainer
         );
         setTimeout(() => clearMessages(msgContainer), 4000);
-      } else {
+      } else if(detail){
         clearMessages(msgContainer);
         displayActivity(detail, msgContainer);
       }
@@ -243,6 +245,16 @@ declare namespace jQuery {
 
     box.setAttribute('open', 'true');
 
+    function submitHandler(form: HTMLFormElement, event: Event) {
+      makeReservation(activity, form, box, event).then(() =>
+          closeBox(new MouseEvent('click'))
+      );
+    }
+    function invalidHandler(): void {
+      // TODO: We want an error message here, this shouldn't happen though.
+      console.log('invalid');
+    }
+
     // If we have a form in our popup, prepare it.
     const form: HTMLFormElement = box.querySelector(
       '#mhwp-ipso-box-form'
@@ -250,16 +262,6 @@ declare namespace jQuery {
     if (form) {
       const v = $jq(form).validate();
       if (v) v.destroy();
-
-      function submitHandler(form: HTMLFormElement, event: Event) {
-        makeReservation(activity, form, box, event).then(() =>
-          closeBox(new MouseEvent('click'))
-        );
-      }
-      function invalidHandler(): void {
-        // TODO: We want an error message here, this shouldn't happen though.
-        console.log('invalid');
-      }
 
       $jq(form).validate({
         rules: {
