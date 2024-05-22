@@ -33,7 +33,7 @@ interface State {
 
 (function () {
   /**
-   * Globales.
+   * Globals.
    */
   // jQuery.
   const $jq = jQuery.noConflict();
@@ -74,7 +74,7 @@ interface State {
       btn.addEventListener("click", () => calendar(7));
     });
 
-    // Initialze the location filtor radio buttons
+    // Initialize the location filter radio buttons
     document
       .querySelectorAll("#mhwp-ipso-location-filter input[type=radio]")
       .forEach((radio) => {
@@ -93,7 +93,7 @@ interface State {
         });
       });
 
-    // Check the url for a locationfilter.
+    // Check the url for a location filter.
     let params = new URLSearchParams(document.location.search);
     let locatie = params.get("locatie")?.toLowerCase(); // is the string "Jonathan"
 
@@ -106,7 +106,7 @@ interface State {
       document.querySelector("#mhwp-ipso-location-filter-nijmegen")!.setAttribute('checked', '')
     }
 
-    // Initialize state such that calender(0) shows 28 days, starting today.
+    // Initialize state such that calendar(0) shows 28 days, starting today.
     state.firstDay = new Date();
     state.firstDay.setHours(0, 0, 0, 0);
 
@@ -197,7 +197,7 @@ interface State {
    * Display the activities.
    *
    * @param prevFirstDay start date for our previous display.
-   * @param container element where to append thje acitivities.
+   * @param container element where to append the activities.
    */
   function displayCalendar(prevFirstDay: Date, container: HTMLElement): void {
     document.querySelectorAll(".mhwp-ipso-week-current").forEach((e) => {
@@ -206,7 +206,7 @@ interface State {
       )}`;
     });
 
-    // Filter. Does the locatin match the location filter.
+    // Filter. Does the location match the location filter.
     state.activities.forEach((a) => {
       if (state.locationFilter === "" || a.location === state.locationFilter) {
         a.element!.classList.remove("filtered");
@@ -243,7 +243,7 @@ interface State {
       state.activities
         .filter((a) => {
           const d = new Date(a.onDate);
-          return a.element!.parentElement != null && d > state.lastDay;
+          return a.element!.parentElement !== null && d > state.lastDay;
         })
         .forEach((a) => a.element!.remove());
 
@@ -252,7 +252,7 @@ interface State {
         .filter((a) => {
           const d = new Date(a.onDate);
           return (
-            a.element!.parentElement == null &&
+            a.element!.parentElement === null &&
             d >= state.firstDay &&
             d <= state.lastDay
           );
@@ -583,7 +583,7 @@ interface State {
     // If we have a form in our popup, prepare it.
     const form: HTMLFormElement = box.querySelector("#mhwp-ipso-box-form") as HTMLFormElement;
     if (form) {
-      // Destory a previous instance of the validator if it exists.
+      // Destroy a previous instance of the validator if it exists.
       const v = $jq(form).validate();
       if (v) v.destroy();
 
