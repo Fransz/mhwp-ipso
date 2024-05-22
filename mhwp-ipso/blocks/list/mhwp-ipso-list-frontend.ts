@@ -76,7 +76,7 @@ interface State {
 
     // Initialze the location filtor radio buttons
     document
-      .querySelectorAll("#mhwp-ipso-location-filter input[type=radio")
+      .querySelectorAll("#mhwp-ipso-location-filter input[type=radio]")
       .forEach((radio) => {
         radio.addEventListener("click", (e) => {
           const monthContainer = document.querySelector(
