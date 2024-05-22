@@ -233,7 +233,7 @@ async function makeReservation(
 
   const activityId = activity.id;
   const activityTitle = activity.title;
-  const activityDate = formatDate(activity.onDate, false);
+  const activityDate = formatDate(item.timeStart, false);
   const activityTime = formatTime(item.timeStart);
 
   // Data for our endpoint.
