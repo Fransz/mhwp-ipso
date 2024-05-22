@@ -568,7 +568,7 @@ interface State {
 
       const button: HTMLButtonElement = box.querySelector(
         "#mhwp-ipso-box-directbutton button"
-      )!;
+      ) as HTMLButtonElement;
       button.addEventListener("click", redirectReservation);
 
       if (activity.disableReservation) {
@@ -581,7 +581,7 @@ interface State {
     box.setAttribute("open", "true");
 
     // If we have a form in our popup, prepare it.
-    const form: HTMLFormElement = box.querySelector("#mhwp-ipso-box-form")!;
+    const form: HTMLFormElement = box.querySelector("#mhwp-ipso-box-form") as HTMLFormElement;
     if (form) {
       // Destory a previous instance of the validator if it exists.
       const v = $jq(form).validate();
@@ -677,7 +677,7 @@ interface State {
 
       const button: HTMLButtonElement = box.querySelector(
         "#mhwp-ipso-box-directbutton button"
-      )!;
+      ) as HTMLButtonElement
       button.removeEventListener("click", redirectReservation);
 
       if (e) e.stopImmediatePropagation();
