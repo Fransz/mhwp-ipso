@@ -1,6 +1,11 @@
 # MHWP\_IPSO
 
 ## Releases
+release 1.0.0-alpha
+- Porting to typescript
+- locations
+- Fix voor een bug in IPSO 2.7; Toon alleen activiteiten met activityId !== 0
+
 release 0.9.2
 - The button now looks ahead 84 days
 

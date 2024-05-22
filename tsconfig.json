@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+      "outDir": "./mhwp-ipso/blocks/dist",
+      "jsx": "react-jsx",
+      "module": "ESNext",
+      "target": "ES6", 
+      "lib": [ "ES2019", "ES6", "dom"],
+      "strict": true,
+      "allowSyntheticDefaultImports": true,
+      "moduleResolution": "node"
+  }
+}
