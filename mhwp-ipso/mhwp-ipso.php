@@ -13,7 +13,7 @@
  * Plugin Name:       MHWP_IPSO
  * Plugin URI:        http://marikenhuis.nl/
  * Description:       marikenhuis plugin. integratie met IPSO.
- * Version:           0.9.2
+ * Version:           0.9.2.x
  * Author:            Frans Jaspers
  * Author URI:        http://fransjaspers.com/
  * License:           GPL-2.0+

@@ -5,6 +5,6 @@ vendor/
 build/
 dist/
 mhwp-ipso/mhwp-ipso.log
-write.php
+mhwp-ipso.code-workspace
 
 *.map

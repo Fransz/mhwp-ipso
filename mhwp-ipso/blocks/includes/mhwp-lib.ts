@@ -10,7 +10,7 @@ type MHWPData = {
 };
 
 type IPSOActivity = {
-  activityID: number; // Activity Id
+  activityID: number; // Activity id
   extraInfo: string;
   id: number; // Calendar Id
   mentors: string[];
@@ -27,7 +27,7 @@ type IPSOActivityDetail = {
   closeOnMaxRegistrations: boolean;
   description: string;
   disableReservation: string; // From mhwp
-  id: number; // Activiy Id
+  id: number; // activity id
   intro: string;
   mainImage: string;
   maxRegistrations: number;
@@ -41,8 +41,9 @@ type IPSOActivityDetail = {
 
 type Activity = Omit<
   IPSOActivity,
-  'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart'
+  'id' | 'mentors' | 'timeEnd' | 'timeOpen' | 'timeStart' | 'extraInfo'
 > & {
+  location: string;
   element: HTMLElement | undefined;
   items: ActivityItem[];
 };
@@ -57,9 +58,9 @@ type ActivityItem = {
 
 type ActivityDetail = Omit<
   IPSOActivityDetail,
-  | 'appointment'
+    'appointment'
   | 'appointmentInfo'
-  | 'closeOnMaxRegistations'
+  | 'closeOnMaxRegistrations'
   | 'maxRegistrations'
   | 'minRegistrations'
   | 'priceExplanation'
@@ -69,6 +70,7 @@ type ActivityDetail = Omit<
   imageUrl: string;
   onDate: string;
   items: ActivityItem[];
+  location: string;
 };
 
 type ActivityParticipants = {
@@ -85,22 +87,27 @@ type ActivityParticipants = {
 async function fetchActivityDetails(
   activity: Activity,
   msgContainer: HTMLElement
-): Promise<ActivityDetail> {
-  const mhwpdata: MHWPData = await fetchDetail(activity, msgContainer);
-  const detail: IPSOActivityDetail = mhwpdata.data as IPSOActivityDetail;
+): Promise<ActivityDetail | void> {
+  const mhwpdata: MHWPData | void = await fetchDetail(activity, msgContainer);
+  let detail: IPSOActivityDetail;
 
-  // Create a chain of promises, starting with an resolved Promise of an empty array.
+  if(mhwpdata) {
+    detail= mhwpdata.data as IPSOActivityDetail;
+
+  // Create a chain of promises, starting with a resolved Promise of an empty array.
   const items: ActivityItem[] = await activity.items.reduce((p, item) => {
     return p.then((acc) => {
       // Chain the promise from fetchParticipants.
       return fetchParticipants(item.calendarId, msgContainer).then(
-        (data: MHWPData) => {
+        (data: MHWPData | void) => {
+          if(data) {
           // Which after resolving adds the places to the current item.
           const places = (data.data as ActivityParticipants).nrParticipants;
           item.places =
             detail.maxRegistrations === 0
               ? 1000
               : detail.maxRegistrations - places;
+          }
 
           // Add the current item to the accumulator.
           return [...acc, item];
@@ -110,11 +117,20 @@ async function fetchActivityDetails(
   }, Promise.resolve([] as ActivityItem[]));
 
   return {
-    ...detail,
-    items: items.filter((i) => i.places && i.places > 0),
+    description: detail.description,
+    disableReservation: detail.disableReservation,
+    id: detail.id,
     imageUrl: detail.mainImage ? new URL(detail.mainImage).toString() : '',
+    intro: detail.intro,
+    items: items.filter((i) => i.places && i.places > 0),
+    location: activity.location,
+    mainImage: detail.mainImage,
     onDate: activity.onDate,
+    reservationUrl: detail.reservationUrl,
+    title: detail.title,
   };
+  }
+  return
 }
 
 /**
@@ -127,14 +143,14 @@ async function fetchActivityDetails(
 async function fetchDetail(
   activity: Activity,
   msgContainer: HTMLElement
-): Promise<MHWPData> {
+): Promise<MHWPData | void> {
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/activitydetail';
   url.searchParams.append('activityId', activity.activityID.toString());
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
-    if (json.mhwp_ipso_code === 429) {
+    if (json && json.mhwp_ipso_code === 429) {
       console.log('Error 429, retrying');
       return wait(1000).then(() => {
         return fetchWpRest(url, {}, msgContainer, true);
@@ -154,14 +170,14 @@ async function fetchDetail(
 function fetchParticipants(
   calendarId: number,
   msgContainer: HTMLElement
-): Promise<MHWPData> {
+): Promise<MHWPData | void> {
   const url = new URL(document.location.origin);
   url.pathname = 'wp-json/mhwp-ipso/v1/participants';
   url.searchParams.append('calendarId', calendarId.toString());
 
   return fetchWpRest(url, {}, msgContainer, false).then((json) => {
     // Upon a 429 error (Too many requests), We try again.
-    if (json.mhwp_ipso_code === 429) {
+    if (json && json.mhwp_ipso_code === 429) {
       console.log('Error 429, retrying');
       return wait(1000).then(() => {
         return fetchWpRest(url, {}, msgContainer, true);
@@ -188,6 +204,9 @@ async function makeReservation(
   event: Event
 ): Promise<void> {
   event.preventDefault();
+
+  // Prevent double clicks.
+  form.querySelector('button')!.style.display = 'none';
 
   // The URL for making the reservation
   const url = new URL(document.location.origin);
@@ -227,11 +246,11 @@ async function makeReservation(
 
   const activityId = activity.id;
   const activityTitle = activity.title;
-  const activityDate = formatDate(activity.onDate, false);
+  const activityDate = formatDate(item.timeStart, false);
   const activityTime = formatTime(item.timeStart);
 
   // Data for our endpoint.
-  // activityId, activityTime, activitydate, activityTitle and remark are used for mail.
+  // activityId, activityTime, activityDate, activityTitle and remark are used for mail.
   const data = {
     activityCalendarId,
     firstName,
@@ -257,14 +276,13 @@ async function makeReservation(
         msgContainer
       );
       msgContainer.scrollIntoView();
-      form.querySelector('button')!.style.display = 'none';
 
       // Return a promise that resolves after 4 seconds.
       // After that the box is closed.
       return wait(4000);
     })
     .catch((_) => {
-      // An exception occured, we already have shown the error.
+      // An exception occurred, we already have shown the error.
       form.querySelector('button')!.style.display = 'none';
 
       // Return a promise that resolves after 5 seconds.
@@ -276,7 +294,7 @@ async function makeReservation(
 /**
  * Helper method for accessing the rest api in our wordPress installation.
  *
- * @param url The URL of the worpress installation.
+ * @param url The URL of the wordPress installation.
  * @param init Additional settings for the fetch init object.
  * @param errorContainer A container for error messages.
  * @param throw_429 whether we should throw upon 429 errors. If this is false the caller should retry.
@@ -287,7 +305,7 @@ function fetchWpRest(
   init: {},
   errorContainer: HTMLElement,
   throw_429: boolean = true
-): Promise<MHWPData> {
+): Promise<MHWPData | void> {
   const defaults: RequestInit = {
     method: 'GET',
     cache: 'no-store',
@@ -332,7 +350,7 @@ function fetchWpRest(
       clearMessages(errorContainer);
       addError(message, errorContainer);
 
-      // retrow the error. Users of this call decide what should happen.
+      // rethrow the error. Users of this call decide what should happen.
       throw err;
     });
 }
@@ -351,7 +369,7 @@ function wait(duration: number): Promise<void> {
 }
 
 /**
- * Helper for creating Nodes from a HTML string.
+ * Helper for creating Nodes from an HTML string.
  * @link https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro
  *
  * @param htmlString The HTML string
@@ -367,7 +385,7 @@ function createNodeFromHTML(htmlString: string): Node {
  *
  * @param message The text message.
  * @param className The messages classname
- * @param container The containter where to add the message.
+ * @param container The container where to add the message.
  */
 function addNode(
   message: string,
@@ -386,7 +404,7 @@ function addMessage(message: string, container: HTMLElement) {
 }
 
 /**
- * Helper for reming messages within a container.
+ * Helper for removing messages from a container.
  * @param className The classname for selecting.
  * @param container The container where to search.
  */
@@ -401,7 +419,7 @@ function clearMessages(container: HTMLElement): void {
 }
 
 /**
- * Helper for formating dates.
+ * Helper for formatting dates.
  *
  * @param datetime
  * @returns {string}
@@ -415,14 +433,15 @@ function formatTime(datetime: Date | string): string {
 }
 
 /**
- * Helper for formating times.
+ * Helper for formatting times.
  *
  * @param datetime The datetime string to format
  * @param replace Do we want to replace spaces by the &nbsp; entity.
  * @returns {string}
  */
 function formatDate(datetime: Date | string, replace: boolean = true): string {
-  const dateFormat = new Intl.DateTimeFormat(undefined, {
+  const locale = undefined!; // Fool PHPStorms ts compiler. This sucks.
+  const dateFormat = new Intl.DateTimeFormat(locale, {
     month: 'long',
     day: 'numeric',
     weekday: 'long',
